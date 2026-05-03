@@ -99,12 +99,29 @@
         {% endif %}
       </div>
 
+      {# Cancelled matches #}
+      <div id="section-cancelled">
+        {% if cancelled_matches %}
+        <div class="section-hd">
+          <span class="section-hd-dot" style="background:#ef4444"></span>
+          <span class="section-hd-label">Annulés</span>
+          <span class="section-hd-count">{{ cancelled_matches|length }}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+          {% for match in cancelled_matches %}
+            {% set past = true %}
+            {% include 'matches/_card.html' %}
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
       {# Past matches #}
       <div id="section-past">
         {% if past_matches %}
         <div class="section-hd">
           <span class="section-hd-dot" style="background:#6b7280"></span>
-          <span class="section-hd-label">Tous les Matchs passés</span>
+          <span class="section-hd-label">Matchs passés</span>
           <span class="section-hd-count">{{ past_matches|length }}</span>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
@@ -117,7 +134,7 @@
       </div>
 
       {# Empty state #}
-      {% if not registered_matches and not open_matches and not confirmed_matches and not past_matches %}
+      {% if not registered_matches and not open_matches and not confirmed_matches and not past_matches and not cancelled_matches %}
       <div class="empty-state">
         <div class="empty-state-icon">
           <i class="bi bi-calendar-x" style="font-size:28px;color:#91a492"></i>

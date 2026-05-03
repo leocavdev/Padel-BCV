@@ -48,14 +48,20 @@ def list_matches():
                          .all())
     past_matches = (Match.query
                     .filter(Match.date < today)
+                    .filter(Match.status != 'cancelled')
                     .order_by(Match.date.desc(), Match.start_time.desc())
                     .all())
+    cancelled_matches = (Match.query
+                         .filter_by(status='cancelled')
+                         .order_by(Match.date.desc(), Match.start_time.desc())
+                         .all())
     now_str = f'{_DAY_NAMES[today.weekday()]} {today.day} {_MONTH_NAMES[today.month - 1]} {today.year}'
     return render_template('matches/list.html',
                            registered_matches=registered_matches,
                            open_matches=open_matches,
                            confirmed_matches=confirmed_matches,
                            past_matches=past_matches,
+                           cancelled_matches=cancelled_matches,
                            incoming_requests=incoming_requests,
                            now=now_str,
                            title='Matchs')
