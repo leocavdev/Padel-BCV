@@ -53,7 +53,7 @@
       <a href="{{ url_for('admin.database') }}"
          class="nav-tab nav-tab-admin {% if request.endpoint == 'admin.database' %}active{% endif %}">
         <i class="bi bi-database{% if request.endpoint == 'admin.database' %}-fill{% endif %}"></i>
-        <span>BDD</span>
+        <span>DB</span>
       </a>
       <a href="{{ url_for('auth.logout') }}"
          onclick="return confirm('Voulez-vous vraiment vous déconnecter ?')"

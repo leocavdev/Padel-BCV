@@ -49,9 +49,14 @@ def create_app(config_class=Config):
 
 
 def _seed_admin():
+    import os
     from app.models import User
-    if not User.query.filter_by(email='admin@padelbcv.com').first():
-        admin = User(username='admin', email='admin@padelbcv.com', role='admin')
-        admin.set_password('admin123')
+    email    = os.environ.get('ADMIN_EMAIL')
+    password = os.environ.get('ADMIN_PASSWORD')
+    if not email or not password:
+        return
+    if not User.query.filter_by(email=email).first():
+        admin = User(username='admin', email=email, role='admin')
+        admin.set_password(password)
         db.session.add(admin)
         db.session.commit()

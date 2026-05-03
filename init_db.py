@@ -26,14 +26,19 @@ def init():
         db.create_all()
         print('Tables created.')
 
-        if not User.query.filter_by(email='admin@padelbcv.com').first():
-            admin = User(username='admin', email='admin@padelbcv.com', role='admin')
-            admin.set_password('admin123')
-            db.session.add(admin)
-            db.session.commit()
-            print('Admin created  →  admin@padelbcv.com  /  admin123')
+        email    = os.environ.get('ADMIN_EMAIL')
+        password = os.environ.get('ADMIN_PASSWORD')
+        if email and password:
+            if not User.query.filter_by(email=email).first():
+                admin = User(username='admin', email=email, role='admin')
+                admin.set_password(password)
+                db.session.add(admin)
+                db.session.commit()
+                print(f'Admin créé → {email}')
+            else:
+                print('Admin déjà existant.')
         else:
-            print('Admin already exists.')
+            print('[!] ADMIN_EMAIL ou ADMIN_PASSWORD non défini — admin non créé.')
 
         generate_payment_qr(app)
         print('Done — run: python run.py')
