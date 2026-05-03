@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+
+  <div class="hero-dark" style="flex-shrink:0">
+    <div class="topbar topbar-transparent">
+      <a href="{{ url_for('admin.database') }}#transactions" class="topbar-back topbar-back-light">‹</a>
+      <div class="topbar-title topbar-title-light">{{ title }}</div>
+    </div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:16px 16px 32px">
+      <form method="POST" novalidate style="display:flex;flex-direction:column;gap:14px">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        {% if not t %}
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Utilisateur</label>
+          <div class="input-box" style="padding:0 12px">
+            <i class="bi bi-person"></i>
+            <select name="user_id" required
+                    style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;padding:12px 0">
+              <option value="">-- Choisir un utilisateur --</option>
+              {% for u in users %}
+              <option value="{{ u.id }}">{{ u.username }} ({{ u.email }})</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        {% else %}
+        <div style="background:#fff;border-radius:12px;padding:12px 14px;border:1.5px solid #dde8de">
+          <div style="font-size:12px;color:#91a492;margin-bottom:4px">Transaction #{{ t.id }}</div>
+          <div style="font-size:14px;font-weight:700;color:#151c17">{{ t.user.username }}</div>
+          <div style="font-size:12px;color:#6b8070">{{ t.user.email }}</div>
+        </div>
+        {% endif %}
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Montant (CHF)</label>
+          <div class="input-box">
+            <i class="bi bi-currency-dollar"></i>
+            <input type="number" name="amount" value="{{ '%.2f'|format(t.amount) if t else '0.00' }}"
+                   step="0.01" required
+                   style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit"
+                   placeholder="Ex : -10.00 ou +25.00">
+          </div>
+          <div style="font-size:11px;color:#91a492;margin-top:4px">Valeur négative = débit, positive = crédit</div>
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Type</label>
+          <div class="input-box" style="padding:0 12px">
+            <i class="bi bi-tag"></i>
+            <select name="type"
+                    style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;padding:12px 0">
+              {% for val in ['top_up','match_fee','refund','manual','correction'] %}
+              <option value="{{ val }}" {% if t and t.type == val %}selected{% endif %}>{{ val }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Description</label>
+          <div class="input-box">
+            <i class="bi bi-chat-left-text"></i>
+            <input type="text" name="description" value="{{ t.description if t else '' }}"
+                   placeholder="Ex : Remboursement manuel" required
+                   style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+          </div>
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Match lié <span style="font-weight:400;color:#91a492">(optionnel)</span></label>
+          <div class="input-box" style="padding:0 12px">
+            <i class="bi bi-calendar3"></i>
+            <select name="match_id"
+                    style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;padding:12px 0">
+              <option value="">-- Aucun --</option>
+              {% for m in matches %}
+              <option value="{{ m.id }}" {% if t and t.match_id == m.id %}selected{% endif %}>
+                #{{ m.id }} · {{ m.location }} · {{ m.date.strftime('%d.%m.%Y') }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-p full">
+          {% if t %}Enregistrer les modifications{% else %}Ajouter la transaction{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

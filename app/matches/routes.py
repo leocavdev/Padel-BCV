@@ -47,8 +47,10 @@ def list_matches():
                          .order_by(Match.date, Match.start_time)
                          .all())
     past_matches = (Match.query
-                    .filter(Match.date < today)
-                    .filter(Match.status != 'cancelled')
+                    .filter(db.or_(
+                        db.and_(Match.date < today, Match.status != 'cancelled'),
+                        Match.status == 'completed'
+                    ))
                     .order_by(Match.date.desc(), Match.start_time.desc())
                     .all())
     cancelled_matches = (Match.query

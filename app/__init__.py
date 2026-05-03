@@ -38,6 +38,14 @@ def create_app(config_class=Config):
         _migrate()
         _seed_admin()
 
+    @app.context_processor
+    def inject_pending_players_count():
+        if current_user.is_authenticated and current_user.is_admin:
+            from app.models import User
+            count = User.query.filter_by(is_approved=False, role='player').count()
+            return {'pending_players_count': count}
+        return {'pending_players_count': 0}
+
     @app.route('/')
     def index():
         if current_user.is_authenticated:

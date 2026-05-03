@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+
+  <div class="hero-dark" style="flex-shrink:0">
+    <div class="topbar topbar-transparent">
+      <a href="{{ url_for('admin.database') }}#users" class="topbar-back topbar-back-light">‹</a>
+      <div class="topbar-title topbar-title-light">{{ title }}</div>
+    </div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:16px 16px 32px">
+      <form method="POST" novalidate style="display:flex;flex-direction:column;gap:14px">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Nom d'utilisateur</label>
+          <div class="input-box">
+            <i class="bi bi-person"></i>
+            <input type="text" name="username" value="{{ user.username if user else '' }}"
+                   placeholder="Ex : Marie123" required
+                   style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+          </div>
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Email</label>
+          <div class="input-box">
+            <i class="bi bi-envelope"></i>
+            <input type="email" name="email" value="{{ user.email if user else '' }}"
+                   placeholder="Ex : marie@email.com" required
+                   style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+          </div>
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">
+            Mot de passe{% if user %} <span style="font-weight:400;color:#91a492">(laisser vide pour ne pas changer)</span>{% endif %}
+          </label>
+          <div class="input-box">
+            <i class="bi bi-lock"></i>
+            <input type="password" name="password" placeholder="Nouveau mot de passe" {% if not user %}required{% endif %}
+                   style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+          </div>
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Rôle</label>
+          <div class="input-box" style="padding:0 12px">
+            <i class="bi bi-shield"></i>
+            <select name="role" style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;padding:12px 0">
+              <option value="player" {% if not user or user.role == 'player' %}selected{% endif %}>Joueur</option>
+              <option value="admin" {% if user and user.role == 'admin' %}selected{% endif %}>Admin</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="input-wrap">
+            <label style="font-size:13px;font-weight:600;color:#2d3e30">Niveau (0–7)</label>
+            <div class="input-box">
+              <i class="bi bi-bar-chart"></i>
+              <input type="number" name="skill_level" value="{{ '%.2f'|format(user.skill_level) if user else '0.00' }}"
+                     min="0" max="7" step="0.05" required
+                     style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+            </div>
+          </div>
+          <div class="input-wrap">
+            <label style="font-size:13px;font-weight:600;color:#2d3e30">Solde CHF</label>
+            <div class="input-box">
+              <i class="bi bi-wallet2"></i>
+              <input type="number" name="wallet_balance" value="{{ '%.2f'|format(user.wallet_balance) if user else '0.00' }}"
+                     step="0.01" required
+                     style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+            </div>
+          </div>
+        </div>
+
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:12px;border:1.5px solid #dde8de;cursor:pointer">
+          <input type="checkbox" name="is_approved" value="1"
+                 {% if user and user.is_approved %}checked{% endif %}
+                 style="width:18px;height:18px;accent-color:#2d6a4f">
+          <span style="font-size:14px;font-weight:600;color:#2d3e30">Compte validé</span>
+        </label>
+
+        <button type="submit" class="btn-p full">
+          {% if user %}Enregistrer les modifications{% else %}Créer l'utilisateur{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

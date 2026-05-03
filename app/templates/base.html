@@ -47,7 +47,12 @@
       </a>
       <a href="{{ url_for('admin.list_players') }}"
          class="nav-tab nav-tab-admin {% if request.endpoint == 'admin.list_players' %}active{% endif %}">
-        <i class="bi bi-people{% if request.endpoint == 'admin.list_players' %}-fill{% endif %}"></i>
+        <span class="nav-icon-wrap">
+          <i class="bi bi-people{% if request.endpoint == 'admin.list_players' %}-fill{% endif %}"></i>
+          {% if pending_players_count > 0 %}
+          <span class="nav-notif-badge">{{ pending_players_count }}</span>
+          {% endif %}
+        </span>
         <span>Joueurs</span>
       </a>
       <a href="{{ url_for('admin.database') }}"

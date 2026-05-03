@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+
+  <div class="hero-dark" style="flex-shrink:0">
+    <div class="topbar topbar-transparent">
+      <a href="{{ url_for('admin.database') }}#proposals" class="topbar-back topbar-back-light">‹</a>
+      <div class="topbar-title topbar-title-light">{{ title }}</div>
+    </div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:16px 16px 32px">
+
+      <div style="background:#fff;border-radius:12px;padding:12px 14px;border:1.5px solid #dde8de;margin-bottom:14px">
+        <div style="font-size:12px;color:#91a492;margin-bottom:4px">Proposition #{{ p.id }}</div>
+        <div style="font-size:14px;font-weight:700;color:#151c17">Proposée par {{ p.proposed_by.username }}</div>
+        <div style="font-size:12px;color:#6b8070;margin-top:2px">
+          Match #{{ p.match_id }} · {{ p.match.location }} · {{ p.match.date.strftime('%d.%m.%Y') }}
+        </div>
+      </div>
+
+      <form method="POST" novalidate style="display:flex;flex-direction:column;gap:14px">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Équipe gagnante proposée</label>
+          <div style="display:flex;gap:8px">
+            {% for val, label in [('1','Équipe 1'), ('2','Équipe 2')] %}
+            <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;border:1.5px solid #dde8de;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;background:#fff">
+              <input type="radio" name="winner_team" value="{{ val }}"
+                     {% if p.winner_team|string == val %}checked{% endif %}
+                     style="accent-color:#2d6a4f">
+              {{ label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Statut</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            {% for val, label, color in [('pending','En attente','#d97706'),('accepted','Accepté','#16a34a'),('rejected','Refusé','#dc2626')] %}
+            <label style="flex:1;min-width:100px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:1.5px solid #dde8de;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;background:#fff">
+              <input type="radio" name="status" value="{{ val }}"
+                     {% if p.status == val %}checked{% endif %}
+                     style="accent-color:{{ color }}">
+              {{ label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="btn-p full">Enregistrer</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

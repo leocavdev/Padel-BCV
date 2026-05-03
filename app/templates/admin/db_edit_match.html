@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+
+  <div class="hero-dark" style="flex-shrink:0">
+    <div class="topbar topbar-transparent">
+      <a href="{{ url_for('admin.database') }}#matches" class="topbar-back topbar-back-light">‹</a>
+      <div class="topbar-title topbar-title-light">Match #{{ match.id }}</div>
+    </div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:16px 16px 32px">
+      <form method="POST" novalidate style="display:flex;flex-direction:column;gap:14px">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Lieu / Court</label>
+          <div class="input-box">
+            <i class="bi bi-geo-alt"></i>
+            <input type="text" name="location" value="{{ match.location }}" required
+                   placeholder="Ex : Court Beaumont A"
+                   style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+          </div>
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Date</label>
+          <div class="input-box">
+            <i class="bi bi-calendar3"></i>
+            <input type="date" name="date" value="{{ match.date.strftime('%Y-%m-%d') }}" required
+                   style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="input-wrap">
+            <label style="font-size:13px;font-weight:600;color:#2d3e30">Heure début</label>
+            <div class="input-box">
+              <input type="time" name="start_time" value="{{ match.start_time.strftime('%H:%M') }}" required
+                     style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+            </div>
+          </div>
+          <div class="input-wrap">
+            <label style="font-size:13px;font-weight:600;color:#2d3e30">Heure fin</label>
+            <div class="input-box">
+              <input type="time" name="end_time" value="{{ match.end_time.strftime('%H:%M') }}" required
+                     style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+            </div>
+          </div>
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Niveau requis</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="skill-pills">
+            {% for val, label, cls in [('beginner','Débutant','pill-beginner'),('intermediate','Intermédiaire','pill-intermediate'),('advanced','Avancé','pill-advanced'),('expert','Expert','pill-expert')] %}
+            <button type="button" class="skill-pill {{ cls }}{% if match.required_skill == val %} sel{% endif %}"
+                    onclick="selectSkill('{{ val }}', this)">{{ label }}</button>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="required_skill" id="skill-hidden" value="{{ match.required_skill }}">
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Prix par joueur (CHF)</label>
+          <div class="input-box">
+            <i class="bi bi-currency-dollar"></i>
+            <input type="number" name="price_per_player" value="{{ '%.2f'|format(match.price_per_player) }}"
+                   min="0" max="500" step="0.50" required
+                   style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+          </div>
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Statut</label>
+          <div class="input-box" style="padding:0 12px">
+            <i class="bi bi-flag"></i>
+            <select name="status" style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;padding:12px 0">
+              {% for val, label in [('open','Ouvert'),('confirmed','Confirmé'),('completed','Terminé'),('cancelled','Annulé')] %}
+              <option value="{{ val }}" {% if match.status == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Équipe gagnante</label>
+          <div style="display:flex;gap:8px">
+            {% for val, label in [('', 'Aucune'), ('1', 'Équipe 1'), ('2', 'Équipe 2')] %}
+            <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:1.5px solid #dde8de;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;background:#fff">
+              <input type="radio" name="winner_team" value="{{ val }}"
+                     {% if (match.winner_team|string) == val or (not match.winner_team and val == '') %}checked{% endif %}
+                     style="accent-color:#2d6a4f">
+              {{ label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="btn-p full">Enregistrer les modifications</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function selectSkill(val, el) {
+  document.querySelectorAll('#skill-pills .skill-pill').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('skill-hidden').value = val;
+}
+</script>
+{% endblock %}

@@ -37,6 +37,12 @@
 
       {# ── USERS ─────────────────────────────────────────────────────── #}
       <div id="section-users">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <a href="{{ url_for('admin.db_add_user') }}"
+             style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;background:#2d6a4f;color:#fff;border-radius:10px;padding:7px 14px;text-decoration:none">
+            <i class="bi bi-plus-lg"></i> Ajouter un utilisateur
+          </a>
+        </div>
         {% if users %}
           {% for u in users %}
           <div class="card-new" style="padding:12px 14px;margin-bottom:8px">
@@ -47,6 +53,7 @@
               <div style="flex:1;min-width:0">
                 <div style="font-size:14px;font-weight:700;color:#151c17">{{ u.username }}
                   {% if u.is_admin %}<span style="font-size:10px;background:#2d6a4f;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px">admin</span>{% endif %}
+                  {% if not u.is_approved and not u.is_admin %}<span style="font-size:10px;background:#d97706;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px">non validé</span>{% endif %}
                 </div>
                 <div style="font-size:11px;color:#91a492;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.email }}</div>
               </div>
@@ -57,10 +64,26 @@
               </div>
             </div>
             {% if u.created_at %}
-            <div style="margin-top:6px;font-size:10px;color:#b0bcb1;text-align:right">
+            <div style="margin-top:4px;font-size:10px;color:#b0bcb1;text-align:right">
               Créé le {{ u.created_at.strftime('%d.%m.%Y %H:%M') }}
             </div>
             {% endif %}
+            <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px">
+              <a href="{{ url_for('admin.db_edit_user', user_id=u.id) }}"
+                 style="font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1;border-radius:8px;padding:4px 10px;text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+                <i class="bi bi-pencil"></i> Modifier
+              </a>
+              {% if not u.is_admin %}
+              <form method="POST" action="{{ url_for('admin.db_delete_user', user_id=u.id) }}"
+                    onsubmit="return confirm('Supprimer {{ u.username }} ? Cette action est irréversible.')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        style="font-size:11px;font-weight:700;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+                  <i class="bi bi-trash3"></i> Supprimer
+                </button>
+              </form>
+              {% endif %}
+            </div>
           </div>
           {% endfor %}
         {% else %}
@@ -71,6 +94,12 @@
       {# ── MATCHES ───────────────────────────────────────────────────── #}
       {% set status_colors = {'open':'#2563eb','confirmed':'#16a34a','completed':'#6b7280','cancelled':'#dc2626'} %}
       <div id="section-matches" style="display:none">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <a href="{{ url_for('admin.create_match') }}"
+             style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;background:#2d6a4f;color:#fff;border-radius:10px;padding:7px 14px;text-decoration:none">
+            <i class="bi bi-plus-lg"></i> Créer un match
+          </a>
+        </div>
         {% if matches %}
           {% for m in matches %}
           {% set sc = status_colors.get(m.status, '#6b7280') %}
@@ -95,6 +124,20 @@
               <span style="font-size:11px;color:#6b8070">Niveau: {{ m.required_skill_label }}</span>
               {% if m.winner_team %}<span style="font-size:11px;font-weight:700;color:#16a34a">Gagnant: Équipe {{ m.winner_team }}</span>{% endif %}
             </div>
+            <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px">
+              <a href="{{ url_for('admin.db_edit_match', match_id=m.id) }}"
+                 style="font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1;border-radius:8px;padding:4px 10px;text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+                <i class="bi bi-pencil"></i> Modifier
+              </a>
+              <form method="POST" action="{{ url_for('admin.db_delete_match', match_id=m.id) }}"
+                    onsubmit="return confirm('Supprimer définitivement le match #{{ m.id }} ? Cette action est irréversible.')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        style="font-size:11px;font-weight:700;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+                  <i class="bi bi-trash3"></i> Supprimer
+                </button>
+              </form>
+            </div>
           </div>
           {% endfor %}
         {% else %}
@@ -106,6 +149,12 @@
       {% set pay_colors = {'pending':'#d97706','paid':'#16a34a','refunded':'#2563eb'} %}
       {% set pay_labels = {'pending':'En attente','paid':'Payé','refunded':'Remboursé'} %}
       <div id="section-match_players" style="display:none">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <a href="{{ url_for('admin.db_add_matchplayer') }}"
+             style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;background:#2d6a4f;color:#fff;border-radius:10px;padding:7px 14px;text-decoration:none">
+            <i class="bi bi-plus-lg"></i> Ajouter une inscription
+          </a>
+        </div>
         {% if match_players %}
           {% for mp in match_players %}
           {% set pc = pay_colors.get(mp.payment_status, '#6b7280') %}
@@ -123,6 +172,20 @@
             {% if mp.joined_at %}
             <div style="font-size:10px;color:#b0bcb1;text-align:right;margin-top:4px">{{ mp.joined_at.strftime('%d.%m.%Y %H:%M') }}</div>
             {% endif %}
+            <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px">
+              <a href="{{ url_for('admin.db_edit_matchplayer', mp_id=mp.id) }}"
+                 style="font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1;border-radius:8px;padding:4px 10px;text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+                <i class="bi bi-pencil"></i> Modifier
+              </a>
+              <form method="POST" action="{{ url_for('admin.db_delete_matchplayer', mp_id=mp.id) }}"
+                    onsubmit="return confirm('Supprimer cette inscription ?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        style="font-size:11px;font-weight:700;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+                  <i class="bi bi-trash3"></i> Supprimer
+                </button>
+              </form>
+            </div>
           </div>
           {% endfor %}
         {% else %}
@@ -132,6 +195,12 @@
 
       {# ── TRANSACTIONS ──────────────────────────────────────────────── #}
       <div id="section-transactions" style="display:none">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <a href="{{ url_for('admin.db_add_transaction') }}"
+             style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;background:#2d6a4f;color:#fff;border-radius:10px;padding:7px 14px;text-decoration:none">
+            <i class="bi bi-plus-lg"></i> Ajouter une transaction
+          </a>
+        </div>
         {% if transactions %}
           {% for t in transactions %}
           <div class="card-new" style="padding:10px 14px;margin-bottom:8px">
@@ -150,6 +219,20 @@
             {% if t.created_at %}
             <div style="font-size:10px;color:#b0bcb1;text-align:right;margin-top:4px">{{ t.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
             {% endif %}
+            <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px">
+              <a href="{{ url_for('admin.db_edit_transaction', t_id=t.id) }}"
+                 style="font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1;border-radius:8px;padding:4px 10px;text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+                <i class="bi bi-pencil"></i> Modifier
+              </a>
+              <form method="POST" action="{{ url_for('admin.db_delete_transaction', t_id=t.id) }}"
+                    onsubmit="return confirm('Supprimer cette transaction ?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        style="font-size:11px;font-weight:700;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+                  <i class="bi bi-trash3"></i> Supprimer
+                </button>
+              </form>
+            </div>
           </div>
           {% endfor %}
         {% else %}
@@ -177,6 +260,20 @@
             {% if r.created_at %}
             <div style="font-size:10px;color:#b0bcb1;text-align:right;margin-top:4px">{{ r.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
             {% endif %}
+            <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px">
+              <a href="{{ url_for('admin.db_edit_replacement', r_id=r.id) }}"
+                 style="font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1;border-radius:8px;padding:4px 10px;text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+                <i class="bi bi-pencil"></i> Modifier
+              </a>
+              <form method="POST" action="{{ url_for('admin.db_delete_replacement', r_id=r.id) }}"
+                    onsubmit="return confirm('Supprimer cette demande de remplacement ?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        style="font-size:11px;font-weight:700;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+                  <i class="bi bi-trash3"></i> Supprimer
+                </button>
+              </form>
+            </div>
           </div>
           {% endfor %}
         {% else %}
@@ -202,6 +299,20 @@
             {% if p.created_at %}
             <div style="font-size:10px;color:#b0bcb1;text-align:right;margin-top:4px">{{ p.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
             {% endif %}
+            <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px">
+              <a href="{{ url_for('admin.db_edit_proposal', p_id=p.id) }}"
+                 style="font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1;border-radius:8px;padding:4px 10px;text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+                <i class="bi bi-pencil"></i> Modifier
+              </a>
+              <form method="POST" action="{{ url_for('admin.db_delete_proposal', p_id=p.id) }}"
+                    onsubmit="return confirm('Supprimer cette proposition ?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        style="font-size:11px;font-weight:700;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+                  <i class="bi bi-trash3"></i> Supprimer
+                </button>
+              </form>
+            </div>
           </div>
           {% endfor %}
         {% else %}
@@ -218,7 +329,7 @@
 <script>
 const TABS = ['users','matches','match_players','transactions','replacements','proposals'];
 
-function showTab(key) {
+function showTab(key, pushHash) {
   TABS.forEach(k => {
     const section = document.getElementById('section-' + k);
     const btn     = document.getElementById('tab-' + k);
@@ -230,6 +341,12 @@ function showTab(key) {
     const badge = btn.querySelector('span');
     if (badge) badge.style.background = active ? '#2d6a4f' : 'rgba(255,255,255,.25)';
   });
+  if (pushHash !== false) history.replaceState(null, '', '#' + key);
 }
+
+(function() {
+  const hash = location.hash.replace('#', '');
+  showTab(TABS.includes(hash) ? hash : 'users', false);
+})();
 </script>
 {% endblock %}
