@@ -122,6 +122,73 @@
   setTimeout(() => {
     document.querySelectorAll('.flash-item').forEach(el => el.remove());
   }, 5000);
+
+  // Pull-to-refresh
+  (function () {
+    const THRESHOLD = 80;
+    const MAX_PULL = 120;
+    let startY = 0;
+    let pulling = false;
+    let indicator = null;
+    const scroller = document.querySelector('.app-content');
+
+    function getIndicator() {
+      if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'ptr-indicator';
+        indicator.innerHTML = '<div class="ptr-spinner"></div>';
+        document.querySelector('.app-shell').prepend(indicator);
+      }
+      return indicator;
+    }
+
+    if (!scroller) return;
+
+    scroller.addEventListener('touchstart', (e) => {
+      if (scroller.scrollTop === 0) {
+        startY = e.touches[0].clientY;
+        pulling = true;
+      }
+    }, { passive: true });
+
+    scroller.addEventListener('touchmove', (e) => {
+      if (!pulling) return;
+      const delta = Math.min(e.touches[0].clientY - startY, MAX_PULL);
+      if (delta <= 0) { pulling = false; return; }
+
+      const el = getIndicator();
+      const progress = Math.min(delta / THRESHOLD, 1);
+      const translateY = delta * 0.5;
+      el.style.opacity = progress;
+      el.style.transform = `translateY(${translateY}px)`;
+      el.querySelector('.ptr-spinner').style.transform =
+        `rotate(${delta * 2.5}deg) scale(${0.5 + progress * 0.5})`;
+
+      if (delta >= THRESHOLD) {
+        el.classList.add('ptr-ready');
+      } else {
+        el.classList.remove('ptr-ready');
+      }
+    }, { passive: true });
+
+    scroller.addEventListener('touchend', (e) => {
+      if (!pulling) return;
+      pulling = false;
+      const el = getIndicator();
+      const delta = e.changedTouches[0].clientY - startY;
+      if (delta >= THRESHOLD) {
+        el.classList.add('ptr-loading');
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(32px)';
+        setTimeout(() => location.reload(), 300);
+      } else {
+        el.style.transition = 'opacity 0.2s, transform 0.2s';
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-40px)';
+        setTimeout(() => { el.style.transition = ''; }, 250);
+      }
+    });
+  })();
 </script>
 {% block scripts %}{% endblock %}
 </body>
