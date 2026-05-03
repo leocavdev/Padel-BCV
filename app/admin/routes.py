@@ -186,7 +186,7 @@ def record_result(match_id):
 @admin_required
 def list_players():
     skill_filter = request.args.get('skill', '')
-    query = User.query.filter_by(role='player')
+    query = User.query.filter_by(role='player', is_approved=True)
 
     if skill_filter in SKILL_LEVELS:
         min_level, max_level, _ = SKILL_LEVELS[skill_filter]
@@ -194,8 +194,19 @@ def list_players():
                              User.skill_level <= max_level)
 
     players = query.order_by(User.username).all()
-    return render_template('admin/players.html', players=players,
+    pending = User.query.filter_by(role='player', is_approved=False).order_by(User.created_at).all()
+    return render_template('admin/players.html', players=players, pending=pending,
                            title='Joueurs', current_skill=skill_filter)
+
+
+@bp.route('/players/<int:player_id>/approve', methods=['POST'])
+@admin_required
+def approve_player(player_id):
+    player = User.query.filter_by(id=player_id, role='player').first_or_404()
+    player.is_approved = True
+    db.session.commit()
+    flash(f'Compte de {player.username} validé.', 'success')
+    return redirect(url_for('admin.list_players'))
 
 
 @bp.route('/players/<int:player_id>/set-level', methods=['POST'])

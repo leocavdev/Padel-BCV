@@ -30,7 +30,7 @@ def init():
         password = os.environ.get('ADMIN_PASSWORD')
         if email and password:
             if not User.query.filter_by(email=email).first():
-                admin = User(username='admin', email=email, role='admin')
+                admin = User(username='admin', email=email, role='admin', is_approved=True)
                 admin.set_password(password)
                 db.session.add(admin)
                 db.session.commit()

@@ -42,6 +42,7 @@ class User(db.Model, UserMixin):
     email           = db.Column(db.String(120), unique=True, nullable=False)
     password_hash   = db.Column(db.String(256), nullable=False)
     role            = db.Column(db.String(20), nullable=False, default='player')
+    is_approved     = db.Column(db.Boolean, nullable=False, default=False)
     skill_level     = db.Column(db.Float, nullable=False, default=0.0)
     wallet_balance  = db.Column(db.Float, nullable=False, default=0.0)
     created_at      = db.Column(db.DateTime, default=_now_ch)

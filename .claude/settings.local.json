@@ -17,7 +17,8 @@
       "Bash(grep -E \"\\\\.\\(env|cfg|ini|sh\\)$\")",
       "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV ls-files padel.db)",
       "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV rm --cached padel.db)",
-      "Bash(python3 -c \"from app import create_app; app = create_app\\(\\); print\\('OK'\\)\")"
+      "Bash(python3 -c \"from app import create_app; app = create_app\\(\\); print\\('OK'\\)\")",
+      "Bash(grep -E \"\\\\.\\(py|html|js|json\\)$\")"
     ]
   }
 }

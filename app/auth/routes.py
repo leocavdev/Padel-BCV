@@ -14,6 +14,9 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
         if user and user.check_password(form.password.data):
+            if not user.is_approved and not user.is_admin:
+                flash('Votre compte est en attente de validation par un administrateur.', 'warning')
+                return redirect(url_for('auth.login'))
             login_user(user, remember=form.remember_me.data)
             next_page = request.args.get('next')
             flash(f'Bienvenue, {user.username} !', 'success')
@@ -34,7 +37,7 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Inscription réussie ! Vous pouvez maintenant vous connecter.', 'success')
+        flash('Inscription reçue ! Votre compte sera activé après validation par un administrateur.', 'info')
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form, title='Inscription')
 
