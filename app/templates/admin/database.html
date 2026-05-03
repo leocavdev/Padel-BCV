@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% block title %}Base de données — Padel BCV{% endblock %}
+{% block content %}
+
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+
+  {# Header #}
+  <div class="hero-dark" style="padding:16px 20px 16px;flex-shrink:0">
+    <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:2px">Administration</div>
+    <div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:12px">
+      <i class="bi bi-database" style="margin-right:8px"></i>Base de données
+    </div>
+
+    {# Tab bar #}
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px">
+      {% set tabs = [
+        ('users',         'bi-people',        'Utilisateurs', counts.users),
+        ('matches',       'bi-calendar3',     'Matchs',        counts.matches),
+        ('match_players', 'bi-person-check',  'Inscriptions',  counts.match_players),
+        ('transactions',  'bi-arrow-left-right','Transactions', counts.transactions),
+        ('replacements',  'bi-arrow-repeat',  'Remplacements', counts.replacements),
+        ('proposals',     'bi-trophy',        'Propositions',  counts.proposals),
+      ] %}
+      {% for key, icon, label, count in tabs %}
+      <button onclick="showTab('{{ key }}')" id="tab-{{ key }}"
+              style="flex-shrink:0;border:none;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;
+                     {% if loop.first %}background:#fff;color:#151c17;{% else %}background:rgba(255,255,255,.15);color:rgba(255,255,255,.85);{% endif %}">
+        <i class="bi {{ icon }}"></i>{{ label }}
+        <span style="background:{% if loop.first %}#2d6a4f{% else %}rgba(255,255,255,.25){% endif %};color:#fff;border-radius:999px;padding:1px 7px;font-size:10px">{{ count }}</span>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:12px 16px 24px">
+
+      {# ── USERS ─────────────────────────────────────────────────────── #}
+      <div id="section-users">
+        {% if users %}
+          {% for u in users %}
+          <div class="card-new" style="padding:12px 14px;margin-bottom:8px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:50%;background:{% if u.is_admin %}#2d6a4f{% else %}#2563eb{% endif %};display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800;flex-shrink:0">
+                {{ u.username[:2]|upper }}
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:14px;font-weight:700;color:#151c17">{{ u.username }}
+                  {% if u.is_admin %}<span style="font-size:10px;background:#2d6a4f;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px">admin</span>{% endif %}
+                </div>
+                <div style="font-size:11px;color:#91a492;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.email }}</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div style="font-size:11px;color:#91a492">ID #{{ u.id }}</div>
+                <div style="font-size:12px;font-weight:700;color:#14532d">{{ '%.2f'|format(u.wallet_balance) }} CHF</div>
+                <div style="font-size:11px;color:#6b8070">Niv. {{ '%.2f'|format(u.skill_level) }}</div>
+              </div>
+            </div>
+            {% if u.created_at %}
+            <div style="margin-top:6px;font-size:10px;color:#b0bcb1;text-align:right">
+              Créé le {{ u.created_at.strftime('%d.%m.%Y %H:%M') }}
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state"><p>Aucun utilisateur.</p></div>
+        {% endif %}
+      </div>
+
+      {# ── MATCHES ───────────────────────────────────────────────────── #}
+      {% set status_colors = {'open':'#2563eb','confirmed':'#16a34a','completed':'#6b7280','cancelled':'#dc2626'} %}
+      <div id="section-matches" style="display:none">
+        {% if matches %}
+          {% for m in matches %}
+          {% set sc = status_colors.get(m.status, '#6b7280') %}
+          <div class="card-new" style="padding:12px 14px;margin-bottom:8px;border-left:3px solid {{ sc }}">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#151c17">
+                  <i class="bi bi-geo-alt" style="color:#2d6a4f;margin-right:4px"></i>{{ m.location }}
+                </div>
+                <div style="font-size:11px;color:#6b8070;margin-top:2px">
+                  {{ m.date.strftime('%d.%m.%Y') }} · {{ m.start_time.strftime('%H:%M') }}–{{ m.end_time.strftime('%H:%M') }}
+                </div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:10px;font-weight:700;background:{{ sc }};color:#fff;border-radius:999px;padding:2px 8px">{{ m.status_label }}</div>
+                <div style="font-size:10px;color:#91a492;margin-top:3px">ID #{{ m.id }}</div>
+              </div>
+            </div>
+            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+              <span style="font-size:11px;color:#6b8070"><i class="bi bi-people" style="margin-right:3px"></i>{{ m.player_count }}/4 joueurs</span>
+              <span style="font-size:11px;color:#6b8070"><i class="bi bi-currency-dollar" style="margin-right:2px"></i>{{ '%.2f'|format(m.price_per_player) }} CHF</span>
+              <span style="font-size:11px;color:#6b8070">Niveau: {{ m.required_skill_label }}</span>
+              {% if m.winner_team %}<span style="font-size:11px;font-weight:700;color:#16a34a">Gagnant: Équipe {{ m.winner_team }}</span>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state"><p>Aucun match.</p></div>
+        {% endif %}
+      </div>
+
+      {# ── MATCH PLAYERS ─────────────────────────────────────────────── #}
+      {% set pay_colors = {'pending':'#d97706','paid':'#16a34a','refunded':'#2563eb'} %}
+      {% set pay_labels = {'pending':'En attente','paid':'Payé','refunded':'Remboursé'} %}
+      <div id="section-match_players" style="display:none">
+        {% if match_players %}
+          {% for mp in match_players %}
+          {% set pc = pay_colors.get(mp.payment_status, '#6b7280') %}
+          <div class="card-new" style="padding:10px 14px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#151c17">{{ mp.player.username }}</div>
+                <div style="font-size:11px;color:#6b8070">Match #{{ mp.match_id }} · {% if mp.team %}Équipe {{ mp.team }}{% else %}Équipe non définie{% endif %}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:10px;font-weight:700;background:{{ pc }};color:#fff;border-radius:999px;padding:2px 8px">{{ pay_labels.get(mp.payment_status, mp.payment_status) }}</div>
+                <div style="font-size:10px;color:#91a492;margin-top:2px">ID #{{ mp.id }}</div>
+              </div>
+            </div>
+            {% if mp.joined_at %}
+            <div style="font-size:10px;color:#b0bcb1;text-align:right;margin-top:4px">{{ mp.joined_at.strftime('%d.%m.%Y %H:%M') }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state"><p>Aucune inscription.</p></div>
+        {% endif %}
+      </div>
+
+      {# ── TRANSACTIONS ──────────────────────────────────────────────── #}
+      <div id="section-transactions" style="display:none">
+        {% if transactions %}
+          {% for t in transactions %}
+          <div class="card-new" style="padding:10px 14px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#151c17">{{ t.user.username }}</div>
+                <div style="font-size:11px;color:#6b8070;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.description }}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:14px;font-weight:800;color:{% if t.amount >= 0 %}#16a34a{% else %}#dc2626{% endif %}">
+                  {% if t.amount >= 0 %}+{% endif %}{{ '%.2f'|format(t.amount) }} CHF
+                </div>
+                <div style="font-size:10px;color:#91a492">{{ t.type }} · #{{ t.id }}</div>
+              </div>
+            </div>
+            {% if t.created_at %}
+            <div style="font-size:10px;color:#b0bcb1;text-align:right;margin-top:4px">{{ t.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state"><p>Aucune transaction.</p></div>
+        {% endif %}
+      </div>
+
+      {# ── REPLACEMENTS ──────────────────────────────────────────────── #}
+      <div id="section-replacements" style="display:none">
+        {% if replacements %}
+          {% for r in replacements %}
+          <div class="card-new" style="padding:10px 14px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#151c17">
+                  {{ r.requester.username }} <i class="bi bi-arrow-right" style="color:#91a492"></i> {{ r.replacement.username }}
+                </div>
+                <div style="font-size:11px;color:#6b8070">Match #{{ r.match_id }}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:10px;font-weight:700;background:#d97706;color:#fff;border-radius:999px;padding:2px 8px">{{ r.status }}</div>
+                <div style="font-size:10px;color:#91a492;margin-top:2px">#{{ r.id }}</div>
+              </div>
+            </div>
+            {% if r.created_at %}
+            <div style="font-size:10px;color:#b0bcb1;text-align:right;margin-top:4px">{{ r.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state"><p>Aucune demande de remplacement.</p></div>
+        {% endif %}
+      </div>
+
+      {# ── PROPOSALS ─────────────────────────────────────────────────── #}
+      <div id="section-proposals" style="display:none">
+        {% if proposals %}
+          {% for p in proposals %}
+          <div class="card-new" style="padding:10px 14px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#151c17">{{ p.proposed_by.username }}</div>
+                <div style="font-size:11px;color:#6b8070">Match #{{ p.match_id }} · Équipe {{ p.winner_team }} gagnante</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:10px;font-weight:700;background:#6b7280;color:#fff;border-radius:999px;padding:2px 8px">{{ p.status }}</div>
+                <div style="font-size:10px;color:#91a492;margin-top:2px">#{{ p.id }}</div>
+              </div>
+            </div>
+            {% if p.created_at %}
+            <div style="font-size:10px;color:#b0bcb1;text-align:right;margin-top:4px">{{ p.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state"><p>Aucune proposition de résultat.</p></div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+const TABS = ['users','matches','match_players','transactions','replacements','proposals'];
+
+function showTab(key) {
+  TABS.forEach(k => {
+    const section = document.getElementById('section-' + k);
+    const btn     = document.getElementById('tab-' + k);
+    if (!section || !btn) return;
+    const active = k === key;
+    section.style.display = active ? 'block' : 'none';
+    btn.style.background  = active ? '#fff' : 'rgba(255,255,255,.15)';
+    btn.style.color       = active ? '#151c17' : 'rgba(255,255,255,.85)';
+    const badge = btn.querySelector('span');
+    if (badge) badge.style.background = active ? '#2d6a4f' : 'rgba(255,255,255,.25)';
+  });
+}
+</script>
+{% endblock %}

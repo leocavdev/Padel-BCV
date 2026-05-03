@@ -5,7 +5,9 @@ from flask_login import login_required, current_user
 from app import db
 from app.admin import bp
 from app.admin.forms import CreateMatchForm, EditMatchForm
-from app.models import Match, MatchPlayer, Transaction, User, SKILL_ORDER, SKILL_LEVELS
+from app.models import (Match, MatchPlayer, Transaction, User,
+                         ReplacementRequest, MatchResultProposal,
+                         SKILL_ORDER, SKILL_LEVELS)
 
 
 def admin_required(f):
@@ -214,6 +216,33 @@ def set_level(player_id):
     db.session.commit()
     flash(f'Niveau de {player.username} mis à jour à {player.skill_level:.1f}.', 'success')
     return redirect(url_for('admin.list_players'))
+
+
+@bp.route('/database')
+@admin_required
+def database():
+    users = User.query.order_by(User.id).all()
+    matches = Match.query.order_by(Match.id.desc()).all()
+    match_players = MatchPlayer.query.order_by(MatchPlayer.id.desc()).all()
+    transactions = Transaction.query.order_by(Transaction.id.desc()).all()
+    replacements = ReplacementRequest.query.order_by(ReplacementRequest.id.desc()).all()
+    proposals = MatchResultProposal.query.order_by(MatchResultProposal.id.desc()).all()
+    counts = {
+        'users': len(users),
+        'matches': len(matches),
+        'match_players': len(match_players),
+        'transactions': len(transactions),
+        'replacements': len(replacements),
+        'proposals': len(proposals),
+    }
+    return render_template('admin/database.html',
+                           users=users, matches=matches,
+                           match_players=match_players,
+                           transactions=transactions,
+                           replacements=replacements,
+                           proposals=proposals,
+                           counts=counts,
+                           title='Base de données')
 
 
 @bp.route('/players/<int:player_id>/add-balance', methods=['POST'])

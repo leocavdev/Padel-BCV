@@ -14,7 +14,10 @@
       "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/padel.db ' *)",
       "Bash(python3 -c \"import sqlalchemy; print\\(sqlalchemy.__version__\\)\")",
       "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/app/padel.db \"SELECT id, username, skill_level FROM users WHERE role='player';\")",
-      "Bash(grep -E \"\\\\.\\(env|cfg|ini|sh\\)$\")"
+      "Bash(grep -E \"\\\\.\\(env|cfg|ini|sh\\)$\")",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV ls-files padel.db)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV rm --cached padel.db)",
+      "Bash(python3 -c \"from app import create_app; app = create_app\\(\\); print\\('OK'\\)\")"
     ]
   }
 }
