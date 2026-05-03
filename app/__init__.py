@@ -35,6 +35,7 @@ def create_app(config_class=Config):
 
     with app.app_context():
         db.create_all()
+        _migrate()
         _seed_admin()
 
     @app.route('/')
@@ -46,6 +47,18 @@ def create_app(config_class=Config):
         return redirect(url_for('auth.login'))
 
     return app
+
+
+def _migrate():
+    from sqlalchemy import text, inspect
+    inspector = inspect(db.engine)
+    existing = [col['name'] for col in inspector.get_columns('users')]
+    if 'is_approved' not in existing:
+        with db.engine.connect() as conn:
+            conn.execute(text(
+                'ALTER TABLE users ADD COLUMN is_approved BOOLEAN NOT NULL DEFAULT TRUE'
+            ))
+            conn.commit()
 
 
 def _seed_admin():
