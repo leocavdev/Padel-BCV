@@ -13,7 +13,8 @@
       "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/padel.db \"SELECT * FROM match_result_proposals;\")",
       "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/padel.db ' *)",
       "Bash(python3 -c \"import sqlalchemy; print\\(sqlalchemy.__version__\\)\")",
-      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/app/padel.db \"SELECT id, username, skill_level FROM users WHERE role='player';\")"
+      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/app/padel.db \"SELECT id, username, skill_level FROM users WHERE role='player';\")",
+      "Bash(grep -E \"\\\\.\\(env|cfg|ini|sh\\)$\")"
     ]
   }
 }

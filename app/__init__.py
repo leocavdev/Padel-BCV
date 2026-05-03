@@ -33,6 +33,9 @@ def create_app(config_class=Config):
     from app.wallet import bp as wallet_bp
     app.register_blueprint(wallet_bp)
 
+    with app.app_context():
+        db.create_all()
+
     @app.route('/')
     def index():
         if current_user.is_authenticated:
