@@ -56,7 +56,7 @@ def _seed_admin():
     if not email or not password:
         return
     if not User.query.filter_by(email=email).first():
-        admin = User(username='admin', email=email, role='admin')
+        admin = User(username='admin', email=email, role='admin', is_approved=True)
         admin.set_password(password)
         db.session.add(admin)
         db.session.commit()
