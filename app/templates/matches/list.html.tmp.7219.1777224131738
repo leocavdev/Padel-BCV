@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Partidos — Padel BCV{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h5 class="mb-0 fw-bold"><i class="bi bi-calendar3 me-2 text-primary"></i>Partidos</h5>
+  {% if current_user.is_admin %}
+  <a href="{{ url_for('admin.create_match') }}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i>Nuevo
+  </a>
+  {% endif %}
+</div>
+
+{# ── Open matches ──────────────────────────────────────────────── #}
+<h6 class="section-label">
+  <i class="bi bi-circle-fill text-success me-1" style="font-size:.55rem;vertical-align:middle"></i>
+  Disponibles
+  <span class="badge bg-secondary ms-1">{{ open_matches|length }}</span>
+</h6>
+
+{% if open_matches %}
+  {% for match in open_matches %}
+  {% include 'matches/_card.html' %}
+  {% endfor %}
+{% else %}
+<div class="empty-state text-center py-4 text-muted small mb-4">
+  <i class="bi bi-calendar-x" style="font-size:2rem"></i>
+  <p class="mt-2 mb-0">No hay partidos disponibles.</p>
+</div>
+{% endif %}
+
+{# ── Confirmed matches ─────────────────────────────────────────── #}
+{% if confirmed_matches %}
+<h6 class="section-label mt-4">
+  <i class="bi bi-circle-fill text-primary me-1" style="font-size:.55rem;vertical-align:middle"></i>
+  Confirmados
+  <span class="badge bg-secondary ms-1">{{ confirmed_matches|length }}</span>
+</h6>
+{% for match in confirmed_matches %}
+{% include 'matches/_card.html' %}
+{% endfor %}
+{% endif %}
+{% endblock %}

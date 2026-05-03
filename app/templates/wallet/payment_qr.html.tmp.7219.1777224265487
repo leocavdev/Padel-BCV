@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Datos de pago — Padel BCV{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-3">
+  <a href="{{ url_for('wallet.dashboard') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <h5 class="mb-0 fw-bold"><i class="bi bi-qr-code me-1 text-primary"></i>Datos de pago</h5>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body text-center p-4">
+    <p class="text-muted small mb-3">
+      Escanea el QR o realiza la transferencia con los datos indicados.
+      Incluye tu nombre y la fecha del partido en el concepto.
+    </p>
+
+    <div class="qr-box mx-auto mb-4">
+      <img src="{{ url_for('static', filename='img/qr_payment.png') }}"
+           alt="QR de pago" class="img-fluid rounded"
+           style="max-width:220px"
+           onerror="this.style.display='none';document.getElementById('qr-fallback').style.display='block'">
+      <div id="qr-fallback" style="display:none" class="p-4 text-muted">
+        <i class="bi bi-qr-code" style="font-size:4rem"></i>
+        <p class="small mt-2">QR no generado. Ejecuta <code>python init_db.py</code></p>
+      </div>
+    </div>
+
+    <div class="text-start bg-light rounded p-3 small">
+      <div class="mb-2">
+        <span class="text-muted">Bizum</span><br>
+        <strong class="fs-6">612 345 678</strong>
+      </div>
+      <hr class="my-2">
+      <div class="mb-2">
+        <span class="text-muted">Transferencia bancaria (IBAN)</span><br>
+        <strong>ES12 3456 7890 1234 5678 90</strong>
+      </div>
+      <hr class="my-2">
+      <div>
+        <span class="text-muted">Concepto</span><br>
+        <strong>{{ current_user.username }} + fecha del partido</strong>
+      </div>
+    </div>
+
+    <div class="alert alert-warning py-2 small mt-3 text-start mb-0">
+      <i class="bi bi-exclamation-triangle me-1"></i>
+      El pago debe ser confirmado por un administrador. Guarda el comprobante.
+    </div>
+  </div>
+</div>
+{% endblock %}

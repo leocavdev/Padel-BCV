@@ -1,0 +1,130 @@
+from flask import render_template, redirect, url_for, flash, request
+from flask_login import login_required, current_user
+from app import db
+from app.matches import bp
+from app.models import Match, MatchPlayer, Transaction, SKILL_LEVELS, SKILL_ORDER
+
+
+@bp.route('/')
+@login_required
+def list_matches():
+    open_matches = (Match.query
+                    .filter_by(status='open')
+                    .order_by(Match.date, Match.start_time)
+                    .all())
+    confirmed_matches = (Match.query
+                         .filter_by(status='confirmed')
+                         .order_by(Match.date, Match.start_time)
+                         .all())
+    return render_template('matches/list.html',
+                           open_matches=open_matches,
+                           confirmed_matches=confirmed_matches,
+                           title='Partidos')
+
+
+@bp.route('/<int:match_id>')
+@login_required
+def match_detail(match_id):
+    match = Match.query.get_or_404(match_id)
+    registration = None
+    if not current_user.is_admin:
+        registration = MatchPlayer.query.filter_by(
+            match_id=match_id, player_id=current_user.id
+        ).first()
+    return render_template('matches/detail.html', match=match,
+                           registration=registration, title='Detalle del partido')
+
+
+@bp.route('/<int:match_id>/join', methods=['POST'])
+@login_required
+def join_match(match_id):
+    if current_user.is_admin:
+        flash('Los administradores no pueden inscribirse en partidos.', 'warning')
+        return redirect(url_for('matches.match_detail', match_id=match_id))
+
+    match = Match.query.get_or_404(match_id)
+
+    if match.status != 'open':
+        flash('Este partido ya no está disponible.', 'danger')
+        return redirect(url_for('matches.list_matches'))
+
+    current_count = MatchPlayer.query.filter_by(match_id=match_id).count()
+    if current_count >= 4:
+        flash('El partido está completo.', 'danger')
+        return redirect(url_for('matches.list_matches'))
+
+    # Skill level gate
+    player_idx   = SKILL_ORDER.index(current_user.skill_category_key)
+    required_idx = SKILL_ORDER.index(match.required_skill)
+    if player_idx < required_idx:
+        flash(
+            f'Tu nivel ({current_user.skill_label}) no alcanza el nivel requerido '
+            f'({match.required_skill_label}).',
+            'danger',
+        )
+        return redirect(url_for('matches.match_detail', match_id=match_id))
+
+    if MatchPlayer.query.filter_by(match_id=match_id, player_id=current_user.id).first():
+        flash('Ya estás inscrito en este partido.', 'warning')
+        return redirect(url_for('matches.match_detail', match_id=match_id))
+
+    # Payment method
+    use_wallet = request.form.get('use_wallet') == 'true'
+    if use_wallet and current_user.wallet_balance >= match.price_per_player:
+        current_user.wallet_balance -= match.price_per_player
+        payment_status = 'paid'
+        db.session.add(Transaction(
+            user_id=current_user.id,
+            amount=-match.price_per_player,
+            type='match_fee',
+            description=f'Pago con monedero — partido #{match.id} ({match.location})',
+            match_id=match.id,
+        ))
+        flash(f'Inscripción confirmada. {match.price_per_player:.2f}€ descontados de tu monedero.', 'success')
+    else:
+        payment_status = 'pending'
+        flash('Inscripción recibida. Realiza el pago para confirmar tu plaza.', 'info')
+
+    mp = MatchPlayer(match_id=match_id, player_id=current_user.id, payment_status=payment_status)
+    db.session.add(mp)
+
+    if current_count + 1 >= 4:
+        match.status = 'confirmed'
+        flash('¡El partido está completo (4/4) y ha sido confirmado!', 'success')
+
+    db.session.commit()
+    return redirect(url_for('matches.match_detail', match_id=match_id))
+
+
+@bp.route('/<int:match_id>/leave', methods=['POST'])
+@login_required
+def leave_match(match_id):
+    match = Match.query.get_or_404(match_id)
+
+    if match.status not in ('open', 'confirmed'):
+        flash('No puedes abandonar este partido.', 'danger')
+        return redirect(url_for('matches.match_detail', match_id=match_id))
+
+    mp = MatchPlayer.query.filter_by(match_id=match_id, player_id=current_user.id).first()
+    if not mp:
+        flash('No estás inscrito en este partido.', 'warning')
+        return redirect(url_for('matches.match_detail', match_id=match_id))
+
+    if mp.payment_status == 'paid':
+        current_user.wallet_balance += match.price_per_player
+        db.session.add(Transaction(
+            user_id=current_user.id,
+            amount=match.price_per_player,
+            type='refund',
+            description=f'Reembolso por baja — partido #{match.id} ({match.location})',
+            match_id=match.id,
+        ))
+        flash(f'{match.price_per_player:.2f}€ devueltos a tu monedero.', 'success')
+
+    if match.status == 'confirmed':
+        match.status = 'open'
+
+    db.session.delete(mp)
+    db.session.commit()
+    flash('Has abandonado el partido.', 'info')
+    return redirect(url_for('matches.list_matches'))

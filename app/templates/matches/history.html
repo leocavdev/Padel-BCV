@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Historique — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+  <div style="background:#fff;padding:16px 20px 12px;flex-shrink:0;border-bottom:1px solid #eef2ee">
+    <div style="font-size:13px;color:#91a492;margin-bottom:2px">Historique</div>
+    <div style="font-size:22px;font-weight:800;color:#151c17">Mes matchs</div>
+    <div style="font-size:13px;color:#6b8070;margin-top:4px">{{ total }} match{{ 's' if total != 1 else '' }}</div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:16px 16px 8px">
+
+      {% if upcoming_matches %}
+      <div class="section-hd">
+        <span class="section-hd-dot" style="background:#16a34a"></span>
+        <span class="section-hd-label">À venir</span>
+        <span class="section-hd-count">{{ upcoming_matches|length }}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+        {% set past = false %}{% set history = false %}
+        {% for match in upcoming_matches %}{% include 'matches/_card.html' %}{% endfor %}
+      </div>
+      {% endif %}
+
+      {% if past_matches %}
+      <div class="section-hd">
+        <span class="section-hd-dot" style="background:#6b7280"></span>
+        <span class="section-hd-label">Passés</span>
+        <span class="section-hd-count">{{ past_matches|length }}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+        {% set history = true %}{% set past = false %}
+        {% for match in past_matches %}{% include 'matches/_card.html' %}{% endfor %}
+      </div>
+      {% endif %}
+
+      {% if not upcoming_matches and not past_matches %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-calendar-x" style="font-size:28px;color:#91a492"></i></div>
+        <p>Aucun match pour le moment.</p>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

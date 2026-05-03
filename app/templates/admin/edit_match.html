@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Modifier le match — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+
+  <div class="hero-dark" style="flex-shrink:0">
+    <div class="topbar topbar-transparent">
+      <a href="{{ url_for('admin.manage_match', match_id=match.id) }}" class="topbar-back topbar-back-light">‹</a>
+      <div class="topbar-title topbar-title-light">Modifier le match</div>
+    </div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:16px 16px 32px">
+      <form method="POST" novalidate style="display:flex;flex-direction:column;gap:14px">
+        {{ form.hidden_tag() }}
+
+        <div class="input-wrap">
+          {{ form.location.label }}
+          <div class="input-box">
+            <i class="bi bi-geo-alt"></i>
+            {{ form.location(placeholder="Ex : Court Beaumont A") }}
+          </div>
+          {% for e in form.location.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="input-wrap">
+          {{ form.date.label }}
+          <div class="input-box">
+            <i class="bi bi-calendar3"></i>
+            {{ form.date() }}
+          </div>
+          {% for e in form.date.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="input-wrap">
+            {{ form.start_time.label }}
+            <div class="input-box">
+              {{ form.start_time() }}
+            </div>
+            {% for e in form.start_time.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="input-wrap">
+            {{ form.end_time.label }}
+            <div class="input-box">
+              {{ form.end_time() }}
+            </div>
+            {% for e in form.end_time.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="input-wrap">
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Niveau requis</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="skill-pills">
+            {% set skill_defs = [
+              ('beginner',     'Débutant',      'pill-beginner'),
+              ('intermediate', 'Intermédiaire', 'pill-intermediate'),
+              ('advanced',     'Avancé',        'pill-advanced'),
+              ('expert',       'Expert',        'pill-expert'),
+            ] %}
+            {% for val, label, cls in skill_defs %}
+            <button type="button" class="skill-pill {{ cls }}{% if form.required_skill.data == val %} sel{% endif %}"
+                    onclick="selectSkill('{{ val }}', this)">{{ label }}</button>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="{{ form.required_skill.name }}" id="skill-hidden"
+                 value="{{ form.required_skill.data or match.required_skill }}">
+          {% for e in form.required_skill.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="input-wrap">
+          {{ form.price_per_player.label }}
+          <div class="input-box">
+            <i class="bi bi-currency-chf"></i>
+            {{ form.price_per_player(placeholder="10.00", step="0.50") }}
+          </div>
+          {% for e in form.price_per_player.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        {% if match.players %}
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 14px;font-size:12px;color:#92400e;display:flex;align-items:center;gap:8px">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          {{ match.players|length }} joueur(s) déjà inscrit(s). Modifier le prix n'affecte pas les paiements existants.
+        </div>
+        {% endif %}
+
+        {{ form.submit(class="btn-p full") }}
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function selectSkill(val, el) {
+  document.querySelectorAll('#skill-pills .skill-pill').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('skill-hidden').value = val;
+}
+(function() {
+  const cur = document.getElementById('skill-hidden').value;
+  document.querySelectorAll('#skill-pills .skill-pill').forEach(b => {
+    if (b.getAttribute('onclick').includes("'" + cur + "'")) b.classList.add('sel');
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Registrarse — Padel BCV{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-3">
+  <div class="col-12 col-sm-9">
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <h5 class="card-title mb-1 text-center">Crear cuenta</h5>
+        <p class="text-center text-muted small mb-4">Únete a la asociación</p>
+
+        <form method="POST" novalidate>
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            {{ form.username.label(class="form-label fw-semibold small") }}
+            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""),
+                             placeholder="Ej: carlos_padel", autocomplete="username") }}
+            {% for e in form.username.errors %}
+            <div class="invalid-feedback">{{ e }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            {{ form.email.label(class="form-label fw-semibold small") }}
+            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""),
+                          placeholder="tu@email.com", autocomplete="email") }}
+            {% for e in form.email.errors %}
+            <div class="invalid-feedback">{{ e }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            {{ form.password.label(class="form-label fw-semibold small") }}
+            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""),
+                             placeholder="Mín. 6 caracteres", autocomplete="new-password") }}
+            {% for e in form.password.errors %}
+            <div class="invalid-feedback">{{ e }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-4">
+            {{ form.confirm_password.label(class="form-label fw-semibold small") }}
+            {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""),
+                                     placeholder="Repite la contraseña", autocomplete="new-password") }}
+            {% for e in form.confirm_password.errors %}
+            <div class="invalid-feedback">{{ e }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="alert alert-info py-2 small mb-4">
+            <i class="bi bi-info-circle me-1"></i>
+            Tu nivel inicial será <strong>Principiante</strong> y subirá conforme ganes partidos.
+          </div>
+
+          <div class="d-grid">
+            {{ form.submit(class="btn btn-primary btn-lg fw-semibold") }}
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <p class="text-center mt-3 small text-muted">
+      ¿Ya tienes cuenta?
+      <a href="{{ url_for('auth.login') }}" class="fw-semibold">Inicia sesión</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}

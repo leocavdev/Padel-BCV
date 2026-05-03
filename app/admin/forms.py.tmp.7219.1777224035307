@@ -1,0 +1,23 @@
+from flask_wtf import FlaskForm
+from wtforms import StringField, DateField, TimeField, SelectField, FloatField, SubmitField
+from wtforms.validators import DataRequired, NumberRange
+
+SKILL_CHOICES = [
+    ('beginner',     'Principiante'),
+    ('intermediate', 'Intermedio'),
+    ('advanced',     'Avanzado'),
+    ('expert',       'Experto'),
+]
+
+
+class CreateMatchForm(FlaskForm):
+    location         = StringField('Ubicación / Pista', validators=[DataRequired()])
+    date             = DateField('Fecha', validators=[DataRequired()])
+    start_time       = TimeField('Hora de inicio', validators=[DataRequired()])
+    end_time         = TimeField('Hora de fin', validators=[DataRequired()])
+    required_skill   = SelectField('Nivel mínimo requerido', choices=SKILL_CHOICES,
+                                   validators=[DataRequired()])
+    price_per_player = FloatField('Precio por jugador (€)',
+                                  validators=[DataRequired(), NumberRange(min=0, max=500)],
+                                  default=10.0)
+    submit = SubmitField('Crear partido')

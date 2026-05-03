@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% block title %}Gérer — {{ match.location }} — Padel BCV{% endblock %}
+{% block content %}
+{% set player_count = match.players|length %}
+
+{# Dark gradient header #}
+<div class="hero-dark" style="flex-shrink:0">
+  <div class="topbar topbar-transparent">
+    <a href="{{ url_for('admin.dashboard') }}" class="topbar-back topbar-back-light">‹</a>
+    <div class="topbar-title topbar-title-light">{{ match.location }}</div>
+    <span class="status-badge status-{{ match.status }}" style="flex-shrink:0">
+      <span class="status-dot dot-{{ match.status }}"></span>{{ match.status_label }}
+    </span>
+  </div>
+  <div style="display:flex;gap:16px;padding:0 20px 16px">
+    <div style="display:flex;align-items:center;gap:5px">
+      <i class="bi bi-calendar3" style="font-size:13px;color:rgba(255,255,255,.6)"></i>
+      <span style="font-size:13px;color:rgba(255,255,255,.85);font-weight:500">{{ match.date.strftime('%d/%m/%Y') }}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:5px">
+      <i class="bi bi-clock" style="font-size:13px;color:rgba(255,255,255,.6)"></i>
+      <span style="font-size:13px;color:rgba(255,255,255,.85);font-weight:500">{{ match.start_time.strftime('%H:%M') }}–{{ match.end_time.strftime('%H:%M') }}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:5px">
+      <i class="bi bi-currency-chf" style="font-size:13px;color:rgba(255,255,255,.6)"></i>
+      <span style="font-size:13px;color:rgba(255,255,255,.85);font-weight:500">{{ '%.2f'|format(match.price_per_player) }} CHF/joueur</span>
+    </div>
+  </div>
+</div>
+
+<div class="scroll-content" style="background:#f4f6f4">
+  <div style="padding:16px 16px 32px;display:flex;flex-direction:column;gap:12px">
+
+    {# Players + payments #}
+    <div class="card-new" style="overflow:hidden">
+      <div style="padding:12px 16px;border-bottom:1px solid #eef2ee;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:14px;font-weight:700;color:#151c17">
+          <i class="bi bi-people-fill" style="color:#2d6a4f;margin-right:6px"></i>Joueurs
+        </span>
+        <span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;
+              background:{% if player_count >= 4 %}#dcfce7{% else %}#f0f4f1{% endif %};
+              color:{% if player_count >= 4 %}#14532d{% else %}#6b8070{% endif %}">{{ player_count }}/4</span>
+      </div>
+      {% if match.players %}
+        {% for mp in match.players %}
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;
+             border-bottom:{{ '1px solid #f4f6f4' if not loop.last else 'none' }}">
+          <div class="avatar av-{{ mp.player.skill_category_key }}" style="width:38px;height:38px;font-size:14px">
+            {{ mp.player.username[:2]|upper }}
+          </div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600;color:#151c17">{{ mp.player.username }}</div>
+            <div style="font-size:12px;color:#91a492">{{ mp.player.skill_label }} · {{ '%.2f'|format(mp.player.skill_level) }}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+            <span class="pay-badge pay-{{ mp.payment_status }}">
+              {% if mp.payment_status == 'paid' %}Payé
+              {% elif mp.payment_status == 'pending' %}En attente
+              {% else %}Remboursé{% endif %}
+            </span>
+            {% if mp.payment_status == 'pending' and match.status not in ('cancelled','completed') %}
+            <form method="POST" action="{{ url_for('admin.confirm_payment', match_id=match.id, player_id=mp.player_id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button style="font-size:11px;font-weight:700;color:#fff;background:#16a34a;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-family:inherit">
+                ✓ Confirmer
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="empty-state" style="padding:32px 24px">
+        <div class="empty-state-icon"><i class="bi bi-person-x" style="font-size:28px;color:#91a492"></i></div>
+        <p>Aucun joueur inscrit.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    {# Record result (confirmed matches) #}
+    {% if match.status == 'confirmed' %}
+    <div class="card-new" style="overflow:hidden">
+      <div style="padding:12px 16px;border-bottom:1px solid #eef2ee;background:#f0fdf4">
+        <span style="font-size:14px;font-weight:700;color:#14532d">
+          <i class="bi bi-trophy-fill" style="color:#d97706;margin-right:6px"></i>Enregistrer le résultat
+        </span>
+      </div>
+      <div style="padding:14px 16px">
+        <p style="font-size:13px;color:#6b8070;margin-bottom:14px;line-height:1.5">
+          Assignez chaque joueur à une équipe. Les niveaux seront mis à jour automatiquement.
+        </p>
+        <form method="POST" action="{{ url_for('admin.record_result', match_id=match.id) }}"
+              onsubmit="return confirm('Confirmer le résultat ? Les niveaux seront mis à jour.')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% for mp in match.players %}
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div class="avatar av-{{ mp.player.skill_category_key }}" style="width:32px;height:32px;font-size:11px">
+              {{ mp.player.username[:2]|upper }}
+            </div>
+            <span style="font-size:14px;font-weight:600;flex:1;color:#151c17">{{ mp.player.username }}</span>
+            <div style="display:flex;gap:6px">
+              {% for t in [1,2] %}
+              <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+                <input type="radio" name="team_{{ mp.player_id }}" value="{{ t }}"
+                       {% if loop.first %}checked{% endif %}
+                       style="accent-color:#2d6a4f">
+                <span style="font-size:12px;font-weight:700;color:#2d6a4f">Éq. {{ t }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+          <div style="margin-top:14px">
+            <div style="font-size:13px;font-weight:700;color:#2d3e30;margin-bottom:8px">Équipe gagnante</div>
+            <div style="display:flex;gap:10px">
+              {% for t in [1,2] %}
+              <label style="flex:1;cursor:pointer">
+                <input type="radio" name="winner_team" value="{{ t }}" {% if loop.first %}checked{% endif %} style="display:none" class="winner-radio">
+                <div class="team-btn" data-team="{{ t }}" style="padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:1.5px solid #2d6a4f;cursor:pointer;text-align:center;color:#2d6a4f;background:transparent;transition:background .15s,color .15s">
+                  <i class="bi bi-trophy-fill" style="margin-right:5px;color:#d97706"></i>Équipe {{ t }}
+                </div>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+          <div style="margin-top:14px">
+            <button class="btn-p full green">
+              <i class="bi bi-check2-circle"></i> Enregistrer le résultat
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Result display (completed) #}
+    {% if match.status == 'completed' and match.winner_team %}
+    <div style="background:#f0fdf4;border-radius:14px;padding:14px 16px;border:1px solid #bbf7d0;display:flex;align-items:center;gap:10px">
+      <i class="bi bi-trophy-fill" style="font-size:22px;color:#d97706"></i>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#14532d">Résultat enregistré</div>
+        <div style="font-size:12px;color:#16a34a">Équipe {{ match.winner_team }} gagnante · Niveaux mis à jour.</div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Edit #}
+    <div class="card-new" style="padding:14px 16px">
+      <a href="{{ url_for('admin.edit_match', match_id=match.id) }}" class="btn-p full" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none">
+        <i class="bi bi-pencil-square"></i> Modifier le match
+      </a>
+    </div>
+
+    {# Cancel #}
+    {% if match.status not in ('cancelled', 'completed') %}
+    <div class="card-new" style="border:1px solid #fecaca;padding:14px 16px">
+      <p style="font-size:13px;color:#6b8070;margin-bottom:12px;line-height:1.5">
+        Annuler ce match remboursera automatiquement les joueurs ayant déjà payé.
+      </p>
+      <form method="POST" action="{{ url_for('admin.cancel_match', match_id=match.id) }}"
+            onsubmit="return confirm('Annuler ce match ? Les remboursements seront traités.')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn-p full red">
+          <i class="bi bi-x-circle"></i> Annuler le match et rembourser
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.winner-radio').forEach(r => {
+  r.addEventListener('change', () => {
+    document.querySelectorAll('.team-btn').forEach(b => {
+      b.style.background = 'transparent';
+      b.style.color = '#2d6a4f';
+    });
+    const btn = document.querySelector(`.team-btn[data-team="${r.value}"]`);
+    if (btn) { btn.style.background = '#2d6a4f'; btn.style.color = '#fff'; }
+  });
+});
+document.querySelector('.winner-radio:checked')?.dispatchEvent(new Event('change'));
+</script>
+{% endblock %}

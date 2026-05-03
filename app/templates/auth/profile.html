@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Mon profil — Padel BCV{% endblock %}
+{% block content %}
+{% set skill = current_user.skill_category_key %}
+{% set skill_labels = {'beginner':'Débutant','intermediate':'Intermédiaire','advanced':'Avancé','expert':'Expert'} %}
+{% set accent_map = {'beginner':'#16a34a','intermediate':'#2563eb','advanced':'#d97706','expert':'#dc2626'} %}
+{% set accent = accent_map[skill] %}
+{% set pct = (((current_user.skill_level - 0) / 7) * 100)|int %}
+
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+  <div class="topbar topbar-white">
+    <div class="topbar-title topbar-title-dark">Mon profil</div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4;display:flex;flex-direction:column;flex:1;min-height:0">
+    <div style="padding:20px 16px 0;flex:1;min-height:0">
+
+      {# Profile hero card #}
+      <div class="card-new" style="padding:20px;margin-bottom:12px;text-align:center">
+        <div style="display:flex;justify-content:center;margin-bottom:14px">
+          <div style="width:72px;height:72px;border-radius:50%;background:{{ accent }};color:#fff;
+               display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800">
+            {{ current_user.username[:2]|upper }}
+          </div>
+        </div>
+        <div style="font-size:20px;font-weight:800;color:#151c17">{{ current_user.username }}</div>
+        <div style="font-size:13px;color:#91a492;margin-bottom:12px">{{ current_user.email }}</div>
+        <span class="skill-badge skill-{{ skill }}">{{ current_user.skill_label }}</span>
+      </div>
+
+      {# Skill level bar #}
+      <a href="{{ url_for('auth.skill_levels') }}" style="text-decoration:none;color:inherit;display:block">
+        <div class="card-new" style="padding:16px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+            <span style="font-size:13px;font-weight:700;color:#2d3e30">Mon niveau de jeu</span>
+            <span style="font-size:13px;font-weight:800;color:{{ accent }}">{{ '%.2f'|format(current_user.skill_level) }} / 7</span>
+          </div>
+          {# 4 segments proportional to actual ranges: beginner=1, inter=1.5, advanced=2, expert=2.5 #}
+          <div style="display:flex;gap:3px;height:14px">
+            <div style="flex:1;background:#16a34a;opacity:{{ '1' if skill=='beginner' else '0.18' }};border-radius:7px 0 0 7px"></div>
+            <div style="flex:1.5;background:#2563eb;opacity:{{ '1' if skill=='intermediate' else '0.18' }}"></div>
+            <div style="flex:2;background:#d97706;opacity:{{ '1' if skill=='advanced' else '0.18' }}"></div>
+            <div style="flex:2.5;background:#dc2626;opacity:{{ '1' if skill=='expert' else '0.18' }};border-radius:0 7px 7px 0"></div>
+          </div>
+          <div style="display:flex;gap:3px;margin-top:7px">
+            <div style="flex:1;text-align:center">
+              <span style="font-size:10px;font-weight:{{ '700' if skill=='beginner' else '500' }};color:{{ '#16a34a' if skill=='beginner' else '#91a492' }}">Débutant</span>
+            </div>
+            <div style="flex:1.5;text-align:center">
+              <span style="font-size:10px;font-weight:{{ '700' if skill=='intermediate' else '500' }};color:{{ '#2563eb' if skill=='intermediate' else '#91a492' }}">Inter.</span>
+            </div>
+            <div style="flex:2;text-align:center">
+              <span style="font-size:10px;font-weight:{{ '700' if skill=='advanced' else '500' }};color:{{ '#d97706' if skill=='advanced' else '#91a492' }}">Avancé</span>
+            </div>
+            <div style="flex:2.5;text-align:center">
+              <span style="font-size:10px;font-weight:{{ '700' if skill=='expert' else '500' }};color:{{ '#dc2626' if skill=='expert' else '#91a492' }}">Expert</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      {# Stats mini-grid #}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <a href="{{ url_for('matches.history') }}" class="card-new" style="padding:14px;text-align:center;text-decoration:none;color:inherit">
+          <div style="width:40px;height:40px;border-radius:50%;background:#d8f0e4;
+               display:flex;align-items:center;justify-content:center;margin:0 auto 8px">
+            <i class="bi bi-calendar-check-fill" style="font-size:18px;color:#2d6a4f"></i>
+          </div>
+          <div style="font-size:18px;font-weight:800;color:#151c17">{{ match_count }}</div>
+          <div style="font-size:11px;color:#91a492;margin-top:2px">Mes matchs</div>
+        </a>
+        <div class="card-new" style="padding:14px;text-align:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:#dbeafe;
+               display:flex;align-items:center;justify-content:center;margin:0 auto 8px">
+            <i class="bi bi-wallet2" style="font-size:18px;color:#1e40af"></i>
+          </div>
+            <div style="font-size:18px;font-weight:800;color:#151c17">{{ '%.2f'|format(current_user.wallet_balance) }} CHF</div>
+          <div style="font-size:11px;color:#91a492;margin-top:2px">Mon solde</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="padding:0 16px 32px">
+      {# Logout #}
+      <a href="{{ url_for('auth.logout') }}" class="btn-p full red"
+         onclick="return confirm('Se déconnecter ?')">
+        <i class="bi bi-box-arrow-right"></i> Se déconnecter
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

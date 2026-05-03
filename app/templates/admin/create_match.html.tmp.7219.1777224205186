@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Crear partido — Padel BCV{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-3">
+  <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <h5 class="mb-0 fw-bold"><i class="bi bi-plus-circle-fill me-1 text-primary"></i>Nuevo partido</h5>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-4">
+    <form method="POST" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        {{ form.location.label(class="form-label fw-semibold small") }}
+        {{ form.location(class="form-control" + (" is-invalid" if form.location.errors else ""),
+                         placeholder="Ej: Pista 1 — Club Padel Norte") }}
+        {% for e in form.location.errors %}
+        <div class="invalid-feedback">{{ e }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.date.label(class="form-label fw-semibold small") }}
+        {{ form.date(class="form-control" + (" is-invalid" if form.date.errors else "")) }}
+        {% for e in form.date.errors %}
+        <div class="invalid-feedback">{{ e }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          {{ form.start_time.label(class="form-label fw-semibold small") }}
+          {{ form.start_time(class="form-control" + (" is-invalid" if form.start_time.errors else "")) }}
+          {% for e in form.start_time.errors %}
+          <div class="invalid-feedback">{{ e }}</div>
+          {% endfor %}
+        </div>
+        <div class="col-6">
+          {{ form.end_time.label(class="form-label fw-semibold small") }}
+          {{ form.end_time(class="form-control" + (" is-invalid" if form.end_time.errors else "")) }}
+          {% for e in form.end_time.errors %}
+          <div class="invalid-feedback">{{ e }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        {{ form.required_skill.label(class="form-label fw-semibold small") }}
+        {{ form.required_skill(class="form-select" + (" is-invalid" if form.required_skill.errors else "")) }}
+        {% for e in form.required_skill.errors %}
+        <div class="invalid-feedback">{{ e }}</div>
+        {% endfor %}
+        <div class="form-text">Los jugadores con nivel inferior no podrán inscribirse.</div>
+      </div>
+
+      <div class="mb-4">
+        {{ form.price_per_player.label(class="form-label fw-semibold small") }}
+        <div class="input-group">
+          {{ form.price_per_player(class="form-control" + (" is-invalid" if form.price_per_player.errors else ""),
+                                   step="0.50") }}
+          <span class="input-group-text">€</span>
+          {% for e in form.price_per_player.errors %}
+          <div class="invalid-feedback">{{ e }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="d-grid">
+        {{ form.submit(class="btn btn-primary btn-lg fw-semibold") }}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

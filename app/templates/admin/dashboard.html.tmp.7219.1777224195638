@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Admin — Padel BCV{% endblock %}
+
+{% block content %}
+
+{# ── Stats ─────────────────────────────────────────────────────── #}
+<h5 class="fw-bold mb-3"><i class="bi bi-speedometer2 me-2 text-primary"></i>Panel de administración</h5>
+
+<div class="row g-2 mb-4">
+  <div class="col-6">
+    <div class="stat-card bg-primary">
+      <div class="stat-number">{{ stats.total }}</div>
+      <div class="stat-label">Total partidos</div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="stat-card bg-success">
+      <div class="stat-number">{{ stats.open }}</div>
+      <div class="stat-label">Abiertos</div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="stat-card" style="background:#0f5132">
+      <div class="stat-number">{{ stats.confirmed }}</div>
+      <div class="stat-label">Confirmados</div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="stat-card" style="background:#6c757d">
+      <div class="stat-number">{{ stats.players }}</div>
+      <div class="stat-label">Jugadores</div>
+    </div>
+  </div>
+</div>
+
+{# ── Quick actions ─────────────────────────────────────────────── #}
+<div class="d-flex gap-2 mb-4">
+  <a href="{{ url_for('admin.create_match') }}" class="btn btn-primary btn-sm flex-fill">
+    <i class="bi bi-plus-circle me-1"></i>Nuevo partido
+  </a>
+  <a href="{{ url_for('admin.list_players') }}" class="btn btn-outline-primary btn-sm flex-fill">
+    <i class="bi bi-people me-1"></i>Jugadores
+  </a>
+</div>
+
+{# ── Filter tabs ───────────────────────────────────────────────── #}
+<div class="mb-3 overflow-auto">
+  <div class="d-flex gap-1 flex-nowrap">
+    {% for s, label in [('', 'Todos'), ('open', 'Abiertos'), ('confirmed', 'Confirmados'),
+                        ('completed', 'Completados'), ('cancelled', 'Cancelados')] %}
+    <a href="{{ url_for('admin.dashboard', status=s) }}"
+       class="btn btn-sm flex-shrink-0
+              {{ 'btn-primary' if current_status == s else 'btn-outline-secondary' }}">
+      {{ label }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+{# ── Match list ────────────────────────────────────────────────── #}
+{% if matches %}
+{% for match in matches %}
+<div class="card border-0 shadow-sm mb-2">
+  <div class="card-body py-2 px-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="flex-grow-1 me-2 overflow-hidden">
+        <div class="fw-semibold small text-truncate">
+          <i class="bi bi-geo-alt-fill text-primary me-1"></i>{{ match.location }}
+        </div>
+        <div class="text-muted" style="font-size:.72rem">
+          {{ match.date.strftime('%d/%m/%Y') }} · {{ match.start_time.strftime('%H:%M') }} ·
+          <span class="badge skill-badge skill-{{ match.required_skill }}">{{ match.required_skill_label }}</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2 flex-shrink-0">
+        <span class="badge status-badge status-{{ match.status }}">
+          {% if match.status == 'open' %}Abierto
+          {% elif match.status == 'confirmed' %}Confirmado
+          {% elif match.status == 'cancelled' %}Cancelado
+          {% else %}Completado{% endif %}
+        </span>
+        <span class="small text-muted">{{ match.player_count }}/4</span>
+        <a href="{{ url_for('admin.manage_match', match_id=match.id) }}"
+           class="btn btn-outline-primary btn-sm px-2 py-1">
+          <i class="bi bi-gear-fill"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="text-center py-5 text-muted">
+  <i class="bi bi-calendar-x" style="font-size:2.5rem"></i>
+  <p class="mt-2">No hay partidos con este filtro.</p>
+</div>
+{% endif %}
+
+{% endblock %}

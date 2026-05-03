@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% block title %}Gestionar partido #{{ match.id }} — Padel BCV{% endblock %}
+
+{% block content %}
+
+{# ── Header ────────────────────────────────────────────────────── #}
+<div class="d-flex align-items-center gap-2 mb-3">
+  <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <h5 class="mb-0 fw-bold text-truncate">
+    <i class="bi bi-geo-alt-fill text-primary me-1"></i>{{ match.location }}
+  </h5>
+  <span class="badge status-badge status-{{ match.status }} ms-auto flex-shrink-0">
+    {% if match.status == 'open' %}Abierto
+    {% elif match.status == 'confirmed' %}Confirmado
+    {% elif match.status == 'cancelled' %}Cancelado
+    {% else %}Completado{% endif %}
+  </span>
+</div>
+
+{# ── Match info ────────────────────────────────────────────────── #}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body py-3">
+    <div class="row g-2 small">
+      <div class="col-6">
+        <i class="bi bi-calendar3 text-primary me-1"></i>
+        {{ match.date.strftime('%d/%m/%Y') }}
+      </div>
+      <div class="col-6">
+        <i class="bi bi-clock text-primary me-1"></i>
+        {{ match.start_time.strftime('%H:%M') }}–{{ match.end_time.strftime('%H:%M') }}
+      </div>
+      <div class="col-6">
+        <i class="bi bi-bar-chart-fill text-primary me-1"></i>
+        <span class="badge skill-badge skill-{{ match.required_skill }}">{{ match.required_skill_label }}</span>
+      </div>
+      <div class="col-6">
+        <i class="bi bi-currency-euro text-primary me-1"></i>
+        <strong>{{ '%.2f'|format(match.price_per_player) }}€</strong>/jugador
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Players & payment ─────────────────────────────────────────── #}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-header bg-transparent py-2 d-flex justify-content-between align-items-center">
+    <span class="fw-semibold small">
+      <i class="bi bi-people-fill me-1 text-primary"></i>Jugadores inscritos
+    </span>
+    <span class="badge bg-{{ 'success' if match.player_count >= 4 else 'secondary' }}">
+      {{ match.player_count }}/4
+    </span>
+  </div>
+
+  {% if match.players %}
+  <ul class="list-group list-group-flush">
+    {% for mp in match.players %}
+    <li class="list-group-item py-2 px-3">
+      <div class="d-flex align-items-center gap-2">
+        <div class="avatar-circle flex-shrink-0">{{ mp.player.username[0].upper() }}</div>
+        <div class="flex-grow-1 overflow-hidden">
+          <div class="fw-semibold small text-truncate">{{ mp.player.username }}</div>
+          <div class="text-muted" style="font-size:.7rem">
+            {{ mp.player.skill_label }} · Niv. {{ '%.1f'|format(mp.player.skill_level) }}
+          </div>
+        </div>
+        <div class="flex-shrink-0 text-end">
+          <span class="badge pay-badge pay-{{ mp.payment_status }} d-block mb-1">
+            {% if mp.payment_status == 'paid' %}
+              <i class="bi bi-check-circle-fill"></i> Pagado
+            {% elif mp.payment_status == 'pending' %}
+              <i class="bi bi-clock"></i> Pendiente
+            {% else %}
+              <i class="bi bi-arrow-counterclockwise"></i> Reembolsado
+            {% endif %}
+          </span>
+          {% if mp.payment_status == 'pending' and match.status not in ('cancelled','completed') %}
+          <form method="POST"
+                action="{{ url_for('admin.confirm_payment', match_id=match.id, player_id=mp.player_id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-success btn-sm py-0 px-2" style="font-size:.7rem">
+              Confirmar pago
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="card-body text-center text-muted small">Sin inscritos.</div>
+  {% endif %}
+</div>
+
+{# ── Record result (confirmed matches only) ───────────────────── #}
+{% if match.status == 'confirmed' %}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-header bg-primary bg-opacity-10 py-2">
+    <span class="fw-semibold small text-primary">
+      <i class="bi bi-trophy-fill me-1"></i>Registrar resultado
+    </span>
+  </div>
+  <div class="card-body">
+    <p class="small text-muted mb-3">
+      Asigna cada jugador a un equipo y selecciona el ganador.
+      Los niveles se actualizarán automáticamente.
+    </p>
+    <form method="POST" action="{{ url_for('admin.record_result', match_id=match.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      {% for mp in match.players %}
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <div class="avatar-circle flex-shrink-0">{{ mp.player.username[0].upper() }}</div>
+        <span class="small fw-semibold flex-grow-1 text-truncate">{{ mp.player.username }}</span>
+        <select name="team_{{ mp.player_id }}" class="form-select form-select-sm"
+                style="width:110px">
+          <option value="1">Equipo 1</option>
+          <option value="2">Equipo 2</option>
+        </select>
+      </div>
+      {% endfor %}
+
+      <div class="mt-3 mb-3">
+        <label class="form-label fw-semibold small">Equipo ganador</label>
+        <select name="winner_team" class="form-select">
+          <option value="1"><i class="bi bi-trophy"></i> Equipo 1</option>
+          <option value="2"><i class="bi bi-trophy"></i> Equipo 2</option>
+        </select>
+      </div>
+
+      <div class="d-grid">
+        <button class="btn btn-success fw-semibold"
+                onclick="return confirm('¿Confirmar resultado? Los niveles se actualizarán.')">
+          <i class="bi bi-check2-circle me-1"></i>Guardar resultado
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{# ── Completed result display ─────────────────────────────────── #}
+{% if match.status == 'completed' and match.winner_team %}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-header bg-transparent py-2">
+    <span class="fw-semibold small"><i class="bi bi-trophy-fill me-1 text-warning"></i>Resultado</span>
+  </div>
+  <div class="card-body">
+    {% for t in [1,2] %}
+    <div class="d-flex align-items-center mb-2 p-2 rounded
+         {{ 'bg-success bg-opacity-10 border border-success' if match.winner_team == t else 'bg-light' }}">
+      <span class="fw-bold me-2 small">Equipo {{ t }}</span>
+      {% if match.winner_team == t %}
+      <i class="bi bi-trophy-fill text-warning me-1"></i>
+      <span class="badge bg-success me-2">Ganador</span>
+      {% endif %}
+      <span class="small text-muted">
+        {% for p in match.get_team(t) %}{{ p.username }}{% if not loop.last %}, {% endif %}{% endfor %}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{# ── Danger zone ───────────────────────────────────────────────── #}
+{% if match.status not in ('cancelled', 'completed') %}
+<div class="card border-danger border-opacity-25 shadow-sm">
+  <div class="card-body py-2">
+    <p class="small text-muted mb-2">
+      Cancelar el partido devolverá el pago automáticamente al monedero de los jugadores.
+    </p>
+    <form method="POST"
+          action="{{ url_for('admin.cancel_match', match_id=match.id) }}"
+          onsubmit="return confirm('¿Cancelar partido? Se procesarán los reembolsos.')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-outline-danger btn-sm w-100">
+        <i class="bi bi-x-circle me-1"></i>Cancelar partido y reembolsar
+      </button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

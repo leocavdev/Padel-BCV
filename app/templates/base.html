@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>{% block title %}Padel BCV{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% block body %}
+<div class="app-shell">
+  <div class="app-content">
+
+    {# Flash messages #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-list">
+      {% for category, message in messages %}
+      <div class="flash-item flash-{{ category }}">
+        <span>{{ message }}</span>
+        <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+
+  {# Bottom Navigation #}
+  {% if current_user.is_authenticated %}
+    {% if current_user.is_admin %}
+    <nav class="bottom-nav-admin">
+      <a href="{{ url_for('admin.dashboard') }}"
+         class="nav-tab nav-tab-admin {% if request.endpoint and request.endpoint.startswith('admin') and 'players' not in request.endpoint and 'create_match' not in request.endpoint and 'manage_match' not in request.endpoint %}active{% endif %}">
+        <i class="bi {% if request.endpoint and request.endpoint == 'admin.dashboard' %}bi-speedometer2{% else %}bi-speedometer2{% endif %}"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('matches.list_matches') }}"
+         class="nav-tab nav-tab-admin {% if request.endpoint and request.endpoint.startswith('matches') %}active{% endif %}">
+        <i class="bi bi-calendar3{% if request.endpoint and request.endpoint.startswith('matches') %}-fill{% endif %}"></i>
+        <span>Matchs</span>
+      </a>
+      <a href="{{ url_for('admin.list_players') }}"
+         class="nav-tab nav-tab-admin {% if request.endpoint == 'admin.list_players' %}active{% endif %}">
+        <i class="bi bi-people{% if request.endpoint == 'admin.list_players' %}-fill{% endif %}"></i>
+        <span>Joueurs</span>
+      </a>
+      <a href="{{ url_for('auth.logout') }}"
+         onclick="return confirm('Voulez-vous vraiment vous déconnecter ?')"
+         class="nav-tab nav-tab-admin">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Déconnexion</span>
+      </a>
+    </nav>
+    {% else %}
+    <nav class="bottom-nav">
+      <a href="{{ url_for('matches.list_matches') }}"
+         class="nav-tab {% if request.endpoint and request.endpoint.startswith('matches') %}active{% endif %}">
+        {% if request.endpoint and request.endpoint.startswith('matches') %}
+        <i class="bi bi-calendar-event-fill"></i>
+        {% else %}
+        <i class="bi bi-calendar-event"></i>
+        {% endif %}
+        <span>Matchs</span>
+        {% if request.endpoint and request.endpoint.startswith('matches') %}
+        <div class="nav-tab-indicator"></div>
+        {% endif %}
+      </a>
+      <a href="{{ url_for('wallet.dashboard') }}"
+         class="nav-tab {% if request.endpoint and request.endpoint.startswith('wallet') %}active{% endif %}">
+        {% if request.endpoint and request.endpoint.startswith('wallet') %}
+        <i class="bi bi-wallet-fill"></i>
+        {% else %}
+        <i class="bi bi-wallet2"></i>
+        {% endif %}
+        <span>Solde</span>
+        {% if request.endpoint and request.endpoint.startswith('wallet') %}
+        <div class="nav-tab-indicator"></div>
+        {% endif %}
+      </a>
+      <a href="{{ url_for('auth.padel_bcv') }}"
+         class="nav-tab {% if request.endpoint == 'auth.padel_bcv' %}active{% endif %}">
+        {% if request.endpoint == 'auth.padel_bcv' %}
+        <i class="bi bi-info-square-fill"></i>
+        {% else %}
+        <i class="bi bi-info-square"></i>
+        {% endif %}
+        <span>Padel BCV</span>
+        {% if request.endpoint == 'auth.padel_bcv' %}
+        <div class="nav-tab-indicator"></div>
+        {% endif %}
+      </a>
+      <a href="{{ url_for('auth.profile') }}"
+         class="nav-tab {% if request.endpoint == 'auth.profile' %}active{% endif %}">
+        {% if request.endpoint == 'auth.profile' %}
+        <i class="bi bi-person-fill"></i>
+        {% else %}
+        <i class="bi bi-person"></i>
+        {% endif %}
+        <span>Profil</span>
+        {% if request.endpoint == 'auth.profile' %}
+        <div class="nav-tab-indicator"></div>
+        {% endif %}
+      </a>
+    </nav>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock body %}
+
+<script>
+  setTimeout(() => {
+    document.querySelectorAll('.flash-item').forEach(el => el.remove());
+  }, 5000);
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

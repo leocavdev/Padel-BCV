@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Inscription — Padel BCV{% endblock %}
+{% block body %}
+<div class="auth-shell page-fade" style="background:#f4f6f4">
+
+  {# Top bar #}
+  <div class="topbar" style="background:#fff;border-bottom:1px solid #eef2ee;flex-shrink:0">
+    <a href="{{ url_for('auth.login') }}" class="topbar-back topbar-back-dark">‹</a>
+    <div class="topbar-title topbar-title-dark">Créer un compte</div>
+  </div>
+
+  {# Scrollable content #}
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:24px 20px;display:flex;flex-direction:column;gap:16px">
+
+      {# Flash messages #}
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      {% for category, message in messages %}
+      <div class="flash-item flash-{{ category }}">
+        <span>{{ message }}</span>
+        <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+
+      {# Info card #}
+      <div style="background:#fff;border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+        <div style="width:44px;height:44px;border-radius:50%;background:#d8f0e4;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="bi bi-info-circle-fill" style="font-size:20px;color:#2d6a4f"></i>
+        </div>
+        <p style="font-size:13px;color:#2d3e30;margin:0;line-height:1.5">
+          Votre niveau initial sera <strong>Débutant</strong> et progressera automatiquement selon vos résultats.
+        </p>
+      </div>
+
+      <form method="POST" novalidate style="display:flex;flex-direction:column;gap:14px">
+        {{ form.hidden_tag() }}
+
+        <div class="input-wrap">
+          {{ form.username.label }}
+          <div class="input-box">
+            <i class="bi bi-person"></i>
+            {{ form.username(placeholder="Ex : jean_padel", autocomplete="username") }}
+          </div>
+          {% for e in form.username.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="input-wrap">
+          {{ form.email.label }}
+          <div class="input-box">
+            <i class="bi bi-envelope"></i>
+            {{ form.email(placeholder="votre@email.com", autocomplete="email") }}
+          </div>
+          {% for e in form.email.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="input-wrap">
+          {{ form.password.label }}
+          <div class="input-box">
+            <i class="bi bi-lock"></i>
+            {{ form.password(placeholder="6 caractères minimum", autocomplete="new-password") }}
+          </div>
+          {% for e in form.password.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="input-wrap">
+          {{ form.confirm_password.label }}
+          <div class="input-box">
+            <i class="bi bi-shield-lock"></i>
+            {{ form.confirm_password(placeholder="Répétez le mot de passe", autocomplete="new-password") }}
+          </div>
+          {% for e in form.confirm_password.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        {{ form.submit(class="btn-p full", value="Créer mon compte") }}
+      </form>
+
+      <div style="text-align:center;font-size:13px;color:#6b8070;padding-bottom:16px">
+        Déjà un compte ?
+        <a href="{{ url_for('auth.login') }}" style="color:#2d6a4f;font-weight:700;text-decoration:none">Se connecter</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  setTimeout(() => {
+    document.querySelectorAll('.flash-item').forEach(el => el.remove());
+  }, 5000);
+</script>
+{% endblock body %}

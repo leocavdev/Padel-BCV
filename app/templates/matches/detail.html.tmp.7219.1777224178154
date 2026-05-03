@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% block title %}Partido #{{ match.id }} — Padel BCV{% endblock %}
+
+{% block content %}
+
+{# ── Header ────────────────────────────────────────────────────── #}
+<div class="d-flex align-items-center mb-3 gap-2">
+  <a href="{{ url_for('matches.list_matches') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <h5 class="mb-0 fw-bold text-truncate">
+    <i class="bi bi-geo-alt-fill text-primary me-1"></i>{{ match.location }}
+  </h5>
+  <span class="badge status-badge status-{{ match.status }} ms-auto flex-shrink-0">
+    {% if match.status == 'open' %}Abierto
+    {% elif match.status == 'confirmed' %}Confirmado
+    {% elif match.status == 'cancelled' %}Cancelado
+    {% else %}Completado{% endif %}
+  </span>
+</div>
+
+{# ── Info card ─────────────────────────────────────────────────── #}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-6">
+        <div class="info-item">
+          <i class="bi bi-calendar3 text-primary"></i>
+          <div>
+            <div class="info-label">Fecha</div>
+            <div class="info-value">{{ match.date.strftime('%d/%m/%Y') }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="info-item">
+          <i class="bi bi-clock text-primary"></i>
+          <div>
+            <div class="info-label">Horario</div>
+            <div class="info-value">{{ match.start_time.strftime('%H:%M') }}–{{ match.end_time.strftime('%H:%M') }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="info-item">
+          <i class="bi bi-bar-chart-fill text-primary"></i>
+          <div>
+            <div class="info-label">Nivel</div>
+            <div class="info-value">
+              <span class="badge skill-badge skill-{{ match.required_skill }}">{{ match.required_skill_label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="info-item">
+          <i class="bi bi-currency-euro text-primary"></i>
+          <div>
+            <div class="info-label">Precio</div>
+            <div class="info-value fw-bold">{{ '%.2f'|format(match.price_per_player) }}€/jugador</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Players ───────────────────────────────────────────────────── #}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-header bg-transparent py-2 d-flex justify-content-between align-items-center">
+    <span class="fw-semibold small"><i class="bi bi-people-fill me-1 text-primary"></i>Jugadores</span>
+    <span class="badge bg-{{ 'success' if match.player_count >= 4 else 'secondary' }}">
+      {{ match.player_count }}/4
+    </span>
+  </div>
+  <div class="card-body p-0">
+    {% if match.players %}
+    <ul class="list-group list-group-flush">
+      {% for mp in match.players %}
+      <li class="list-group-item d-flex align-items-center gap-2 py-2">
+        <div class="avatar-circle">{{ mp.player.username[0].upper() }}</div>
+        <div class="flex-grow-1">
+          <div class="fw-semibold small">{{ mp.player.username }}</div>
+          <div class="text-muted" style="font-size:.72rem">{{ mp.player.skill_label }}</div>
+        </div>
+        {% if current_user.is_admin %}
+        <span class="badge pay-badge pay-{{ mp.payment_status }}">
+          {% if mp.payment_status == 'paid' %}<i class="bi bi-check-circle-fill me-1"></i>Pagado
+          {% elif mp.payment_status == 'pending' %}<i class="bi bi-clock me-1"></i>Pendiente
+          {% else %}<i class="bi bi-arrow-counterclockwise me-1"></i>Reembolsado{% endif %}
+        </span>
+        {% elif mp.player_id == current_user.id %}
+        <span class="badge pay-badge pay-{{ mp.payment_status }}">
+          {% if mp.payment_status == 'paid' %}Pagado
+          {% elif mp.payment_status == 'pending' %}Pago pendiente
+          {% else %}Reembolsado{% endif %}
+        </span>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-muted small text-center py-3 mb-0">Sin inscritos aún.</p>
+    {% endif %}
+  </div>
+</div>
+
+{# ── Player actions ────────────────────────────────────────────── #}
+{% if not current_user.is_admin %}
+
+  {# Not registered #}
+  {% if not registration and match.status == 'open' and not match.is_full %}
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+      <h6 class="fw-bold mb-3"><i class="bi bi-person-plus-fill me-1 text-primary"></i>Inscribirse</h6>
+
+      {% if current_user.wallet_balance >= match.price_per_player %}
+      <form method="POST" action="{{ url_for('matches.join_match', match_id=match.id) }}" class="mb-2">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="use_wallet" value="true">
+        <button class="btn btn-success w-100">
+          <i class="bi bi-wallet2 me-1"></i>Pagar con monedero
+          ({{ '%.2f'|format(match.price_per_player) }}€)
+        </button>
+      </form>
+      <p class="text-center text-muted small mb-2">— o —</p>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('matches.join_match', match_id=match.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-primary w-100">
+          <i class="bi bi-qr-code me-1"></i>Inscribirse y pagar con QR
+        </button>
+      </form>
+      <p class="text-muted small mt-2 mb-0 text-center">
+        Nivel requerido: <strong>{{ match.required_skill_label }}</strong>
+        · Tu nivel: <strong>{{ current_user.skill_label }}</strong>
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+  {# Already registered — pending payment #}
+  {% if registration and registration.payment_status == 'pending' %}
+  <div class="card border-primary border-0 shadow-sm mb-3">
+    <div class="card-header bg-warning bg-opacity-10 py-2">
+      <span class="fw-semibold small text-warning-emphasis">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>Pago pendiente
+      </span>
+    </div>
+    <div class="card-body text-center">
+      <p class="small text-muted mb-3">
+        Muestra el siguiente QR al administrador o realiza la transferencia.
+        Precio: <strong>{{ '%.2f'|format(match.price_per_player) }}€</strong>
+      </p>
+
+      <div class="qr-box mx-auto mb-3">
+        <img src="{{ url_for('static', filename='img/qr_payment.png') }}"
+             alt="QR de pago" class="img-fluid" style="max-width:200px"
+             onerror="this.style.display='none';document.getElementById('qr-fallback').style.display='block'">
+        <div id="qr-fallback" style="display:none" class="text-muted small p-3">
+          <i class="bi bi-qr-code" style="font-size:3rem"></i>
+          <p class="mt-2">Ejecuta <code>python init_db.py</code> para generar el QR.</p>
+        </div>
+      </div>
+
+      <div class="bg-light rounded p-2 small text-start mb-3">
+        <strong>Datos de pago:</strong><br>
+        Bizum: <strong>612 345 678</strong><br>
+        IBAN: ES12 3456 7890 1234 5678 90<br>
+        Concepto: <strong>{{ current_user.username }} — {{ match.date.strftime('%d/%m') }}</strong>
+      </div>
+
+      {% if current_user.wallet_balance >= match.price_per_player %}
+      <form method="POST" action="{{ url_for('matches.join_match', match_id=match.id) }}" class="mb-2">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="use_wallet" value="true">
+        <button class="btn btn-success btn-sm">
+          <i class="bi bi-wallet2 me-1"></i>Pagar ahora con monedero
+        </button>
+      </form>
+      {% endif %}
+
+    </div>
+  </div>
+  {% endif %}
+
+  {# Already registered — paid #}
+  {% if registration and registration.payment_status == 'paid' %}
+  <div class="alert alert-success d-flex align-items-center gap-2 shadow-sm">
+    <i class="bi bi-check-circle-fill fs-5"></i>
+    <div class="small">
+      <strong>Plaza confirmada</strong> — pago recibido.
+    </div>
+  </div>
+  {% endif %}
+
+  {# Leave button #}
+  {% if registration and match.status in ('open', 'confirmed') %}
+  <form method="POST" action="{{ url_for('matches.leave_match', match_id=match.id) }}"
+        onsubmit="return confirm('¿Seguro que quieres abandonar este partido?')">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-outline-danger btn-sm w-100">
+      <i class="bi bi-person-dash me-1"></i>Abandonar partido
+    </button>
+  </form>
+  {% endif %}
+
+{% endif %}
+
+{# ── Completed result ──────────────────────────────────────────── #}
+{% if match.status == 'completed' and match.winner_team %}
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-primary bg-opacity-10 py-2">
+    <span class="fw-semibold small text-primary">
+      <i class="bi bi-trophy-fill me-1"></i>Resultado final
+    </span>
+  </div>
+  <div class="card-body">
+    {% for t in [1,2] %}
+    <div class="d-flex align-items-center mb-2 p-2 rounded
+         {{ 'bg-success bg-opacity-10 border border-success' if match.winner_team == t else 'bg-light' }}">
+      <span class="fw-bold me-2 small">Equipo {{ t }}</span>
+      {% if match.winner_team == t %}
+      <i class="bi bi-trophy-fill text-warning me-2"></i>
+      {% endif %}
+      <span class="small text-muted">
+        {% for p in match.get_team(t) %}{{ p.username }}{% if not loop.last %}, {% endif %}{% endfor %}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

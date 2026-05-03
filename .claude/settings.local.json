@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 init_db.py)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 run.py)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5000/login)",
+      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/app/padel.db \"SELECT id, username, skill_level FROM users WHERE role='player' LIMIT 10;\")",
+      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/padel.db \"SELECT id, username, skill_level FROM users WHERE role='player';\")",
+      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/padel.db \"SELECT m.id, m.status, m.winner_team, m.date FROM matches m WHERE m.status='completed' ORDER BY m.date DESC LIMIT 5;\")",
+      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/padel.db \"SELECT mp.match_id, mp.player_id, mp.team, u.username, u.skill_level FROM match_players mp JOIN users u ON mp.player_id=u.id WHERE mp.match_id IN \\(6,8,2\\);\")",
+      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/padel.db \"SELECT * FROM match_result_proposals WHERE status='confirmed';\")",
+      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/padel.db \"SELECT * FROM match_result_proposals;\")",
+      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/padel.db ' *)",
+      "Bash(python3 -c \"import sqlalchemy; print\\(sqlalchemy.__version__\\)\")",
+      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/app/padel.db \"SELECT id, username, skill_level FROM users WHERE role='player';\")"
+    ]
+  }
+}

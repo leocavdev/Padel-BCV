@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Administration — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+
+  {# Dark gradient header with glassmorphism stats #}
+  <div class="hero-dark" style="padding:16px 20px 20px;flex-shrink:0">
+    <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:2px">Administration</div>
+    <div style="font-size:22px;font-weight:800;color:#fff">Tableau de bord</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+      {% set stat_items = [
+        ('Total matchs', stats.total, 'bi-calendar3',        '#d8f0e4', '#2d6a4f'),
+        ('Ouverts',      stats.open,  'bi-circle-fill',      '#dcfce7', '#16a34a'),
+        ('Confirmés',    stats.confirmed, 'bi-check-circle-fill', '#dbeafe', '#2563eb'),
+        ('Joueurs',      stats.players,   'bi-people-fill',  '#ede9fe', '#7c3aed'),
+      ] %}
+      {% for label, value, icon, ibg, icolor in stat_items %}
+      <div class="stat-glass">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:28px;height:28px;border-radius:8px;background:{{ ibg }};display:flex;align-items:center;justify-content:center">
+            <i class="bi {{ icon }}" style="font-size:13px;color:{{ icolor }}"></i>
+          </div>
+          <span style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600">{{ label }}</span>
+        </div>
+        <div style="font-size:28px;font-weight:800;color:#fff;line-height:1">{{ value }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# Quick action #}
+  <div style="padding:12px 16px;background:#fff;flex-shrink:0;display:flex;gap:10px;border-bottom:1px solid #eef2ee">
+    <a href="{{ url_for('admin.create_match') }}" class="btn-p small full">
+      <i class="bi bi-plus-circle-fill"></i> Nouveau match
+    </a>
+  </div>
+
+  {# Filter chips #}
+  <div style="padding:10px 16px;background:#fff;flex-shrink:0;border-bottom:1px solid #eef2ee;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none">
+    {% for s, label in [('', 'Tous'), ('open', 'Ouverts'), ('confirmed', 'Confirmés'), ('completed', 'Terminés'), ('cancelled', 'Annulés')] %}
+    <a href="{{ url_for('admin.dashboard', status=s) }}"
+       class="chip {% if current_status == s %}admin-active{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  {# Match list #}
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:12px 16px 24px;display:flex;flex-direction:column;gap:8px">
+      {% if matches %}
+        {% for match in matches %}
+        {% set accent_map = {'beginner':'#16a34a','intermediate':'#2563eb','advanced':'#d97706','expert':'#dc2626'} %}
+        {% set accent = accent_map[match.required_skill] %}
+        <a href="{{ url_for('admin.manage_match', match_id=match.id) }}"
+           class="admin-match-row {% if match.status in ['cancelled', 'completed'] %}admin-row-muted{% endif %}"
+           style="border-left:3px solid {{ accent }}">
+          <div style="flex:1;padding:11px 14px">
+            <div style="font-size:14px;font-weight:700;color:#151c17;margin-bottom:3px">{{ match.location }}</div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <span style="font-size:12px;color:#6b8070">{{ match.date.strftime('%d/%m/%Y') }}</span>
+              <span style="color:#c5d5c5">·</span>
+              <span style="font-size:12px;color:#6b8070">{{ match.start_time.strftime('%H:%M') }}</span>
+              <span class="skill-badge skill-{{ match.required_skill }}">{{ match.required_skill_label }}</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding:11px 14px;flex-shrink:0">
+            <span class="status-badge status-{{ match.status }}">
+              <span class="status-dot dot-{{ match.status }}"></span>{{ match.status_label }}
+            </span>
+            <span style="font-size:12px;color:#91a492;font-weight:600">{{ match.players|length }}/4 joueurs</span>
+          </div>
+          <div style="padding:0 12px 0 0;color:#c5d5c5;font-size:16px">›</div>
+        </a>
+        {% endfor %}
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-calendar-x" style="font-size:28px;color:#91a492"></i></div>
+        <p>Aucun match pour ce filtre.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

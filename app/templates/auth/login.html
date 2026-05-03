@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Connexion — Padel BCV{% endblock %}
+{% block body %}
+<div class="auth-shell page-fade">
+
+  {# Hero top — 42% dark green gradient #}
+  <div class="hero-login">
+    <div class="hero-login-lines"></div>
+    <div class="hero-login-icon">
+      <i class="bi bi-trophy-fill" style="font-size:32px;color:#52b788"></i>
+    </div>
+    <div style="font-size:26px;font-weight:800;color:#fff;letter-spacing:-.01em">Padel BCV</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.6);margin-top:4px">Association de Padel</div>
+  </div>
+
+  {# Form card #}
+  <div class="login-form-card">
+
+    {# Flash messages #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="margin-bottom:16px">
+      {% for category, message in messages %}
+      <div class="flash-item flash-{{ category }}" style="margin-bottom:6px">
+        <span>{{ message }}</span>
+        <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div style="font-size:22px;font-weight:800;color:#151c17;margin-bottom:4px">Connexion</div>
+    <div style="font-size:14px;color:#6b8070;margin-bottom:24px">Bon retour sur le court !</div>
+
+    <form method="POST" novalidate style="display:flex;flex-direction:column;gap:14px">
+      {{ form.hidden_tag() }}
+
+      <div class="input-wrap">
+        {{ form.email.label }}
+        <div class="input-box {% if form.email.errors %}border-danger{% endif %}">
+          <i class="bi bi-envelope"></i>
+          {{ form.email(placeholder="votre@email.com", autocomplete="email") }}
+        </div>
+        {% for e in form.email.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="input-wrap">
+        {{ form.password.label }}
+        <div class="input-box {% if form.password.errors %}border-danger{% endif %}">
+          <i class="bi bi-lock"></i>
+          {{ form.password(placeholder="Mot de passe", autocomplete="current-password") }}
+        </div>
+        {% for e in form.password.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px">
+        {{ form.remember_me(style="width:16px;height:16px;accent-color:#2d6a4f") }}
+        {{ form.remember_me.label(style="font-size:13px;color:#6b8070;margin:0") }}
+      </div>
+
+      {{ form.submit(class="btn-p full", value="Se connecter") }}
+    </form>
+
+    <div style="text-align:center;margin-top:16px;font-size:13px;color:#6b8070">
+      Pas encore de compte ?
+      <a href="{{ url_for('auth.register') }}" style="color:#2d6a4f;font-weight:700;text-decoration:none">S'inscrire</a>
+    </div>
+
+    <div style="margin-top:auto;padding-top:20px;border-top:1px solid #e4ebe5;text-align:center">
+      <span style="font-size:12px;color:#91a492">Admin : </span>
+      <span style="font-size:12px;color:#1b4332;font-weight:600">admin@padelbcv.com / admin123</span>
+    </div>
+  </div>
+</div>
+<script>
+  setTimeout(() => {
+    document.querySelectorAll('.flash-item').forEach(el => el.remove());
+  }, 5000);
+</script>
+{% endblock body %}

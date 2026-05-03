@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Solde — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+
+  {# Balance hero #}
+  <div class="wallet-hero" style="flex-shrink:0">
+    <div class="wallet-hero-bg"></div>
+    <div style="position:relative">
+      <div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:4px">Solde disponible</div>
+      <div class="wallet-balance">
+        {{ '%.2f'|format(current_user.wallet_balance) }}<span style="font-size:22px;font-weight:600;color:rgba(255,255,255,.7);margin-left:2px">CHF</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap">
+        <a href="{{ url_for('wallet.payment_qr') }}" class="wallet-chip">
+          <i class="bi bi-qr-code" style="font-size:14px"></i> Recharger
+        </a>
+        <a href="#historique" class="wallet-chip">
+          <i class="bi bi-arrow-up-right" style="font-size:14px"></i> Historique
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {# Transactions #}
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:16px 16px 24px" id="historique">
+      <div class="section-hd">
+        <span class="section-hd-label">Mouvements récents</span>
+      </div>
+
+      {% if transactions %}
+      <div class="card-new" style="overflow:hidden">
+        {% for tx in transactions %}
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;
+             border-bottom:{{ '1px solid #f4f6f4' if not loop.last else 'none' }}">
+          <div style="width:40px;height:40px;border-radius:50%;flex-shrink:0;
+               background:{{ '#dcfce7' if tx.amount > 0 else '#fff1f0' }};
+               display:flex;align-items:center;justify-content:center">
+            <i class="bi {{ 'bi-arrow-down-circle-fill' if tx.amount > 0 else 'bi-arrow-up-circle-fill' }}"
+               style="font-size:18px;color:{{ '#16a34a' if tx.amount > 0 else '#dc2626' }}"></i>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:600;color:#151c17;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              {{ tx.description }}
+            </div>
+            <div style="font-size:12px;color:#91a492;margin-top:1px">
+              {{ tx.created_at.strftime('%d/%m/%Y %H:%M') }}
+            </div>
+          </div>
+          <div style="font-size:15px;font-weight:800;flex-shrink:0;color:{{ '#16a34a' if tx.amount > 0 else '#dc2626' }}">
+            {{ '+' if tx.amount > 0 else '' }}{{ '%.2f'|format(tx.amount) }} CHF
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-receipt" style="font-size:28px;color:#91a492"></i></div>
+        <p>Aucun mouvement enregistré.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

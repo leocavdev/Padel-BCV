@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Comment progresser — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+  <div style="background:#fff;padding:16px 20px 12px;flex-shrink:0;border-bottom:1px solid #eef2ee">
+    <div style="font-size:13px;color:#91a492;margin-bottom:2px">Niveaux de jeu</div>
+    <div style="font-size:22px;font-weight:800;color:#151c17">Comment progresser</div>
+    <div style="font-size:13px;color:#6b8070;margin-top:4px">Découvrez comment sont attribués les niveaux et comment monter en compétence.</div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:20px 16px 32px;display:flex;flex-direction:column;gap:16px">
+      <div class="card-new" style="padding:18px">
+        <div style="font-size:16px;font-weight:700;color:#151c17;margin-bottom:12px">Comment sont attribués les niveaux ?</div>
+        <p style="font-size:14px;color:#4b5563;line-height:1.7;margin-bottom:12px">
+          Votre niveau est calculé sur une échelle de 0 à 7, puis classé dans une catégorie de jeu.
+          Chaque victoire augmente légèrement votre niveau, et chaque défaite le réduit légèrement.
+        </p>
+        <ul style="display:grid;gap:10px;padding-left:16px;color:#4b5563;font-size:14px;line-height:1.7">
+          {% for key, range_data in skill_levels.items() %}
+          {% set min_level, max_level, label = range_data %}
+          {% if key == 'beginner' %}{% set level_color = '#16a34a' %}
+          {% elif key == 'intermediate' %}{% set level_color = '#2563eb' %}
+          {% elif key == 'advanced' %}{% set level_color = '#d97706' %}
+          {% elif key == 'expert' %}{% set level_color = '#dc2626' %}
+          {% else %}{% set level_color = '#151c17' %}{% endif %}
+          <li>
+            <strong style="color:{{ level_color }}">{{ label }}</strong> — {{ '%.1f'|format(min_level) }} à {{ '%.1f'|format(max_level) }}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="card-new" style="padding:18px">
+        <div style="font-size:16px;font-weight:700;color:#151c17;margin-bottom:12px">Comment progresser ?</div>
+        <div style="display:flex;flex-direction:column;gap:10px;color:#4b5563;font-size:14px;line-height:1.7">
+          <div>
+            <strong>1. Jouez régulièrement</strong> — plus vous participez à des matchs, plus votre niveau est évalué précisément.
+          </div>
+          <div>
+            <strong>2. Gagnez des matchs</strong> — chaque victoire vous fait monter progressivement.
+          </div>
+          <div>
+            <strong>3. Respectez votre catégorie</strong> — jouez des matchs adaptés à votre niveau pour progresser sereinement.
+          </div>
+          <div>
+            <strong>4. Analysez vos performances</strong> — regardez les adversaires et adaptez votre jeu pour monter en compétence.
+          </div>
+        </div>
+      </div>
+
+      <div class="card-new" style="padding:18px">
+        <div style="font-size:16px;font-weight:700;color:#151c17;margin-bottom:12px">Ce que signifie votre barre</div>
+        <p style="font-size:14px;color:#4b5563;line-height:1.7">
+          La barre de niveau sur votre profil représente votre position sur l’échelle de 0 à 7.
+          Elle passe du vert au rouge en fonction de la catégorie, et indique visuellement votre progression.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

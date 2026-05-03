@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Padel BCV — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+  <div class="topbar topbar-white">
+    <div class="topbar-title topbar-title-dark">Padel BCV</div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:20px 16px 32px;display:flex;flex-direction:column;gap:14px">
+      <div class="card-new" style="padding:18px">
+        <div style="font-size:16px;font-weight:700;color:#151c17;margin-bottom:8px">Padel BCV</div>
+        <p style="font-size:14px;color:#4b5563;line-height:1.7">
+          Retrouvez ici les ressources dédiées à la communauté Padel BCV :
+          joueurs, progression et règlement.
+        </p>
+      </div>
+
+      <a href="{{ url_for('auth.players_bcv') }}" class="btn-p full">
+        Joueurs BCV
+      </a>
+      <a href="{{ url_for('auth.skill_levels') }}" class="btn-p full">
+        Comment progresser
+      </a>
+      <a href="{{ url_for('auth.regles_padel') }}" class="btn-p full">
+        Comment jouer
+      </a>
+      <a href="{{ url_for('auth.reglement') }}" class="btn-p full">
+        Règlement
+      </a>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

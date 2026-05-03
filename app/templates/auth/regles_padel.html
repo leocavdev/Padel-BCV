@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Comment jouer — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+  <div class="topbar topbar-white">
+    <div class="topbar-title topbar-title-dark">Comment jouer</div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:20px 16px 32px;display:flex;flex-direction:column;gap:18px">
+
+      <div class="card-new" style="padding:20px">
+        <div style="font-size:18px;font-weight:800;color:#151c17;margin-bottom:10px">Introduction</div>
+        <p style="font-size:14px;color:#4b5563;line-height:1.8">
+          Le padel se joue à 4 joueurs en double, sur un court fermé de 10 x 20 mètres.
+          Le jeu est basé sur des échanges rapides, l'utilisation des parois et une stratégie de positionnement.
+          Les règles ci-dessous couvrent le format de match, le service, le comptage des points, et la gestion du terrain.
+        </p>
+      </div>
+
+      <div class="card-new" style="padding:20px">
+        <div style="font-size:18px;font-weight:800;color:#151c17;margin-bottom:10px">Court et dimensions</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+          <div style="font-size:14px;color:#4b5563;line-height:1.8">
+            <p><strong>Dimensions</strong> : 20 mètres de long sur 10 mètres de large.</p>
+            <p><strong>Filet</strong> : hauteur 88 cm au centre et 92 cm aux extrémités.</p>
+            <p><strong>Zones</strong> : la surface est divisée en deux moitiés et chaque côté comporte une <span style="background:#fde8e8;color:inherit;padding:0 4px;border-radius:4px">zone de service</span>.</p>
+            <p><strong>Parois</strong> : le court est fermé par des parois vitrées et grillagées qui font partie du jeu une fois que la balle a rebondi.</p>
+          </div>
+          <div style="background:#fff;border-radius:16px;padding:14px;box-shadow:0 0 0 1px rgba(0,0,0,.05)">
+            <svg viewBox="0 0 400 210" width="100%" style="display:block">
+              <rect x="10" y="10" width="380" height="190" rx="16" ry="16" fill="#eaf3f0"/>
+              <rect x="10" y="10" width="90" height="190" rx="12" ry="12" fill="#fde8e8"/>
+              <rect x="300" y="10" width="90" height="190" rx="12" ry="12" fill="#fde8e8"/>
+              <rect x="10" y="10" width="380" height="190" rx="16" ry="16" fill="none" stroke="#22695d" stroke-width="4"/>
+              <line x1="200" y1="10" x2="200" y2="200" stroke="#22695d" stroke-width="3" stroke-dasharray="6 6"/>
+              <line x1="100" y1="10" x2="100" y2="200" stroke="#22695d" stroke-width="3"/>
+              <line x1="300" y1="10" x2="300" y2="200" stroke="#22695d" stroke-width="3"/>
+              <line x1="10" y1="100" x2="100" y2="100" stroke="#22695d" stroke-width="3"/>
+              <line x1="300" y1="100" x2="390" y2="100" stroke="#22695d" stroke-width="3"/>
+              <text x="200" y="105" fill="#134c38" font-size="16" text-anchor="middle" font-weight="700">Filet</text>
+              <text x="200" y="190" fill="#134c38" font-size="12" text-anchor="middle">10 m</text>
+              <text x="380" y="110" fill="#134c38" font-size="12" text-anchor="end" transform="rotate(-90 380,110)">20 m</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-new" style="padding:20px">
+        <div style="font-size:18px;font-weight:800;color:#151c17;margin-bottom:10px">Format de match et points</div>
+        <ul style="font-size:14px;color:#4b5563;line-height:1.8;list-style:disc;margin:0;padding-left:20px">
+          <li>Un match se joue en 2 ou 3 sets. Le premier à 6 jeux avec 2 jeux d’écart remporte le set.</li>
+          <li>En cas d’égalité 6-6, un tie-break est joué.</li>
+          <li>Le comptage des points est identique au tennis : 15, 30, 40, jeu.</li>
+          <li>Lorsque l’équipe au service gagne le point, elle conserve le service ; si elle perd, le point passe à l’adversaire.</li>
+        </ul>
+      </div>
+
+      <div class="card-new" style="padding:20px">
+        <div style="font-size:18px;font-weight:800;color:#151c17;margin-bottom:10px">Le service</div>
+        <ul style="font-size:14px;color:#4b5563;line-height:1.8;list-style:disc;margin:0;padding-left:20px">
+          <li>Le service est toujours effectué à la cuillère, à deux mains, à hauteur de la ceinture maximum.</li>
+          <li>La balle doit rebondir dans la zone de service opposée du côté adverse.</li>
+          <li>Si la balle touche le filet et atterrit dans la bonne zone, le service est à refaire.</li>
+          <li>Le serveur dispose de deux tentatives si le premier service est fautif.</li>
+          <li>Le serveur change de côté après chaque point impair et conserve le même serveur au sein de l’équipe jusqu’à la perte du service.</li>
+        </ul>
+      </div>
+
+      <div class="card-new" style="padding:20px">
+        <div style="font-size:18px;font-weight:800;color:#151c17;margin-bottom:10px">Jeu après le service</div>
+        <ul style="font-size:14px;color:#4b5563;line-height:1.8;list-style:disc;margin:0;padding-left:20px">
+          <li>Après le rebond initial, la balle peut toucher les parois de fond ou latérales de la zone adverse.</li>
+          <li>La balle est encore bonne si elle touche les parois après un rebond au sol dans le camp opposé.</li>
+          <li>Si la balle touche directement les parois avant de rebondir, le point est perdu.</li>
+          <li>La balle doit toujours rebondir une seule fois au sol avant d’être renvoyée.</li>
+        </ul>
+      </div>
+
+      <div class="card-new" style="padding:20px">
+        <div style="font-size:18px;font-weight:800;color:#151c17;margin-bottom:10px">Fautes et comportement</div>
+        <ul style="font-size:14px;color:#4b5563;line-height:1.8;list-style:disc;margin:0;padding-left:20px">
+          <li>La balle est faute si elle sort du court, accélère le grillage sans rebondir dans le camp adverse, ou touche le filet sans passer.</li>
+          <li>Les balles de chaque équipe doivent rester dans leur camp après le 1er rebond pour rester en jeu.</li>
+          <li>Le jeu doit rester respectueux : pas de cris excessifs, pas de coups dangereux, et pas de perturbation du jeu adverse.</li>
+          <li>Les équipes alternent le service à chaque fin de jeu.</li>
+        </ul>
+      </div>
+
+      <div class="card-new" style="padding:20px">
+        <div style="font-size:18px;font-weight:800;color:#151c17;margin-bottom:10px">Conseils de progression</div>
+        <ul style="font-size:14px;color:#4b5563;line-height:1.8;list-style:disc;margin:0;padding-left:20px">
+          <li>Travaillez votre positionnement au filet : c’est l’endroit clé pour dominer les échanges.</li>
+          <li>Utilisez les parois pour surprendre l’adversaire et prolonger la balle.</li>
+          <li>Privilégiez les coups croisés et les amortis pour déplacer l’adversaire.</li>
+          <li>Améliorez votre service pour prendre l’avantage dès le début du point.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

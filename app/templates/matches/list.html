@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block title %}Matchs — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+
+  {# Greeting header #}
+  <div style="background:#fff;padding:16px 20px 12px;flex-shrink:0;border-bottom:1px solid #eef2ee">
+    <div style="font-size:13px;color:#91a492;margin-bottom:2px">
+      {% if now %}{{ now }}{% else %}Aujourd'hui{% endif %}
+    </div>
+    <div style="font-size:22px;font-weight:800;color:#151c17">
+      {% if current_user.is_admin %}
+        Tableau de bord
+      {% else %}
+        Bonjour {{ current_user.username.split(' ')[0] }}
+      {% endif %}
+    </div>
+    {% if registered_matches %}
+    {% set next_match = registered_matches[0] %}
+    <div style="margin-top:12px;padding:12px 14px;background:#f8fafc;border-radius:14px;border:1px solid #e2e8f0">
+      <div style="font-size:13px;color:#475569;margin-bottom:4px">Prochain match inscrit</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:#0f172a">{{ next_match.location }}</div>
+          <div style="font-size:13px;color:#64748b">Le {{ next_match.date.strftime('%d/%m/%Y') }} à {{ next_match.start_time.strftime('%H:%M') }}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:12px;color:#64748b">Compte à rebours</div>
+          <div id="next-match-countdown" data-match-datetime="{{ next_match.date.strftime('%Y-%m-%d') }}T{{ next_match.start_time.strftime('%H:%M:%S') }}" style="font-size:16px;font-weight:700;color:#0f172a;white-space:nowrap">--h --m --s</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+  {# Incoming replacement requests #}
+  {% if incoming_requests %}
+  <div style="padding:10px 16px;background:#eff6ff;border-bottom:2px solid #3b82f6;flex-shrink:0">
+    <div style="font-size:11px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">
+      <i class="bi bi-person-fill-check"></i> Demandes de remplacement ({{ incoming_requests|length }})
+    </div>
+    {% for rr in incoming_requests %}
+    <a href="{{ url_for('matches.match_detail', match_id=rr.match_id) }}"
+       style="background:#fff;border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:#151c17;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ rr.match.location }}</div>
+        <div style="font-size:12px;color:#64748b">{{ rr.match.date.strftime('%d/%m/%Y') }} · <strong>{{ rr.requester.username }}</strong> vous propose sa place</div>
+      </div>
+      <i class="bi bi-arrow-right" style="font-size:14px;color:#2563eb;flex-shrink:0"></i>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Registered matches #}
+  <div class="scroll-content" style="background:#f4f6f4">
+    {% if registered_matches %}
+    <div style="padding:16px 16px 0">
+      <div class="section-hd">
+        <span class="section-hd-dot" style="background:#f59e0b"></span>
+        <span class="section-hd-label">Mes matchs inscrits</span>
+        <span class="section-hd-count">{{ registered_matches|length }}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+        {% for match in registered_matches %}{% include 'matches/_card.html' %}{% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    <div style="padding:16px 16px 8px">
+
+      {# Open matches #}
+      <div id="section-open">
+        {% if open_matches %}
+        {% set past = false %}
+        <div class="section-hd">
+          <span class="section-hd-dot" style="background:#16a34a"></span>
+          <span class="section-hd-label">Matchs disponibles</span>
+          <span class="section-hd-count">{{ open_matches|length }}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+          {% for match in open_matches %}{% include 'matches/_card.html' %}{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      {# Confirmed matches #}
+      <div id="section-confirmed">
+        {% if confirmed_matches %}
+        {% set past = false %}
+        <div class="section-hd">
+          <span class="section-hd-dot" style="background:#3b82f6"></span>
+          <span class="section-hd-label">Confirmés</span>
+          <span class="section-hd-count">{{ confirmed_matches|length }}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+          {% for match in confirmed_matches %}{% include 'matches/_card.html' %}{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      {# Past matches #}
+      <div id="section-past">
+        {% if past_matches %}
+        <div class="section-hd">
+          <span class="section-hd-dot" style="background:#6b7280"></span>
+          <span class="section-hd-label">Tous les Matchs passés</span>
+          <span class="section-hd-count">{{ past_matches|length }}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+          {% for match in past_matches %}
+            {% set past = true %}
+            {% include 'matches/_card.html' %}
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      {# Empty state #}
+      {% if not registered_matches and not open_matches and not confirmed_matches and not past_matches %}
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="bi bi-calendar-x" style="font-size:28px;color:#91a492"></i>
+        </div>
+        <p>Aucun match disponible pour le moment.</p>
+      </div>
+      {% endif %}
+
+      {# Admin: create match CTA #}
+      {% if current_user.is_admin %}
+      <div style="margin-top:8px">
+        <a href="{{ url_for('admin.create_match') }}" class="btn-p full">
+          <i class="bi bi-plus-circle-fill"></i> Nouveau match
+        </a>
+      </div>
+      {% endif %}
+
+      <div style="height:8px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const countdownEl = document.getElementById('next-match-countdown');
+  if (!countdownEl) return;
+  const target = countdownEl.dataset.matchDatetime;
+  const matchTime = new Date(target);
+  function updateCountdown() {
+    const now = new Date();
+    let diff = matchTime - now;
+    if (diff <= 0) {
+      countdownEl.textContent = 'Début imminent';
+      return;
+    }
+    const days = Math.floor(diff / 86400000);
+    diff %= 86400000;
+    const hours = Math.floor(diff / 3600000);
+    diff %= 3600000;
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    const parts = [];
+    if (days) parts.push(days + 'j');
+    parts.push(String(hours).padStart(2, '0') + 'h');
+    parts.push(String(minutes).padStart(2, '0') + 'm');
+    parts.push(String(seconds).padStart(2, '0') + 's');
+    countdownEl.textContent = parts.join(' ');
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+})();
+</script>
+
+{% endblock %}

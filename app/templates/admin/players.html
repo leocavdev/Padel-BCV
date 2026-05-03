@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Joueurs — Padel BCV{% endblock %}
+{% block content %}
+{% set accent_map = {'beginner':'#16a34a','intermediate':'#2563eb','advanced':'#d97706','expert':'#dc2626'} %}
+
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+
+  {# Dark gradient header #}
+  <div class="hero-dark" style="padding:16px 20px 20px;flex-shrink:0">
+    <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:2px">Administration</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div style="font-size:22px;font-weight:800;color:#fff">Joueurs</div>
+      <span style="font-size:13px;font-weight:700;color:#fff;background:rgba(255,255,255,.15);border-radius:999px;padding:4px 12px">
+        {{ players|length }} inscrits
+      </span>
+    </div>
+    <div style="margin-top:14px;display:flex;justify-content:flex-end;align-items:center">
+      <form method="GET" action="{{ url_for('admin.list_players') }}" style="display:flex;align-items:center;gap:10px">
+        <label for="skill-filter" style="font-size:12px;color:rgba(255,255,255,.75);font-weight:600">Filtrer par niveau</label>
+        <select id="skill-filter" name="skill" onchange="this.form.submit()" style="border:none;border-radius:999px;padding:10px 14px;background:rgba(255,255,255,.12);color:#fff;min-width:180px">
+          <option value="" {% if not current_skill %}selected{% endif %}>Tous</option>
+          <option value="beginner" {% if current_skill == 'beginner' %}selected{% endif %}>Débutant</option>
+          <option value="intermediate" {% if current_skill == 'intermediate' %}selected{% endif %}>Intermédiaire</option>
+          <option value="advanced" {% if current_skill == 'advanced' %}selected{% endif %}>Avancé</option>
+          <option value="expert" {% if current_skill == 'expert' %}selected{% endif %}>Expert</option>
+        </select>
+      </form>
+    </div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:12px 16px 24px;display:flex;flex-direction:column;gap:10px">
+      {% if players %}
+        {% for player in players %}
+        {% set skill = player.skill_category_key %}
+        {% set accent = accent_map[skill] %}
+        {% set pct = (((player.skill_level - 0) / 7) * 100)|int %}
+        <div class="card-new" style="padding:14px 16px">
+
+          {# Header row #}
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div class="avatar av-{{ skill }}" style="width:44px;height:44px;font-size:16px">
+              {{ player.username[:2]|upper }}
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:700;color:#151c17">{{ player.username }}</div>
+              <div style="font-size:12px;color:#91a492;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ player.email }}</div>
+              <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+                <span class="skill-badge skill-{{ skill }}">{{ player.skill_label }}</span>
+                <span style="font-size:11px;font-weight:600;color:#14532d;background:#dcfce7;border-radius:999px;padding:2px 8px">
+                  <i class="bi bi-wallet2" style="margin-right:3px"></i>{{ '%.2f'|format(player.wallet_balance) }} CHF
+                </span>
+              </div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:11px;color:#91a492">Matchs</div>
+              <div style="font-size:18px;font-weight:800;color:#151c17">
+                {{ player.registrations|length }}
+              </div>
+            </div>
+          </div>
+
+          <form method="POST" action="{{ url_for('admin.set_level', player_id=player.id) }}"
+                style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div style="flex:1;display:flex;align-items:center;gap:6px;border:1.5px solid #dde8de;border-radius:10px;padding:0 10px;height:38px;background:#fff">
+              <span style="font-size:13px;color:#91a492">Niveau</span>
+              <input type="number" name="skill_level" value="{{ '%.2f'|format(player.skill_level) }}" min="0.0" max="7.0" step="0.05" required
+                     style="flex:1;border:none;outline:none;font-size:14px;color:#151c17;background:transparent;font-family:inherit">
+            </div>
+            <button class="btn-p small blue" type="submit">
+              <i class="bi bi-arrow-repeat"></i> Mettre à jour
+            </button>
+          </form>
+
+          {# Skill bar #}
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+              <span style="font-size:12px;color:#6b8070;font-weight:600">Niveau</span>
+              <span style="font-size:12px;font-weight:800;color:{{ accent }}">{{ '%.2f'|format(player.skill_level) }}</span>
+            </div>
+            <div style="height:5px;border-radius:3px;background:#eef2ee;overflow:hidden">
+              <div style="height:100%;border-radius:3px;background:{{ accent }};width:{{ pct }}%"></div>
+            </div>
+          </div>
+
+          {# Recharge form #}
+          <form method="POST" action="{{ url_for('admin.add_balance', player_id=player.id) }}"
+                style="display:flex;gap:8px">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div style="flex:1;display:flex;align-items:center;gap:6px;border:1.5px solid #dde8de;border-radius:10px;padding:0 10px;height:38px;background:#fff">
+              <span style="font-size:13px;color:#91a492">CHF</span>
+              <input type="number" name="amount" placeholder="Montant" min="0.50" step="0.50" required
+                     style="flex:1;border:none;outline:none;font-size:14px;color:#151c17;background:transparent;font-family:inherit">
+            </div>
+            <button class="btn-p small green">
+              <i class="bi bi-plus-circle-fill"></i> Recharger
+            </button>
+          </form>
+
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-person-x" style="font-size:28px;color:#91a492"></i></div>
+        <p>Aucun joueur enregistré.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
