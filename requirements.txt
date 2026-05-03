@@ -8,3 +8,5 @@ qrcode[pil]==7.4.2
 Pillow==11.0.0
 email-validator==2.1.0
 gunicorn
+psycopg2-binary
+Flask-SQLAlchemy
