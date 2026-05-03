@@ -68,8 +68,13 @@ def _seed_admin():
     password = os.environ.get('ADMIN_PASSWORD')
     if not email or not password:
         return
-    if not User.query.filter_by(email=email).first():
+    admin = User.query.filter_by(email=email).first()
+    if admin:
+        admin.set_password(password)
+        admin.role = 'admin'
+        admin.is_approved = True
+    else:
         admin = User(username='admin', email=email, role='admin', is_approved=True)
         admin.set_password(password)
         db.session.add(admin)
-        db.session.commit()
+    db.session.commit()
