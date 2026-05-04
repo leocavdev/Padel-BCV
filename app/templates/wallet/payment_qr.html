@@ -27,8 +27,8 @@
         </div>
       </div>
 
-      {# TWINT open button #}
-      <button onclick="openBcvTwint()"
+      {# Payer avec TWINT #}
+      <button onclick="payWithTwint()"
          style="display:flex;align-items:center;justify-content:center;gap:10px;
                 background:#000;color:#fff;border-radius:14px;padding:14px 24px;
                 width:100%;font-size:15px;font-weight:700;border:none;cursor:pointer;
@@ -38,16 +38,7 @@
           <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle"
                 font-family="Arial Black,sans-serif" font-size="26" font-weight="900" fill="#000">T</text>
         </svg>
-        Ouvrir BCV TWINT
-      </button>
-
-      {# Share QR button (Web Share API) #}
-      <button id="btn-share-qr" onclick="shareQR()"
-              style="display:flex;align-items:center;justify-content:center;gap:8px;
-                     background:#fff;color:#151c17;border:1.5px solid #d1ddd2;border-radius:14px;
-                     padding:12px 20px;width:100%;font-size:14px;font-weight:600;cursor:pointer">
-        <i class="bi bi-share" style="font-size:16px"></i>
-        Partager le QR code
+        Payer avec TWINT
       </button>
 
       {# Warning #}
@@ -61,40 +52,27 @@
 </div>
 
 <script>
-function openBcvTwint() {
-  const isAndroid = /android/i.test(navigator.userAgent);
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-
-  if (isAndroid) {
-    // Intent URL ciblant directement ch.bcv.twint, fallback Play Store
-    const intentUrl = 'intent://payment#Intent;scheme=twint;package=ch.bcv.twint;' +
-      'S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dch.bcv.twint;end';
-    window.location.href = intentUrl;
-  } else if (isIOS) {
-    // Toutes les apps TWINT bancaires répondent au scheme twint://
-    const fallbackTimer = setTimeout(() => {
-      window.location.href = 'https://apps.apple.com/ch/app/bcv-twint/id1209496081';
-    }, 1500);
-    window.addEventListener('blur', () => clearTimeout(fallbackTimer), { once: true });
-    window.location.href = 'twint://';
-  } else {
-    // Desktop : affiche un message
-    alert('Ouvrez l\'app BCV TWINT sur votre téléphone et scannez le QR code.');
-  }
-}
-
-async function shareQR() {
+async function payWithTwint() {
   const qrUrl = "{{ url_for('static', filename='img/qr_payment.png', _external=True) }}";
+  const isDesktop = !/android|iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  if (isDesktop) {
+    alert('Scannez le QR code depuis l\'app BCV TWINT sur votre téléphone.');
+    return;
+  }
+
   try {
     const resp = await fetch(qrUrl);
     const blob = await resp.blob();
-    const file = new File([blob], 'twint_qr.png', { type: 'image/png' });
+    const file = new File([blob], 'bcv_twint.png', { type: 'image/png' });
+
+    // Partage l'image QR vers TWINT via la share sheet native.
+    // TWINT (iOS & Android) est enregistrée comme extension de partage d'images
+    // et scanne automatiquement le QR pour initier le paiement.
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'QR TWINT – Padel BCV' });
-    } else if (navigator.share) {
-      await navigator.share({ title: 'QR TWINT – Padel BCV', url: qrUrl });
+      await navigator.share({ files: [file], title: 'Paiement BCV TWINT' });
     } else {
-      // fallback: open image in new tab
+      // Fallback : ouvre l'image seule (l'utilisateur peut ensuite la partager manuellement)
       window.open(qrUrl, '_blank');
     }
   } catch (e) {
