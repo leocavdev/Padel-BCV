@@ -24,7 +24,9 @@
       "Bash(git push *)",
       "WebSearch",
       "Bash(pip3 install *)",
-      "Bash(brew install *)"
+      "Bash(brew install *)",
+      "WebFetch(domain:docs.datatrans.ch)",
+      "WebFetch(domain:docs.saferpay.com)"
     ]
   }
 }

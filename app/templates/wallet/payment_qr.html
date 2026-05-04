@@ -52,33 +52,36 @@
 </div>
 
 <script>
-async function payWithTwint() {
-  const qrUrl = "{{ url_for('static', filename='img/qr_payment.png', _external=True) }}";
-  const isDesktop = !/android|iphone|ipad|ipod/i.test(navigator.userAgent);
+const TWINT_TOKEN = "{{ twint_token }}";
 
-  if (isDesktop) {
-    alert('Scannez le QR code depuis l\'app BCV TWINT sur votre téléphone.');
-    return;
-  }
+function payWithTwint() {
+  const ua = navigator.userAgent;
+  const isAndroid = /android/i.test(ua);
+  const isIOS = /iphone|ipad|ipod/i.test(ua);
 
-  try {
-    const resp = await fetch(qrUrl);
-    const blob = await resp.blob();
-    const file = new File([blob], 'bcv_twint.png', { type: 'image/png' });
+  if (isAndroid) {
+    // Intent Android ciblant ch.bcv.twint avec le token du QR statique
+    const code = encodeURIComponent(TWINT_TOKEN);
+    const fallback = encodeURIComponent('https://play.google.com/store/apps/details?id=ch.bcv.twint');
+    const intent = `intent://payment#Intent;` +
+      `action=ch.twint.action.TWINT_PAYMENT;` +
+      `scheme=twint;` +
+      `package=ch.bcv.twint;` +
+      `S.code=${code};` +
+      `S.startingOrigin=EXTERNAL_WEB_BROWSER;` +
+      `S.browser_fallback_url=${fallback};end`;
+    window.location.href = intent;
 
-    // Partage l'image QR vers TWINT via la share sheet native.
-    // TWINT (iOS & Android) est enregistrée comme extension de partage d'images
-    // et scanne automatiquement le QR pour initier le paiement.
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Paiement BCV TWINT' });
-    } else {
-      // Fallback : ouvre l'image seule (l'utilisateur peut ensuite la partager manuellement)
-      window.open(qrUrl, '_blank');
-    }
-  } catch (e) {
-    if (e.name !== 'AbortError') {
-      window.open(qrUrl, '_blank');
-    }
+  } else if (isIOS) {
+    // Deep link iOS — toutes les apps TWINT bancaires répondent à twint://
+    const fallbackTimer = setTimeout(() => {
+      window.location.href = 'https://apps.apple.com/ch/app/bcv-twint/id1209496081';
+    }, 1500);
+    window.addEventListener('blur', () => clearTimeout(fallbackTimer), { once: true });
+    window.location.href = 'twint://qr?data=' + encodeURIComponent(TWINT_TOKEN);
+
+  } else {
+    alert('Ouvrez l\'app BCV TWINT sur votre téléphone et scannez le QR code.');
   }
 }
 </script>

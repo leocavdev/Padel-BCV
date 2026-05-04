@@ -19,7 +19,6 @@ def dashboard():
 @bp.route('/qr')
 @login_required
 def payment_qr():
-    payment_info = current_app.config.get('PAYMENT_QR_DATA', '')
     return render_template('wallet/payment_qr.html',
-                           payment_info=payment_info,
-                           title='Datos de pago')
+                           twint_token=current_app.config.get('TWINT_QR_TOKEN', ''),
+                           title='Paiement TWINT')

@@ -18,3 +18,9 @@ class Config:
         "Virement : IBAN FR76 1234 5678 9012 3456 7890 123 | "
         "Libellé : Votre prénom + date du match"
     )
+    # Token extrait du QR code TWINT BCV statique (utilisé pour le deep link Android/iOS)
+    TWINT_QR_TOKEN = (
+        "02:1732cc684ac546e7b4e463509e548633"
+        "#eedc8077fee9e3f280459d636fa00244d6a05843"
+        "#a~8cDutzr6Rp2pha6lDzRJvA~s~ADL72ziETNmJAfNGQ4KXPQ"
+    )
