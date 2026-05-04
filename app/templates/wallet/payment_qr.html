@@ -28,18 +28,18 @@
       </div>
 
       {# TWINT open button #}
-      <a href="twint://" id="btn-twint"
+      <button onclick="openBcvTwint()"
          style="display:flex;align-items:center;justify-content:center;gap:10px;
                 background:#000;color:#fff;border-radius:14px;padding:14px 24px;
-                width:100%;font-size:15px;font-weight:700;text-decoration:none;
+                width:100%;font-size:15px;font-weight:700;border:none;cursor:pointer;
                 box-shadow:0 4px 14px rgba(0,0,0,0.18)">
         <svg width="22" height="22" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect width="64" height="64" rx="14" fill="#fff"/>
           <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle"
                 font-family="Arial Black,sans-serif" font-size="26" font-weight="900" fill="#000">T</text>
         </svg>
-        Ouvrir TWINT
-      </a>
+        Ouvrir BCV TWINT
+      </button>
 
       {# Share QR button (Web Share API) #}
       <button id="btn-share-qr" onclick="shareQR()"
@@ -61,6 +61,28 @@
 </div>
 
 <script>
+function openBcvTwint() {
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  if (isAndroid) {
+    // Intent URL ciblant directement ch.bcv.twint, fallback Play Store
+    const intentUrl = 'intent://payment#Intent;scheme=twint;package=ch.bcv.twint;' +
+      'S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dch.bcv.twint;end';
+    window.location.href = intentUrl;
+  } else if (isIOS) {
+    // Toutes les apps TWINT bancaires répondent au scheme twint://
+    const fallbackTimer = setTimeout(() => {
+      window.location.href = 'https://apps.apple.com/ch/app/bcv-twint/id1209496081';
+    }, 1500);
+    window.addEventListener('blur', () => clearTimeout(fallbackTimer), { once: true });
+    window.location.href = 'twint://';
+  } else {
+    // Desktop : affiche un message
+    alert('Ouvrez l\'app BCV TWINT sur votre téléphone et scannez le QR code.');
+  }
+}
+
 async function shareQR() {
   const qrUrl = "{{ url_for('static', filename='img/qr_payment.png', _external=True) }}";
   try {
