@@ -12,9 +12,6 @@
         {{ '%.2f'|format(current_user.wallet_balance) }}<span style="font-size:22px;font-weight:600;color:rgba(255,255,255,.7);margin-left:2px">CHF</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap">
-        <a href="{{ url_for('wallet.payment_qr') }}" class="wallet-chip">
-          <i class="bi bi-qr-code" style="font-size:14px"></i> Recharger
-        </a>
         <a href="#historique" class="wallet-chip">
           <i class="bi bi-arrow-up-right" style="font-size:14px"></i> Historique
         </a>
