@@ -95,6 +95,10 @@
     <div style="padding:0 16px 8px">
       <button onclick="hideTwintPicker()" class="twint-bank-btn" style="color:#ff453a">Annuler</button>
     </div>
+    <p id="twint-no-app" style="display:none;text-align:center;font-size:12px;color:#8e8e93;padding:0 16px 12px;margin:0">
+      App non installée ?
+      <a id="twint-appstore-link" href="#" style="color:#3b82f6;text-decoration:none">Télécharger TWINT</a>
+    </p>
   </div>
 </div>
 
@@ -155,37 +159,29 @@ function hideTwintPicker() {
 }
 
 function openTwintApp(bankKey) {
-  hideTwintPicker();
   const bank = BANKS[bankKey];
   const ua = navigator.userAgent;
   const isAndroid = /android/i.test(ua);
   const isIOS    = /iphone|ipad|ipod/i.test(ua);
 
   if (isAndroid) {
+    hideTwintPicker();
     const fb = encodeURIComponent(bank.playstore);
     const pkg = bank.pkg ? `package=${bank.pkg};` : '';
     const intent = `intent://payment#Intent;action=ch.twint.action.TWINT_PAYMENT;scheme=twint;${pkg}S.code=${ENC};S.startingOrigin=EXTERNAL_WEB_BROWSER;S.browser_fallback_url=${fb};end`;
     window.location.href = intent;
 
   } else if (isIOS) {
-    // Toutes les apps TWINT bancaires répondent au schème twint:// (standard TWINT SDK)
-    const a = document.createElement('a');
-    a.href = 'twint://qr?data=' + ENC;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    // Si l'app ne s'est pas ouverte (page toujours visible après délai), proposer l'App Store
-    setTimeout(() => {
-      if (document.visibilityState !== 'hidden') {
-        if (confirm("L'app TWINT ne semble pas installée. Ouvrir l'App Store ?")) {
-          window.location.href = bank.appstore;
-        }
-      }
-    }, 2000);
+    // window.location.href dans le gestionnaire de clic = geste utilisateur direct,
+    // requis par iOS Safari pour ouvrir un URL scheme personnalisé.
+    // Pas de détection automatique (visibilityState/blur non fiables sur iOS) —
+    // on affiche un lien de téléchargement passif si l'app n'est pas installée.
+    document.getElementById('twint-appstore-link').href = bank.appstore;
+    document.getElementById('twint-no-app').style.display = 'block';
+    window.location.href = 'twint://qr?data=' + ENC;
 
   } else {
+    hideTwintPicker();
     alert('Ouvrez votre app TWINT sur votre téléphone et scannez le QR code ci-dessus.');
   }
 }

@@ -41,7 +41,9 @@
       "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV show --stat 150876b)",
       "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV add app/admin/routes.py app/templates/admin/reimbursements.html)",
       "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"add diagnostic count on reimbursements page\")",
-      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV push)"
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV push)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV add app/templates/admin/reimbursements.html)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"fix reimbursements layout: cards in scroll-content, not in hero\")"
     ]
   }
 }
