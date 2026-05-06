@@ -372,6 +372,31 @@ def respond_replacement(match_id, request_id):
             flash('Vous êtes déjà inscrit à ce match.', 'warning')
             return redirect(url_for('matches.match_detail', match_id=match_id))
 
+        payment_method = request.form.get('payment_method', 'wallet')
+        requester = rr.requester
+
+        if payment_method == 'twint':
+            if mp.payment_status == 'paid':
+                requester.wallet_balance += match.price_per_player
+                db.session.add(Transaction(
+                    user_id=requester.id,
+                    amount=match.price_per_player,
+                    type='refund',
+                    description=f'Remboursement pour remplacement — match #{match.id} ({match.location})',
+                    match_id=match.id,
+                ))
+            db.session.add(MatchPlayer(match_id=match_id, player_id=current_user.id, payment_status='pending'))
+            db.session.delete(mp)
+            db.session.delete(rr)
+            db.session.commit()
+            flash(
+                f'Vous remplacez {requester.username} dans le match du '
+                f'{match.date.strftime("%d/%m/%Y")} à {match.location}. '
+                f'Procédez au paiement TWINT pour confirmer votre place.',
+                'info',
+            )
+            return redirect(url_for('wallet.payment_qr', match_id=match_id))
+
         if current_user.wallet_balance < match.price_per_player:
             flash(
                 f'Solde insuffisant pour accepter ce remplacement. '
@@ -381,7 +406,6 @@ def respond_replacement(match_id, request_id):
             )
             return redirect(url_for('matches.match_detail', match_id=match_id))
 
-        requester = rr.requester
         if mp.payment_status == 'paid':
             requester.wallet_balance += match.price_per_player
             db.session.add(Transaction(
