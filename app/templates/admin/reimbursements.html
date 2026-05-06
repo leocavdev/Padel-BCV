@@ -3,49 +3,53 @@
 {% block content %}
 <div class="page-fade" style="display:flex;flex-direction:column;height:100%">
 
-  <div class="hero-dark" style="padding:16px 20px 20px;flex-shrink:0">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+  <div class="hero-dark" style="flex-shrink:0">
+    <div class="topbar topbar-transparent">
       <a href="{{ url_for('admin.dashboard') }}" class="topbar-back topbar-back-light">‹</a>
-      <div style="font-size:18px;font-weight:800;color:#fff">Remboursements</div>
-    </div>
-    <div style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">
-      Ce que l'association doit rembourser
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div style="background:#fff;border-radius:14px;padding:14px 16px">
-        <div style="font-size:11px;color:#6b8070;font-weight:600;margin-bottom:6px">
-          <i class="bi bi-person-fill" style="color:#d97706"></i> À Leonardo
-        </div>
-        <div style="font-size:26px;font-weight:800;color:{% if owed_to_leo > 0 %}#dc2626{% else %}#16a34a{% endif %};line-height:1">
-          {{ "%.2f"|format(owed_to_leo) }}<span style="font-size:13px;font-weight:500;color:#6b8070"> CHF</span>
-        </div>
-      </div>
-      <div style="background:#fff;border-radius:14px;padding:14px 16px">
-        <div style="font-size:11px;color:#6b8070;font-weight:600;margin-bottom:6px">
-          <i class="bi bi-person-fill" style="color:#2563eb"></i> À Withawat
-        </div>
-        <div style="font-size:26px;font-weight:800;color:{% if owed_to_witha > 0 %}#dc2626{% else %}#16a34a{% endif %};line-height:1">
-          {{ "%.2f"|format(owed_to_witha) }}<span style="font-size:13px;font-weight:500;color:#6b8070"> CHF</span>
-        </div>
-      </div>
+      <div class="topbar-title topbar-title-light">Remboursements</div>
     </div>
   </div>
 
   <div class="scroll-content" style="background:#f4f6f4">
     <div style="padding:12px 16px 32px;display:flex;flex-direction:column;gap:10px">
 
+      {# Summary cards #}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+        <div style="background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+          <div style="font-size:11px;color:#6b8070;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:4px">
+            <i class="bi bi-person-fill" style="color:#d97706"></i> Dû à Leonardo
+          </div>
+          <div style="font-size:28px;font-weight:800;line-height:1;color:{% if owed_to_leo > 0 %}#dc2626{% else %}#16a34a{% endif %}">
+            {{ "%.2f"|format(owed_to_leo) }}
+          </div>
+          <div style="font-size:12px;color:#91a492;margin-top:2px">CHF</div>
+        </div>
+
+        <div style="background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+          <div style="font-size:11px;color:#6b8070;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:4px">
+            <i class="bi bi-person-fill" style="color:#2563eb"></i> Dû à Withawat
+          </div>
+          <div style="font-size:28px;font-weight:800;line-height:1;color:{% if owed_to_witha > 0 %}#dc2626{% else %}#16a34a{% endif %}">
+            {{ "%.2f"|format(owed_to_witha) }}
+          </div>
+          <div style="font-size:12px;color:#91a492;margin-top:2px">CHF</div>
+        </div>
+
+      </div>
+
       {# Diagnostic #}
       <div style="background:#fff;border-radius:12px;padding:12px 14px;font-size:12px;color:#6b8070;border:1px solid #eef2ee">
         <i class="bi bi-info-circle"></i>
-        Total matchs en base : <strong>{{ all_matches_count }}</strong> —
-        Matchs avec payeur renseigné : <strong>{{ matches|length }}</strong>
+        Matchs en base : <strong>{{ all_matches_count }}</strong> —
+        Avec payeur renseigné : <strong>{{ matches|length }}</strong>
       </div>
 
       {% if not matches %}
       <div class="empty-state">
         <div class="empty-state-icon"><i class="bi bi-cash-coin" style="font-size:28px;color:#91a492"></i></div>
         {% if all_matches_count == 0 %}
-        <p>Aucun match en base de données.<br>Crée un match et indique qui a payé.</p>
+        <p>Aucun match en base de données.</p>
         {% else %}
         <p>{{ all_matches_count }} match(s) en base, mais aucun n'a le payeur renseigné.<br>
            Modifie un match et sélectionne Leonardo ou Withawat.</p>
@@ -61,7 +65,6 @@
 
       <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06){% if is_settled %};opacity:.65{% endif %}">
 
-        {# Match header #}
         <div style="padding:12px 14px 10px;border-bottom:1px solid #f0f4f0">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
             <div>
@@ -87,7 +90,6 @@
           </div>
         </div>
 
-        {# Amounts #}
         <div style="padding:10px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;border-bottom:1px solid #f0f4f0">
           <div style="text-align:center">
             <div style="font-size:10px;color:#91a492;font-weight:600;text-transform:uppercase;margin-bottom:2px">Total résas</div>
@@ -105,7 +107,6 @@
           </div>
         </div>
 
-        {# Reimbursement form #}
         <div style="padding:10px 14px">
           <div style="font-size:12px;color:#6b8070;margin-bottom:6px">
             Déjà remboursé : <strong>{{ "%.2f"|format(match.reimbursed_amount) }} CHF</strong>
@@ -116,19 +117,13 @@
             <div class="input-box" style="flex:1;margin:0">
               <i class="bi bi-currency-chf"></i>
               <input type="number" name="reimbursed_amount" step="0.50" min="0"
-                     value="{{ "%.2f"|format(match.reimbursed_amount) }}"
+                     value="{{ match.reimbursed_amount }}"
                      style="background:transparent;border:none;outline:none;flex:1;font-size:14px">
             </div>
             <button type="submit" class="btn-p small" style="flex-shrink:0;white-space:nowrap">
               Mettre à jour
             </button>
           </form>
-          {% if not is_settled %}
-          <button type="button" style="margin-top:6px;background:none;border:none;font-size:12px;color:#16a34a;padding:0;cursor:pointer"
-                  onclick="this.previousElementSibling.querySelector('input').value='{{ "%.2f"|format(owed) }}'">
-            <i class="bi bi-check2-circle"></i> Marquer comme entièrement remboursé ({{ "%.2f"|format(owed) }} CHF)
-          </button>
-          {% endif %}
         </div>
 
       </div>

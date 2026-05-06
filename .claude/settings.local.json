@@ -29,7 +29,19 @@
       "WebFetch(domain:docs.saferpay.com)",
       "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/app/padel.db \"ALTER TABLE users ADD COLUMN nom VARCHAR\\(64\\); ALTER TABLE users ADD COLUMN prenom VARCHAR\\(64\\);\")",
       "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV log --oneline)",
-      "Bash(python -c \"from app import create_app; app = create_app\\(\\); print\\('OK'\\)\")"
+      "Bash(python -c \"from app import create_app; app = create_app\\(\\); print\\('OK'\\)\")",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV remote -v)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV status)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV diff --name-only HEAD)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV log --oneline -5)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV show --stat HEAD)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV show --stat HEAD~1)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV log --oneline -10)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV show --stat 2d6a6bb)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV show --stat 150876b)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV add app/admin/routes.py app/templates/admin/reimbursements.html)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"add diagnostic count on reimbursements page\")",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV push)"
     ]
   }
 }
