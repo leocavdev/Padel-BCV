@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from functools import wraps
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
@@ -41,7 +41,7 @@ def dashboard():
     }
     return render_template('admin/dashboard.html', matches=matches,
                            stats=stats, current_status=status_filter,
-                           today=date.today(),
+                           now=datetime.now(),
                            title="Panneau d'administration")
 
 

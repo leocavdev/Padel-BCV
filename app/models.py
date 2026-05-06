@@ -102,6 +102,10 @@ class Match(db.Model):
     transactions = db.relationship('Transaction', back_populates='match')
 
     @property
+    def datetime_start(self):
+        return datetime.combine(self.date, self.start_time)
+
+    @property
     def player_count(self):
         return MatchPlayer.query.filter_by(match_id=self.id).count()
 
