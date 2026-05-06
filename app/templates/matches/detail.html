@@ -399,10 +399,92 @@
       <div style="font-size:14px;font-weight:700;color:#78350f">Paiement en attente</div>
       <div style="font-size:12px;color:#92400e">{{ '%.2f'|format(match.price_per_player) }} CHF à régler</div>
     </div>
-    <a href="{{ url_for('wallet.payment_qr') }}" class="btn-p small" style="background:#2d6a4f;color:#fff;text-decoration:none;padding:6px 12px;font-size:12px">
-      <i class="bi bi-qr-code"></i> QR
-    </a>
+    <button onclick="showPayPendingModal()"
+            style="background:#2d6a4f;color:#fff;border:none;border-radius:10px;
+                   padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0">
+      <i class="bi bi-credit-card"></i> Payer
+    </button>
   </div>
+
+  {# Modale de paiement pour inscription déjà enregistrée #}
+  <div id="pay-pending-modal" onclick="hidePayPendingModal()"
+       style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);
+              align-items:center;justify-content:center;padding:20px">
+    <div onclick="event.stopPropagation()"
+         style="background:#fff;border-radius:20px;padding:22px;max-width:340px;width:100%;
+                box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="width:48px;height:48px;background:#fef3c7;border-radius:50%;
+                    display:flex;align-items:center;justify-content:center;margin:0 auto 10px">
+          <i class="bi bi-credit-card-fill" style="font-size:22px;color:#d97706"></i>
+        </div>
+        <div style="font-size:17px;font-weight:700;color:#151c17">Régler le paiement</div>
+        <div style="font-size:13px;color:#6b8070;margin-top:4px">
+          Vous êtes inscrit — réglez <strong>CHF {{ '%.2f'|format(match.price_per_player) }}</strong> pour confirmer votre place.
+        </div>
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:#91a492;text-transform:uppercase;
+                  letter-spacing:.05em;margin-bottom:8px">Mode de paiement</div>
+
+      {# Option portefeuille #}
+      {% if current_user.wallet_balance >= match.price_per_player %}
+      <form id="pay-wallet-form" method="POST" action="{{ url_for('matches.pay_pending', match_id=match.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit"
+                style="display:flex;align-items:center;gap:10px;width:100%;padding:13px 14px;
+                       background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;
+                       cursor:pointer;margin-bottom:8px;text-align:left">
+          <i class="bi bi-wallet2" style="font-size:18px;color:#16a34a;flex-shrink:0"></i>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#14532d">Portefeuille</div>
+            <div style="font-size:12px;color:#4ade80">CHF {{ '%.2f'|format(match.price_per_player) }} déduits · Solde après : CHF {{ '%.2f'|format(current_user.wallet_balance - match.price_per_player) }}</div>
+          </div>
+          <i class="bi bi-chevron-right" style="color:#86efac;margin-left:auto"></i>
+        </button>
+      </form>
+      {% else %}
+      <div style="display:flex;align-items:center;gap:10px;width:100%;padding:13px 14px;
+                  background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:12px;
+                  margin-bottom:8px;opacity:.6">
+        <i class="bi bi-wallet2" style="font-size:18px;color:#9ca3af;flex-shrink:0"></i>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#6b7280">Portefeuille — solde insuffisant</div>
+          <div style="font-size:12px;color:#9ca3af">Solde : CHF {{ '%.2f'|format(current_user.wallet_balance) }} / CHF {{ '%.2f'|format(match.price_per_player) }} requis</div>
+        </div>
+      </div>
+      {% endif %}
+
+      {# Option TWINT #}
+      <a href="{{ url_for('wallet.payment_qr', match_id=match.id) }}"
+         style="display:flex;align-items:center;gap:10px;width:100%;padding:13px 14px;
+                background:#f8f8f8;border:1.5px solid #d1d5db;border-radius:12px;
+                text-decoration:none;margin-bottom:14px">
+        <img src="{{ url_for('static', filename='img/twint_logo.png') }}" width="26" height="26"
+             style="border-radius:6px;flex-shrink:0" alt="TWINT">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#151c17">TWINT</div>
+          <div style="font-size:12px;color:#6b8070">Scanner le QR et confirmer le paiement</div>
+        </div>
+        <i class="bi bi-chevron-right" style="color:#9ca3af;margin-left:auto"></i>
+      </a>
+
+      <button onclick="hidePayPendingModal()"
+              style="width:100%;padding:12px;background:#f3f4f6;color:#374151;border:none;
+                     border-radius:12px;font-size:15px;font-weight:600;cursor:pointer">
+        Annuler
+      </button>
+    </div>
+  </div>
+  <script>
+    function showPayPendingModal() {
+      document.getElementById('pay-pending-modal').style.display = 'flex';
+    }
+    function hidePayPendingModal() {
+      document.getElementById('pay-pending-modal').style.display = 'none';
+    }
+  </script>
   {% endif %}
 
   {% if registration and registration.payment_status == 'paid' %}

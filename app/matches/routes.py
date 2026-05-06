@@ -229,6 +229,39 @@ def join_match(match_id):
         return redirect(url_for('wallet.payment_qr', match_id=match_id))
 
 
+@bp.route('/<int:match_id>/pay-pending', methods=['POST'])
+@login_required
+def pay_pending(match_id):
+    mp = MatchPlayer.query.filter_by(
+        match_id=match_id,
+        player_id=current_user.id,
+        payment_status='pending',
+    ).first_or_404()
+
+    match = Match.query.get_or_404(match_id)
+
+    if current_user.wallet_balance < match.price_per_player:
+        flash(
+            f'Solde insuffisant ({current_user.wallet_balance:.2f} CHF disponibles, '
+            f'{match.price_per_player:.2f} CHF requis).',
+            'danger',
+        )
+        return redirect(url_for('matches.match_detail', match_id=match_id))
+
+    current_user.wallet_balance -= match.price_per_player
+    mp.payment_status = 'paid'
+    db.session.add(Transaction(
+        user_id=current_user.id,
+        amount=-match.price_per_player,
+        type='match_fee',
+        description=f'Paiement — match #{match.id} ({match.location})',
+        match_id=match.id,
+    ))
+    db.session.commit()
+    flash(f'Paiement confirmé ! {match.price_per_player:.2f} CHF déduits de votre portefeuille.', 'success')
+    return redirect(url_for('matches.match_detail', match_id=match_id))
+
+
 @bp.route('/<int:match_id>/request-replacement', methods=['POST'])
 @login_required
 def request_replacement(match_id):
