@@ -15,18 +15,29 @@
       <form method="POST" novalidate style="display:flex;flex-direction:column;gap:14px">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        <div class="input-wrap">
-          <label style="font-size:13px;font-weight:600;color:#2d3e30">Nom d'utilisateur</label>
-          <div class="input-box">
-            <i class="bi bi-person"></i>
-            <input type="text" name="username" value="{{ user.username if user else '' }}"
-                   placeholder="Ex : Marie123" required
-                   style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="input-wrap">
+            <label style="font-size:13px;font-weight:600;color:#2d3e30">Nom</label>
+            <div class="input-box">
+              <i class="bi bi-person"></i>
+              <input type="text" name="nom" value="{{ user.nom if user and user.nom else '' }}"
+                     placeholder="Ex : Dupont" required
+                     style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+            </div>
+          </div>
+          <div class="input-wrap">
+            <label style="font-size:13px;font-weight:600;color:#2d3e30">Prénom</label>
+            <div class="input-box">
+              <i class="bi bi-person"></i>
+              <input type="text" name="prenom" value="{{ user.prenom if user and user.prenom else '' }}"
+                     placeholder="Ex : Jean" required
+                     style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit">
+            </div>
           </div>
         </div>
 
         <div class="input-wrap">
-          <label style="font-size:13px;font-weight:600;color:#2d3e30">Email</label>
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Email privé (non BCV)</label>
           <div class="input-box">
             <i class="bi bi-envelope"></i>
             <input type="email" name="email" value="{{ user.email if user else '' }}"

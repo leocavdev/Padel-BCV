@@ -287,12 +287,28 @@ def add_balance(player_id):
 
 # --- Users ---
 
+def _build_unique_username(prenom, nom, exclude_id=None):
+    base = f"{prenom} {nom}"
+    username = base
+    suffix = 1
+    while True:
+        q = User.query.filter_by(username=username)
+        if exclude_id:
+            q = q.filter(User.id != exclude_id)
+        if not q.first():
+            break
+        username = f"{base} {suffix}"
+        suffix += 1
+    return username
+
+
 @bp.route('/db/users/add', methods=['GET', 'POST'])
 @admin_required
 def db_add_user():
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        email = request.form.get('email', '').strip()
+        nom    = request.form.get('nom', '').strip()
+        prenom = request.form.get('prenom', '').strip()
+        email  = request.form.get('email', '').strip()
         password = request.form.get('password', '').strip()
         role = request.form.get('role', 'player')
         is_approved = request.form.get('is_approved') == '1'
@@ -305,18 +321,16 @@ def db_add_user():
         except ValueError:
             wallet_balance = 0.0
 
-        if not username or not email or not password:
-            flash("Nom d'utilisateur, email et mot de passe sont requis.", 'danger')
-            return redirect(url_for('admin.db_add_user'))
-        if User.query.filter_by(username=username).first():
-            flash("Ce nom d'utilisateur existe déjà.", 'danger')
+        if not nom or not prenom or not email or not password:
+            flash("Nom, prénom, email et mot de passe sont requis.", 'danger')
             return redirect(url_for('admin.db_add_user'))
         if User.query.filter_by(email=email).first():
             flash('Cet email existe déjà.', 'danger')
             return redirect(url_for('admin.db_add_user'))
 
+        username = _build_unique_username(prenom, nom)
         user = User(
-            username=username, email=email, role=role,
+            username=username, nom=nom, prenom=prenom, email=email, role=role,
             is_approved=is_approved,
             skill_level=round(max(0.0, min(7.0, skill_level)), 2),
             wallet_balance=round(wallet_balance, 2),
@@ -334,8 +348,9 @@ def db_add_user():
 def db_edit_user(user_id):
     user = User.query.get_or_404(user_id)
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        email = request.form.get('email', '').strip()
+        nom    = request.form.get('nom', '').strip()
+        prenom = request.form.get('prenom', '').strip()
+        email  = request.form.get('email', '').strip()
         password = request.form.get('password', '').strip()
         role = request.form.get('role', user.role)
         is_approved = request.form.get('is_approved') == '1'
@@ -348,20 +363,18 @@ def db_edit_user(user_id):
         except ValueError:
             wallet_balance = user.wallet_balance
 
-        if not username or not email:
-            flash("Nom d'utilisateur et email sont requis.", 'danger')
+        if not nom or not prenom or not email:
+            flash("Nom, prénom et email sont requis.", 'danger')
             return redirect(url_for('admin.db_edit_user', user_id=user_id))
 
-        existing = User.query.filter_by(username=username).first()
-        if existing and existing.id != user_id:
-            flash("Ce nom d'utilisateur existe déjà.", 'danger')
-            return redirect(url_for('admin.db_edit_user', user_id=user_id))
         existing = User.query.filter_by(email=email).first()
         if existing and existing.id != user_id:
             flash('Cet email existe déjà.', 'danger')
             return redirect(url_for('admin.db_edit_user', user_id=user_id))
 
-        user.username = username
+        user.nom = nom
+        user.prenom = prenom
+        user.username = _build_unique_username(prenom, nom, exclude_id=user_id)
         user.email = email
         user.role = role
         user.is_approved = is_approved
