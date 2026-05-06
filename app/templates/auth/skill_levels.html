@@ -14,7 +14,7 @@
         <div style="font-size:16px;font-weight:700;color:#151c17;margin-bottom:12px">Comment sont attribués les niveaux ?</div>
         <p style="font-size:14px;color:#4b5563;line-height:1.7;margin-bottom:12px">
           Votre niveau est calculé sur une échelle de 0 à 7, puis classé dans une catégorie de jeu.
-          Chaque victoire augmente légèrement votre niveau, et chaque défaite le réduit légèrement.
+          Chaque victoire augmente votre niveau de <strong>0.05 point</strong>, et chaque défaite le réduit de <strong>0.05 point</strong>.
         </p>
         <ul style="display:grid;gap:10px;padding-left:16px;color:#4b5563;font-size:14px;line-height:1.7">
           {% for key, range_data in skill_levels.items() %}
@@ -38,7 +38,7 @@
             <strong>1. Jouez régulièrement</strong> — plus vous participez à des matchs, plus votre niveau est évalué précisément.
           </div>
           <div>
-            <strong>2. Gagnez des matchs</strong> — chaque victoire vous fait monter progressivement.
+            <strong>2. Gagnez des matchs</strong> — chaque victoire vous rapporte <strong>+0.05 point</strong>, chaque défaite vous en retire <strong>0.05 point</strong>.
           </div>
           <div>
             <strong>3. Respectez votre catégorie</strong> — jouez des matchs adaptés à votre niveau pour progresser sereinement.

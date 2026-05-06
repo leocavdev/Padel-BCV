@@ -25,7 +25,7 @@
           <div style="font-size:13px;color:#64748b">Le {{ next_match.date.strftime('%d/%m/%Y') }} à {{ next_match.start_time.strftime('%H:%M') }}</div>
         </div>
         <div style="text-align:right;flex-shrink:0">
-          <div style="font-size:12px;color:#64748b">Compte à rebours</div>
+          <div style="font-size:12px;color:#64748b">Début du match dans</div>
           <div id="next-match-countdown" data-match-datetime="{{ next_match.date.strftime('%Y-%m-%d') }}T{{ next_match.start_time.strftime('%H:%M:%S') }}" style="font-size:16px;font-weight:700;color:#0f172a;white-space:nowrap">--h --m --s</div>
         </div>
       </div>
