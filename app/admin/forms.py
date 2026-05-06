@@ -19,7 +19,7 @@ class CreateMatchForm(FlaskForm):
                                    validators=[DataRequired()])
     price_per_player = FloatField('Montant de la réservation (CHF)',
                                   validators=[DataRequired(), NumberRange(min=0, max=5000)],
-                                  default=80.0)
+                                  default=78.0)
     submit = SubmitField('Créer le match')
 
 
