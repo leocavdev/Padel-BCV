@@ -7,7 +7,7 @@ from app.admin import bp
 from app.admin.forms import CreateMatchForm, EditMatchForm
 from app.models import (Match, MatchPlayer, Transaction, User,
                          ReplacementRequest, MatchResultProposal,
-                         SKILL_ORDER, SKILL_LEVELS)
+                         SKILL_ORDER, SKILL_LEVELS, _now_ch)
 
 
 def admin_required(f):
@@ -41,7 +41,7 @@ def dashboard():
     }
     return render_template('admin/dashboard.html', matches=matches,
                            stats=stats, current_status=status_filter,
-                           now=datetime.now(),
+                           now=_now_ch(),
                            title="Panneau d'administration")
 
 
