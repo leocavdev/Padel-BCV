@@ -58,7 +58,7 @@ def create_match():
             start_time=form.start_time.data,
             end_time=form.end_time.data,
             required_skill=form.required_skill.data,
-            price_per_player=form.price_per_player.data,
+            price_per_player=round(form.price_per_player.data / 8, 2),
             created_by=current_user.id,
         )
         db.session.add(match)
@@ -80,13 +80,15 @@ def manage_match(match_id):
 def edit_match(match_id):
     match = Match.query.get_or_404(match_id)
     form = EditMatchForm(obj=match)
+    if request.method == 'GET':
+        form.price_per_player.data = round(match.price_per_player * 8, 2)
     if form.validate_on_submit():
         match.location = form.location.data
         match.date = form.date.data
         match.start_time = form.start_time.data
         match.end_time = form.end_time.data
         match.required_skill = form.required_skill.data
-        match.price_per_player = form.price_per_player.data
+        match.price_per_player = round(form.price_per_player.data / 8, 2)
         db.session.commit()
         flash('Match mis à jour avec succès.', 'success')
         return redirect(url_for('admin.manage_match', match_id=match_id))

@@ -73,8 +73,9 @@
           {{ form.price_per_player.label }}
           <div class="input-box">
             <i class="bi bi-currency-chf"></i>
-            {{ form.price_per_player(placeholder="10.00", step="0.50") }}
+            {{ form.price_per_player(placeholder="80.00", step="0.50", id="reservation_amount") }}
           </div>
+          <div id="price-per-player-hint" style="font-size:12px;color:#4a7c59;margin-top:4px;padding-left:2px"></div>
           {% for e in form.price_per_player.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
         </div>
 
@@ -92,6 +93,18 @@
 </div>
 
 <script>
+function updatePriceHint() {
+  const val = parseFloat(document.getElementById('reservation_amount').value);
+  const hint = document.getElementById('price-per-player-hint');
+  if (!isNaN(val) && val > 0) {
+    hint.textContent = '→ Prix par joueur : ' + (val / 8).toFixed(2) + ' CHF';
+  } else {
+    hint.textContent = '';
+  }
+}
+document.getElementById('reservation_amount').addEventListener('input', updatePriceHint);
+updatePriceHint();
+
 function selectSkill(val, el) {
   document.querySelectorAll('#skill-pills .skill-pill').forEach(b => b.classList.remove('sel'));
   el.classList.add('sel');

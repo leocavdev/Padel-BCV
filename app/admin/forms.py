@@ -17,9 +17,9 @@ class CreateMatchForm(FlaskForm):
     end_time         = TimeField('Heure de fin', validators=[DataRequired()])
     required_skill   = SelectField('Niveau minimum requis', choices=SKILL_CHOICES,
                                    validators=[DataRequired()])
-    price_per_player = FloatField('Prix par joueur (CHF)',
-                                  validators=[DataRequired(), NumberRange(min=0, max=500)],
-                                  default=10.0)
+    price_per_player = FloatField('Montant de la réservation (CHF)',
+                                  validators=[DataRequired(), NumberRange(min=0, max=5000)],
+                                  default=80.0)
     submit = SubmitField('Créer le match')
 
 
@@ -30,6 +30,6 @@ class EditMatchForm(FlaskForm):
     end_time         = TimeField('Heure de fin', validators=[DataRequired()])
     required_skill   = SelectField('Niveau minimum requis', choices=SKILL_CHOICES,
                                    validators=[DataRequired()])
-    price_per_player = FloatField('Prix par joueur (CHF)',
-                                  validators=[DataRequired(), NumberRange(min=0, max=500)])
+    price_per_player = FloatField('Montant de la réservation (CHF)',
+                                  validators=[DataRequired(), NumberRange(min=0, max=5000)])
     submit = SubmitField('Enregistrer les modifications')
