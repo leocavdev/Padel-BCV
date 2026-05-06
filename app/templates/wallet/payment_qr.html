@@ -28,7 +28,7 @@
       </div>
 
       {# Payer avec TWINT #}
-      <button onclick="payWithTwint()"
+      <button onclick="showTwintPicker()"
          style="display:flex;align-items:center;justify-content:center;gap:10px;
                 background:#000;color:#fff;border-radius:14px;padding:14px 24px;
                 width:100%;font-size:15px;font-weight:700;border:none;cursor:pointer;
@@ -47,37 +47,123 @@
   </div>
 </div>
 
+{# TWINT App Picker — bottom sheet style iOS #}
+<div id="twint-modal" onclick="hideTwintPicker()"
+     style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);
+            align-items:flex-end;justify-content:center">
+  <div onclick="event.stopPropagation()"
+       style="background:#1c1c1e;border-radius:16px 16px 0 0;width:100%;max-width:500px;
+              padding-bottom:env(safe-area-inset-bottom,16px)">
+
+    <div style="text-align:center;padding:20px 16px 16px;border-bottom:1px solid #3a3a3c">
+      <div style="font-size:17px;font-weight:700;color:#fff;margin-bottom:4px">TWINT</div>
+      <div style="font-size:14px;color:#8e8e93">Veuillez sélectionner l'app TWINT souhaitée</div>
+    </div>
+
+    <div style="padding:8px 16px">
+      <button onclick="openTwintApp('raiffeisen')" class="twint-bank-btn">Raiffeisen TWINT</button>
+      <button onclick="openTwintApp('ubs')"        class="twint-bank-btn">UBS TWINT</button>
+      <button onclick="openTwintApp('postfinance')"class="twint-bank-btn">PostFinance TWINT</button>
+      <button onclick="openTwintApp('zkb')"        class="twint-bank-btn">ZKB TWINT</button>
+      <button onclick="openTwintApp('bcv')"        class="twint-bank-btn">BCV TWINT</button>
+      <button onclick="openTwintApp('generic')"    class="twint-bank-btn">Autre app TWINT</button>
+    </div>
+
+    <div style="padding:0 16px 8px">
+      <button onclick="hideTwintPicker()" class="twint-bank-btn" style="color:#ff453a">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.twint-bank-btn {
+  display:block; width:100%; padding:16px; margin:4px 0;
+  background:#2c2c2e; color:#fff; border:none; border-radius:12px;
+  font-size:17px; font-weight:600; cursor:pointer; text-align:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.twint-bank-btn:active { background:#3a3a3c; }
+</style>
+
 <script>
 const TWINT_TOKEN = "{{ twint_token }}";
+const ENC = encodeURIComponent(TWINT_TOKEN);
 
-function payWithTwint() {
+const BANKS = {
+  raiffeisen: {
+    pkg: 'ch.raiffeisen.android',
+    appstore: 'https://apps.apple.com/ch/search?term=raiffeisen+twint',
+    playstore: 'https://play.google.com/store/search?q=raiffeisen+twint'
+  },
+  ubs: {
+    pkg: 'ch.ubs.twint',
+    appstore: 'https://apps.apple.com/ch/search?term=ubs+twint',
+    playstore: 'https://play.google.com/store/search?q=ubs+twint'
+  },
+  postfinance: {
+    pkg: 'ch.postfinance.twint',
+    appstore: 'https://apps.apple.com/ch/search?term=postfinance+twint',
+    playstore: 'https://play.google.com/store/search?q=postfinance+twint'
+  },
+  zkb: {
+    pkg: 'ch.zkb.twint',
+    appstore: 'https://apps.apple.com/ch/search?term=zkb+twint',
+    playstore: 'https://play.google.com/store/search?q=zkb+twint'
+  },
+  bcv: {
+    pkg: 'ch.bcv.twint',
+    appstore: 'https://apps.apple.com/ch/app/bcv-twint/id1209496081',
+    playstore: 'https://play.google.com/store/apps/details?id=ch.bcv.twint'
+  },
+  generic: {
+    pkg: null,
+    appstore: 'https://apps.apple.com/ch/search?term=twint',
+    playstore: 'https://play.google.com/store/search?q=twint'
+  }
+};
+
+function showTwintPicker() {
+  const modal = document.getElementById('twint-modal');
+  modal.style.display = 'flex';
+}
+
+function hideTwintPicker() {
+  document.getElementById('twint-modal').style.display = 'none';
+}
+
+function openTwintApp(bankKey) {
+  hideTwintPicker();
+  const bank = BANKS[bankKey];
   const ua = navigator.userAgent;
   const isAndroid = /android/i.test(ua);
-  const isIOS = /iphone|ipad|ipod/i.test(ua);
+  const isIOS    = /iphone|ipad|ipod/i.test(ua);
 
   if (isAndroid) {
-    // Intent Android ciblant ch.bcv.twint avec le token du QR statique
-    const code = encodeURIComponent(TWINT_TOKEN);
-    const fallback = encodeURIComponent('https://play.google.com/store/apps/details?id=ch.bcv.twint');
-    const intent = `intent://payment#Intent;` +
-      `action=ch.twint.action.TWINT_PAYMENT;` +
-      `scheme=twint;` +
-      `package=ch.bcv.twint;` +
-      `S.code=${code};` +
-      `S.startingOrigin=EXTERNAL_WEB_BROWSER;` +
-      `S.browser_fallback_url=${fallback};end`;
+    const fb = encodeURIComponent(bank.playstore);
+    const pkg = bank.pkg ? `package=${bank.pkg};` : '';
+    const intent = `intent://payment#Intent;action=ch.twint.action.TWINT_PAYMENT;scheme=twint;${pkg}S.code=${ENC};S.startingOrigin=EXTERNAL_WEB_BROWSER;S.browser_fallback_url=${fb};end`;
     window.location.href = intent;
 
   } else if (isIOS) {
-    // Deep link iOS — toutes les apps TWINT bancaires répondent à twint://
-    const fallbackTimer = setTimeout(() => {
-      window.location.href = 'https://apps.apple.com/ch/app/bcv-twint/id1209496081';
-    }, 1500);
-    window.addEventListener('blur', () => clearTimeout(fallbackTimer), { once: true });
-    window.location.href = 'twint://qr?data=' + encodeURIComponent(TWINT_TOKEN);
+    // Toutes les apps TWINT bancaires répondent au schème twint:// (standard TWINT SDK)
+    const a = document.createElement('a');
+    a.href = 'twint://qr?data=' + ENC;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Si l'app ne s'est pas ouverte (page toujours visible après délai), proposer l'App Store
+    setTimeout(() => {
+      if (document.visibilityState !== 'hidden') {
+        if (confirm("L'app TWINT ne semble pas installée. Ouvrir l'App Store ?")) {
+          window.location.href = bank.appstore;
+        }
+      }
+    }, 2000);
 
   } else {
-    alert('Ouvrez l\'app BCV TWINT sur votre téléphone et scannez le QR code.');
+    alert('Ouvrez votre app TWINT sur votre téléphone et scannez le QR code ci-dessus.');
   }
 }
 </script>
