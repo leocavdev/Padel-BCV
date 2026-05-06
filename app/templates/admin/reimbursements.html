@@ -38,22 +38,10 @@
 
       </div>
 
-      {# Diagnostic #}
-      <div style="background:#fff;border-radius:12px;padding:12px 14px;font-size:12px;color:#6b8070;border:1px solid #eef2ee">
-        <i class="bi bi-info-circle"></i>
-        Matchs en base : <strong>{{ all_matches_count }}</strong> —
-        Avec payeur renseigné : <strong>{{ matches|length }}</strong>
-      </div>
-
       {% if not matches %}
       <div class="empty-state">
         <div class="empty-state-icon"><i class="bi bi-cash-coin" style="font-size:28px;color:#91a492"></i></div>
-        {% if all_matches_count == 0 %}
-        <p>Aucun match en base de données.</p>
-        {% else %}
-        <p>{{ all_matches_count }} match(s) en base, mais aucun n'a le payeur renseigné.<br>
-           Modifie un match et sélectionne Leonardo ou Withawat.</p>
-        {% endif %}
+        <p>Aucun match avec un payeur renseigné.<br>Crée ou modifie un match et sélectionne Leonardo ou Withawat.</p>
       </div>
       {% else %}
 

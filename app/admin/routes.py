@@ -191,7 +191,6 @@ def record_result(match_id):
 @bp.route('/reimbursements')
 @admin_required
 def reimbursements():
-    all_matches_count = Match.query.count()
     matches = (Match.query
                .filter(Match.paid_by.isnot(None))
                .order_by(Match.date.desc(), Match.start_time.desc())
@@ -210,7 +209,6 @@ def reimbursements():
 
     return render_template('admin/reimbursements.html',
                            matches=matches,
-                           all_matches_count=all_matches_count,
                            owed_to_leo=round(owed_to_leo, 2),
                            owed_to_witha=round(owed_to_witha, 2),
                            title='Remboursements')
