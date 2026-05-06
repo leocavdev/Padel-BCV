@@ -58,13 +58,18 @@
       <a href="{{ url_for('admin.reimbursements') }}"
          class="nav-tab nav-tab-admin {% if request.endpoint == 'admin.reimbursements' %}active{% endif %}">
         <i class="bi bi-cash-coin"></i>
-        <span>Rembourst.</span>
+        <span>Cash</span>
+      </a>
+      <a href="{{ url_for('admin.database') }}"
+         class="nav-tab nav-tab-admin {% if request.endpoint == 'admin.database' %}active{% endif %}">
+        <i class="bi bi-database{% if request.endpoint == 'admin.database' %}-fill{% endif %}"></i>
+        <span>DB</span>
       </a>
       <a href="{{ url_for('auth.logout') }}"
          onclick="return confirm('Voulez-vous vraiment vous déconnecter ?')"
          class="nav-tab nav-tab-admin">
         <i class="bi bi-box-arrow-right"></i>
-        <span>Déconnexion</span>
+        <span>Déco.</span>
       </a>
     </nav>
     {% else %}
