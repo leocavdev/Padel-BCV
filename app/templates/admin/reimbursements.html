@@ -10,16 +10,19 @@
     </div>
 
     {# Summary cards #}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+    <div style="margin-top:8px;margin-bottom:4px;font-size:11px;color:rgba(255,255,255,.5);font-weight:600;text-transform:uppercase;letter-spacing:.5px">
+      Ce que l'association doit rembourser
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px">
       <div class="stat-glass">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <div style="width:28px;height:28px;border-radius:8px;background:#fef3c7;display:flex;align-items:center;justify-content:center">
             <i class="bi bi-person-fill" style="font-size:13px;color:#d97706"></i>
           </div>
-          <span style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600">Leonardo doit à Withawat</span>
+          <span style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600">À rembourser à Leonardo</span>
         </div>
         <div style="font-size:26px;font-weight:800;color:#fff;line-height:1">
-          {{ "%.2f"|format(leo_owes) }} <span style="font-size:14px;font-weight:500">CHF</span>
+          {{ "%.2f"|format(owed_to_leo) }} <span style="font-size:14px;font-weight:500">CHF</span>
         </div>
       </div>
       <div class="stat-glass">
@@ -27,10 +30,10 @@
           <div style="width:28px;height:28px;border-radius:8px;background:#dbeafe;display:flex;align-items:center;justify-content:center">
             <i class="bi bi-person-fill" style="font-size:13px;color:#2563eb"></i>
           </div>
-          <span style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600">Withawat doit à Leonardo</span>
+          <span style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600">À rembourser à Withawat</span>
         </div>
         <div style="font-size:26px;font-weight:800;color:#fff;line-height:1">
-          {{ "%.2f"|format(witha_owes) }} <span style="font-size:14px;font-weight:500">CHF</span>
+          {{ "%.2f"|format(owed_to_witha) }} <span style="font-size:14px;font-weight:500">CHF</span>
         </div>
       </div>
     </div>
@@ -87,7 +90,7 @@
             <div style="font-size:15px;font-weight:700;color:#151c17">{{ "%.2f"|format(total) }}<span style="font-size:10px;font-weight:400"> CHF</span></div>
           </div>
           <div style="text-align:center">
-            <div style="font-size:10px;color:#91a492;font-weight:600;text-transform:uppercase;margin-bottom:2px">Doit rembourser</div>
+            <div style="font-size:10px;color:#91a492;font-weight:600;text-transform:uppercase;margin-bottom:2px">Assoc. rembourse</div>
             <div style="font-size:15px;font-weight:700;color:#2563eb">{{ "%.2f"|format(owed) }}<span style="font-size:10px;font-weight:400"> CHF</span></div>
           </div>
           <div style="text-align:center">

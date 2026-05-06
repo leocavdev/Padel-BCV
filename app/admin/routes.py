@@ -196,21 +196,21 @@ def reimbursements():
                .order_by(Match.date.desc(), Match.start_time.desc())
                .all())
 
-    leo_owes = 0.0
-    witha_owes = 0.0
+    owed_to_leo = 0.0
+    owed_to_witha = 0.0
     for m in matches:
         total = round(m.price_per_player * 8, 2)
         owed = round(total / 2, 2)
         remaining = max(0.0, round(owed - m.reimbursed_amount, 2))
         if m.paid_by == 'Leonardo':
-            witha_owes += remaining
+            owed_to_leo += remaining
         elif m.paid_by == 'Withawat':
-            leo_owes += remaining
+            owed_to_witha += remaining
 
     return render_template('admin/reimbursements.html',
                            matches=matches,
-                           leo_owes=round(leo_owes, 2),
-                           witha_owes=round(witha_owes, 2),
+                           owed_to_leo=round(owed_to_leo, 2),
+                           owed_to_witha=round(owed_to_witha, 2),
                            title='Remboursements')
 
 

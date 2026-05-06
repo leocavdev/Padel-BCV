@@ -92,7 +92,7 @@
           </div>
           <input type="hidden" name="{{ form.paid_by.name }}" id="payer-hidden"
                  value="{{ form.paid_by.data or '' }}">
-          <div style="font-size:11px;color:#91a492;margin-top:4px">Optionnel — indique qui a réglé la réservation</div>
+          {% for e in form.paid_by.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
         </div>
 
         {{ form.submit(class="btn-p full", value="Créer le match") }}

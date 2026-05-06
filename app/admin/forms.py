@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, TimeField, SelectField, FloatField, SubmitField
-from wtforms.validators import DataRequired, NumberRange, Optional
+from wtforms.validators import DataRequired, NumberRange
 
 SKILL_CHOICES = [
     ('beginner',     'Débutant'),
@@ -27,7 +27,7 @@ class CreateMatchForm(FlaskForm):
                                   validators=[DataRequired(), NumberRange(min=0, max=5000)],
                                   default=78.0)
     paid_by          = SelectField('Payé par', choices=PAYER_CHOICES,
-                                   validators=[Optional()], default='')
+                                   validators=[DataRequired()], default='')
     submit = SubmitField('Créer le match')
 
 
@@ -41,5 +41,5 @@ class EditMatchForm(FlaskForm):
     price_per_player = FloatField('Montant de la réservation (CHF)',
                                   validators=[DataRequired(), NumberRange(min=0, max=5000)])
     paid_by          = SelectField('Payé par', choices=PAYER_CHOICES,
-                                   validators=[Optional()], default='')
+                                   validators=[DataRequired()], default='')
     submit = SubmitField('Enregistrer les modifications')
