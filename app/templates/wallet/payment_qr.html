@@ -37,11 +37,34 @@
         Payer avec TWINT
       </button>
 
-      {# Warning #}
+      {% if pending_mp and match %}
+      {# Confirmation de paiement TWINT — inscription en attente #}
+      <div style="background:#fff;border-radius:16px;padding:16px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,0.08)">
+        <div style="font-size:13px;font-weight:700;color:#151c17;margin-bottom:4px">
+          <i class="bi bi-calendar2-check" style="color:#2d6a4f;margin-right:6px"></i>
+          Match du {{ match.date.strftime('%d/%m/%Y') }} — {{ match.location }}
+        </div>
+        <div style="font-size:12px;color:#6b8070;margin-bottom:14px">
+          Montant : <strong>CHF {{ '%.2f'|format(match.price_per_player) }}</strong> · Une fois le paiement effectué, confirmez-le ci-dessous pour valider votre inscription.
+        </div>
+        <form method="POST" action="{{ url_for('wallet.confirm_twint', match_id=match.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit"
+                  style="display:flex;align-items:center;justify-content:center;gap:8px;
+                         width:100%;padding:13px;background:#2d6a4f;color:#fff;border:none;
+                         border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;
+                         box-shadow:0 4px 14px rgba(45,106,79,0.3)">
+            <i class="bi bi-check-circle-fill"></i> J'ai effectué le paiement
+          </button>
+        </form>
+      </div>
+      {% else %}
+      {# Warning générique (pas de match en attente) #}
       <div style="background:#fef3c7;border-radius:12px;padding:12px 14px;width:100%;display:flex;gap:10px;align-items:flex-start">
         <i class="bi bi-exclamation-triangle-fill" style="color:#d97706;font-size:16px;flex-shrink:0;margin-top:1px"></i>
-        <span style="font-size:13px;color:#78350f">Le paiement doit être confirmé par un administrateur. Conservez votre justificatif de paiement.</span>
+        <span style="font-size:13px;color:#78350f">Conservez votre justificatif de paiement TWINT.</span>
       </div>
+      {% endif %}
 
     </div>
   </div>

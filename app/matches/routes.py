@@ -226,7 +226,7 @@ def join_match(match_id):
         return redirect(url_for('matches.match_detail', match_id=match_id))
     else:
         flash('Inscription enregistrée. Scannez le QR code pour finaliser votre paiement TWINT.', 'info')
-        return redirect(url_for('wallet.payment_qr'))
+        return redirect(url_for('wallet.payment_qr', match_id=match_id))
 
 
 @bp.route('/<int:match_id>/request-replacement', methods=['POST'])
