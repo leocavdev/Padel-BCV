@@ -27,7 +27,9 @@
       "Bash(brew install *)",
       "WebFetch(domain:docs.datatrans.ch)",
       "WebFetch(domain:docs.saferpay.com)",
-      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/app/padel.db \"ALTER TABLE users ADD COLUMN nom VARCHAR\\(64\\); ALTER TABLE users ADD COLUMN prenom VARCHAR\\(64\\);\")"
+      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/app/padel.db \"ALTER TABLE users ADD COLUMN nom VARCHAR\\(64\\); ALTER TABLE users ADD COLUMN prenom VARCHAR\\(64\\);\")",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV log --oneline)",
+      "Bash(python -c \"from app import create_app; app = create_app\\(\\); print\\('OK'\\)\")"
     ]
   }
 }

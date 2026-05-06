@@ -59,6 +59,7 @@ def create_match():
             end_time=form.end_time.data,
             required_skill=form.required_skill.data,
             price_per_player=round(form.price_per_player.data / 8, 2),
+            paid_by=form.paid_by.data or None,
             created_by=current_user.id,
         )
         db.session.add(match)
@@ -82,6 +83,7 @@ def edit_match(match_id):
     form = EditMatchForm(obj=match)
     if request.method == 'GET':
         form.price_per_player.data = round(match.price_per_player * 8, 2)
+        form.paid_by.data = match.paid_by or ''
     if form.validate_on_submit():
         match.location = form.location.data
         match.date = form.date.data
@@ -89,6 +91,7 @@ def edit_match(match_id):
         match.end_time = form.end_time.data
         match.required_skill = form.required_skill.data
         match.price_per_player = round(form.price_per_player.data / 8, 2)
+        match.paid_by = form.paid_by.data or None
         db.session.commit()
         flash('Match mis à jour avec succès.', 'success')
         return redirect(url_for('admin.manage_match', match_id=match_id))
@@ -181,6 +184,49 @@ def record_result(match_id):
     db.session.commit()
     flash('Résultat enregistré. Niveaux mis à jour automatiquement.', 'success')
     return redirect(url_for('admin.manage_match', match_id=match_id))
+
+
+# ── Reimbursements ────────────────────────────────────────────────────────────
+
+@bp.route('/reimbursements')
+@admin_required
+def reimbursements():
+    matches = (Match.query
+               .filter(Match.paid_by.isnot(None))
+               .order_by(Match.date.desc(), Match.start_time.desc())
+               .all())
+
+    leo_owes = 0.0
+    witha_owes = 0.0
+    for m in matches:
+        total = round(m.price_per_player * 8, 2)
+        owed = round(total / 2, 2)
+        remaining = max(0.0, round(owed - m.reimbursed_amount, 2))
+        if m.paid_by == 'Leonardo':
+            witha_owes += remaining
+        elif m.paid_by == 'Withawat':
+            leo_owes += remaining
+
+    return render_template('admin/reimbursements.html',
+                           matches=matches,
+                           leo_owes=round(leo_owes, 2),
+                           witha_owes=round(witha_owes, 2),
+                           title='Remboursements')
+
+
+@bp.route('/matches/<int:match_id>/update-reimbursement', methods=['POST'])
+@admin_required
+def update_reimbursement(match_id):
+    match = Match.query.get_or_404(match_id)
+    try:
+        amount = float(request.form.get('reimbursed_amount', match.reimbursed_amount))
+    except (TypeError, ValueError):
+        flash('Montant invalide.', 'danger')
+        return redirect(url_for('admin.reimbursements'))
+    match.reimbursed_amount = max(0.0, round(amount, 2))
+    db.session.commit()
+    flash('Remboursement mis à jour.', 'success')
+    return redirect(url_for('admin.reimbursements'))
 
 
 # ── Player management ─────────────────────────────────────────────────────────

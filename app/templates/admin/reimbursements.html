@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Remboursements — Padel BCV{% endblock %}
+{% block content %}
+<div class="page-fade" style="display:flex;flex-direction:column;height:100%">
+
+  <div class="hero-dark" style="padding:16px 20px 20px;flex-shrink:0">
+    <div class="topbar topbar-transparent">
+      <a href="{{ url_for('admin.dashboard') }}" class="topbar-back topbar-back-light">‹</a>
+      <div class="topbar-title topbar-title-light">Remboursements</div>
+    </div>
+
+    {# Summary cards #}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+      <div class="stat-glass">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:28px;height:28px;border-radius:8px;background:#fef3c7;display:flex;align-items:center;justify-content:center">
+            <i class="bi bi-person-fill" style="font-size:13px;color:#d97706"></i>
+          </div>
+          <span style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600">Leonardo doit à Withawat</span>
+        </div>
+        <div style="font-size:26px;font-weight:800;color:#fff;line-height:1">
+          {{ "%.2f"|format(leo_owes) }} <span style="font-size:14px;font-weight:500">CHF</span>
+        </div>
+      </div>
+      <div class="stat-glass">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:28px;height:28px;border-radius:8px;background:#dbeafe;display:flex;align-items:center;justify-content:center">
+            <i class="bi bi-person-fill" style="font-size:13px;color:#2563eb"></i>
+          </div>
+          <span style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600">Withawat doit à Leonardo</span>
+        </div>
+        <div style="font-size:26px;font-weight:800;color:#fff;line-height:1">
+          {{ "%.2f"|format(witha_owes) }} <span style="font-size:14px;font-weight:500">CHF</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-content" style="background:#f4f6f4">
+    <div style="padding:12px 16px 32px;display:flex;flex-direction:column;gap:10px">
+
+      {% if not matches %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-cash-coin" style="font-size:28px;color:#91a492"></i></div>
+        <p>Aucun match avec un payeur renseigné.<br>Modifiez un match pour indiquer qui a payé.</p>
+      </div>
+      {% else %}
+
+      {% for match in matches %}
+      {% set total = (match.price_per_player * 8) | round(2) %}
+      {% set owed = (total / 2) | round(2) %}
+      {% set remaining = [0.0, (owed - match.reimbursed_amount) | round(2)] | max %}
+      {% set is_settled = remaining <= 0 %}
+
+      <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06){% if is_settled %};opacity:.65{% endif %}">
+
+        {# Match header #}
+        <div style="padding:12px 14px 10px;border-bottom:1px solid #f0f4f0">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:#151c17">{{ match.location }}</div>
+              <div style="font-size:12px;color:#6b8070;margin-top:2px">
+                {{ match.date.strftime('%d/%m/%Y') }} · {{ match.start_time.strftime('%H:%M') }}
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+              {% if is_settled %}
+              <span style="font-size:11px;font-weight:700;background:#dcfce7;color:#16a34a;padding:3px 8px;border-radius:20px">
+                <i class="bi bi-check-circle-fill"></i> Soldé
+              </span>
+              {% else %}
+              <span style="font-size:11px;font-weight:700;background:#fef3c7;color:#d97706;padding:3px 8px;border-radius:20px">
+                <i class="bi bi-clock-fill"></i> En attente
+              </span>
+              {% endif %}
+              <span style="font-size:11px;color:#91a492">
+                Payé par <strong style="color:#2d3e30">{{ match.paid_by }}</strong>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {# Amounts #}
+        <div style="padding:10px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;border-bottom:1px solid #f0f4f0">
+          <div style="text-align:center">
+            <div style="font-size:10px;color:#91a492;font-weight:600;text-transform:uppercase;margin-bottom:2px">Total résas</div>
+            <div style="font-size:15px;font-weight:700;color:#151c17">{{ "%.2f"|format(total) }}<span style="font-size:10px;font-weight:400"> CHF</span></div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:10px;color:#91a492;font-weight:600;text-transform:uppercase;margin-bottom:2px">Doit rembourser</div>
+            <div style="font-size:15px;font-weight:700;color:#2563eb">{{ "%.2f"|format(owed) }}<span style="font-size:10px;font-weight:400"> CHF</span></div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:10px;color:#91a492;font-weight:600;text-transform:uppercase;margin-bottom:2px">Restant</div>
+            <div style="font-size:15px;font-weight:700;color:{% if is_settled %}#16a34a{% else %}#dc2626{% endif %}">
+              {{ "%.2f"|format(remaining) }}<span style="font-size:10px;font-weight:400"> CHF</span>
+            </div>
+          </div>
+        </div>
+
+        {# Reimbursement form #}
+        <div style="padding:10px 14px">
+          <div style="font-size:12px;color:#6b8070;margin-bottom:6px">
+            Déjà remboursé : <strong>{{ "%.2f"|format(match.reimbursed_amount) }} CHF</strong>
+          </div>
+          <form method="POST" action="{{ url_for('admin.update_reimbursement', match_id=match.id) }}"
+                style="display:flex;gap:8px;align-items:center">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="input-box" style="flex:1;margin:0">
+              <i class="bi bi-currency-chf"></i>
+              <input type="number" name="reimbursed_amount" step="0.50" min="0"
+                     value="{{ "%.2f"|format(match.reimbursed_amount) }}"
+                     style="background:transparent;border:none;outline:none;flex:1;font-size:14px">
+            </div>
+            <button type="submit" class="btn-p small" style="flex-shrink:0;white-space:nowrap">
+              Mettre à jour
+            </button>
+          </form>
+          {% if not is_settled %}
+          <button type="button" style="margin-top:6px;background:none;border:none;font-size:12px;color:#16a34a;padding:0;cursor:pointer"
+                  onclick="this.previousElementSibling.querySelector('input').value='{{ "%.2f"|format(owed) }}'">
+            <i class="bi bi-check2-circle"></i> Marquer comme entièrement remboursé ({{ "%.2f"|format(owed) }} CHF)
+          </button>
+          {% endif %}
+        </div>
+
+      </div>
+      {% endfor %}
+
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

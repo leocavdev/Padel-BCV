@@ -60,16 +60,23 @@ def create_app(config_class=Config):
 def _migrate():
     from sqlalchemy import text, inspect
     inspector = inspect(db.engine)
-    existing = [col['name'] for col in inspector.get_columns('users')]
+    existing_users = [col['name'] for col in inspector.get_columns('users')]
+    existing_matches = [col['name'] for col in inspector.get_columns('matches')]
     with db.engine.connect() as conn:
-        if 'is_approved' not in existing:
+        if 'is_approved' not in existing_users:
             conn.execute(text(
                 'ALTER TABLE users ADD COLUMN is_approved BOOLEAN NOT NULL DEFAULT TRUE'
             ))
-        if 'nom' not in existing:
+        if 'nom' not in existing_users:
             conn.execute(text('ALTER TABLE users ADD COLUMN nom VARCHAR(64)'))
-        if 'prenom' not in existing:
+        if 'prenom' not in existing_users:
             conn.execute(text('ALTER TABLE users ADD COLUMN prenom VARCHAR(64)'))
+        if 'paid_by' not in existing_matches:
+            conn.execute(text('ALTER TABLE matches ADD COLUMN paid_by VARCHAR(20)'))
+        if 'reimbursed_amount' not in existing_matches:
+            conn.execute(text(
+                'ALTER TABLE matches ADD COLUMN reimbursed_amount FLOAT NOT NULL DEFAULT 0.0'
+            ))
         conn.commit()
 
 

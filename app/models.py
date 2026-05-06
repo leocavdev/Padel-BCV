@@ -95,6 +95,8 @@ class Match(db.Model):
     status           = db.Column(db.String(20), nullable=False, default='open')
     price_per_player = db.Column(db.Float, nullable=False, default=10.0)
     winner_team      = db.Column(db.Integer, nullable=True)
+    paid_by          = db.Column(db.String(20), nullable=True)
+    reimbursed_amount = db.Column(db.Float, nullable=False, default=0.0)
     created_by       = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at       = db.Column(db.DateTime, default=_now_ch)
 
