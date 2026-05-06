@@ -164,6 +164,10 @@ def join_match(match_id):
         flash("Ce match n'est plus disponible.", 'danger')
         return redirect(url_for('matches.list_matches'))
 
+    if match.date < datetime.now(_CH).date():
+        flash("Impossible de s'inscrire à un match passé.", 'danger')
+        return redirect(url_for('matches.match_detail', match_id=match_id))
+
     current_count = MatchPlayer.query.filter_by(match_id=match_id).count()
     if current_count >= 4:
         flash('Le match est complet.', 'danger')

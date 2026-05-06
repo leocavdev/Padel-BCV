@@ -280,7 +280,7 @@
 
 {# Sticky bottom CTA for players #}
 {% if not current_user.is_admin %}
-  {% if not registration and match.status == 'open' and not isFull and not incoming_request %}
+  {% if not registration and match.status == 'open' and not isFull and not incoming_request and match.date >= today %}
   <div class="sticky-cta">
     <button onclick="showJoinConfirm()" class="btn-p full green">
       <i class="bi bi-check-circle"></i> S'inscrire · CHF {{ '%.2f'|format(match.price_per_player) }}
