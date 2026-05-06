@@ -12,17 +12,14 @@ class LoginForm(FlaskForm):
 
 
 class RegisterForm(FlaskForm):
-    username         = StringField("Nom d'utilisateur", validators=[DataRequired(), Length(3, 64)])
-    email            = StringField('Email', validators=[DataRequired(), Email()])
+    nom              = StringField('Nom', validators=[DataRequired(), Length(1, 64)])
+    prenom           = StringField('Prénom', validators=[DataRequired(), Length(1, 64)])
+    email            = StringField('Email privé (non BCV)', validators=[DataRequired(), Email()])
     password         = PasswordField('Mot de passe', validators=[DataRequired(), Length(6, 128)])
     confirm_password = PasswordField('Confirmer le mot de passe',
                                      validators=[DataRequired(), EqualTo('password',
                                                  message='Les mots de passe ne correspondent pas.')])
     submit = SubmitField("S'inscrire")
-
-    def validate_username(self, field):
-        if User.query.filter_by(username=field.data).first():
-            raise ValidationError("Ce nom d'utilisateur est déjà utilisé.")
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():

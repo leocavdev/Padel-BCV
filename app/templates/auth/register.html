@@ -39,12 +39,21 @@
         {{ form.hidden_tag() }}
 
         <div class="input-wrap">
-          {{ form.username.label }}
+          {{ form.nom.label }}
           <div class="input-box">
             <i class="bi bi-person"></i>
-            {{ form.username(placeholder="Ex : jean_padel", autocomplete="username") }}
+            {{ form.nom(placeholder="Ex : Dupont", autocomplete="family-name") }}
           </div>
-          {% for e in form.username.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+          {% for e in form.nom.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="input-wrap">
+          {{ form.prenom.label }}
+          <div class="input-box">
+            <i class="bi bi-person"></i>
+            {{ form.prenom(placeholder="Ex : Jean", autocomplete="given-name") }}
+          </div>
+          {% for e in form.prenom.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
         </div>
 
         <div class="input-wrap">

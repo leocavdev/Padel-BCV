@@ -33,7 +33,14 @@ def register():
         return redirect(url_for('matches.list_matches'))
     form = RegisterForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data.lower())
+        base = f"{form.prenom.data.strip()} {form.nom.data.strip()}"
+        username = base
+        suffix = 1
+        while User.query.filter_by(username=username).first():
+            username = f"{base} {suffix}"
+            suffix += 1
+        user = User(username=username, nom=form.nom.data.strip(),
+                    prenom=form.prenom.data.strip(), email=form.email.data.lower())
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()

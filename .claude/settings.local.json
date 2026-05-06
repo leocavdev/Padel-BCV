@@ -26,7 +26,8 @@
       "Bash(pip3 install *)",
       "Bash(brew install *)",
       "WebFetch(domain:docs.datatrans.ch)",
-      "WebFetch(domain:docs.saferpay.com)"
+      "WebFetch(domain:docs.saferpay.com)",
+      "Bash(sqlite3 /Users/leonardo/Desktop/App_padel_BCV/app/padel.db \"ALTER TABLE users ADD COLUMN nom VARCHAR\\(64\\); ALTER TABLE users ADD COLUMN prenom VARCHAR\\(64\\);\")"
     ]
   }
 }
