@@ -52,7 +52,7 @@
         {% set accent_map = {'beginner':'#16a34a','intermediate':'#2563eb','advanced':'#d97706','expert':'#dc2626'} %}
         {% set accent = accent_map[match.required_skill] %}
         <a href="{{ url_for('admin.manage_match', match_id=match.id) }}"
-           class="admin-match-row {% if match.status in ['cancelled', 'completed'] %}admin-row-muted{% endif %}"
+           class="admin-match-row {% if match.status in ['cancelled', 'completed'] or match.date < today %}admin-row-muted{% endif %}"
            style="border-left:3px solid {{ accent }}">
           <div style="flex:1;padding:11px 14px">
             <div style="font-size:14px;font-weight:700;color:#151c17;margin-bottom:3px">{{ match.location }}</div>

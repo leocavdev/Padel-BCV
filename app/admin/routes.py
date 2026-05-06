@@ -41,6 +41,7 @@ def dashboard():
     }
     return render_template('admin/dashboard.html', matches=matches,
                            stats=stats, current_status=status_filter,
+                           today=date.today(),
                            title="Panneau d'administration")
 
 
