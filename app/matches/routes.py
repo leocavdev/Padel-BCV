@@ -244,6 +244,10 @@ def pay_pending(match_id):
 
     match = Match.query.get_or_404(match_id)
 
+    if match.date < datetime.now(_CH).date():
+        flash("Impossible d'effectuer une action sur un match passé.", 'danger')
+        return redirect(url_for('matches.match_detail', match_id=match_id))
+
     if current_user.wallet_balance < match.price_per_player:
         flash(
             f'Solde insuffisant ({current_user.wallet_balance:.2f} CHF disponibles, '
@@ -270,6 +274,10 @@ def pay_pending(match_id):
 @login_required
 def request_replacement(match_id):
     match = Match.query.get_or_404(match_id)
+
+    if match.date < datetime.now(_CH).date():
+        flash("Impossible d'effectuer une action sur un match passé.", 'danger')
+        return redirect(url_for('matches.match_detail', match_id=match_id))
 
     if match.status not in ('open', 'confirmed'):
         flash('Vous ne pouvez pas quitter ce match.', 'danger')
@@ -349,6 +357,10 @@ def respond_replacement(match_id, request_id):
 
     action = request.form.get('action')
     match = Match.query.get_or_404(match_id)
+
+    if match.date < datetime.now(_CH).date():
+        flash("Impossible d'effectuer une action sur un match passé.", 'danger')
+        return redirect(url_for('matches.match_detail', match_id=match_id))
 
     if action == 'decline':
         db.session.delete(rr)
