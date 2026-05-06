@@ -184,39 +184,49 @@ def join_match(match_id):
         flash('Vous êtes déjà inscrit à ce match.', 'warning')
         return redirect(url_for('matches.match_detail', match_id=match_id))
 
-    # Paiement immédiat par portefeuille uniquement
-    if current_user.wallet_balance < match.price_per_player:
-        flash(
-            f'Solde insuffisant. Rechargez votre portefeuille '
-            f'({match.price_per_player:.2f} CHF requis, solde actuel : {current_user.wallet_balance:.2f} CHF).',
-            'danger',
-        )
-        return redirect(url_for('matches.match_detail', match_id=match_id))
+    use_wallet = request.form.get('use_wallet') == 'true'
 
-    current_user.wallet_balance -= match.price_per_player
-    db.session.add(Transaction(
-        user_id=current_user.id,
-        amount=-match.price_per_player,
-        type='match_fee',
-        description=f'Paiement — match #{match.id} ({match.location})',
-        match_id=match.id,
-    ))
+    if use_wallet:
+        if current_user.wallet_balance < match.price_per_player:
+            flash(
+                f'Solde insuffisant. Rechargez votre portefeuille '
+                f'({match.price_per_player:.2f} CHF requis, solde actuel : {current_user.wallet_balance:.2f} CHF).',
+                'danger',
+            )
+            return redirect(url_for('matches.match_detail', match_id=match_id))
+        current_user.wallet_balance -= match.price_per_player
+        db.session.add(Transaction(
+            user_id=current_user.id,
+            amount=-match.price_per_player,
+            type='match_fee',
+            description=f'Paiement — match #{match.id} ({match.location})',
+            match_id=match.id,
+        ))
+        payment_status = 'paid'
+    else:
+        payment_status = 'pending'
 
-    mp = MatchPlayer(match_id=match_id, player_id=current_user.id, payment_status='paid')
+    mp = MatchPlayer(match_id=match_id, player_id=current_user.id, payment_status=payment_status)
     db.session.add(mp)
 
     if current_count + 1 >= 4:
         match.status = 'confirmed'
-        flash(
-            f'Inscription confirmée ! {match.price_per_player:.2f} CHF déduits. '
-            f'Le match est complet (4/4) et confirmé !',
-            'success',
-        )
-    else:
-        flash(f'Inscription confirmée ! {match.price_per_player:.2f} CHF déduits de votre portefeuille.', 'success')
 
     db.session.commit()
-    return redirect(url_for('matches.match_detail', match_id=match_id))
+
+    if payment_status == 'paid':
+        if match.status == 'confirmed':
+            flash(
+                f'Inscription confirmée ! {match.price_per_player:.2f} CHF déduits. '
+                f'Le match est complet (4/4) et confirmé !',
+                'success',
+            )
+        else:
+            flash(f'Inscription confirmée ! {match.price_per_player:.2f} CHF déduits de votre portefeuille.', 'success')
+        return redirect(url_for('matches.match_detail', match_id=match_id))
+    else:
+        flash('Inscription enregistrée. Scannez le QR code pour finaliser votre paiement TWINT.', 'info')
+        return redirect(url_for('wallet.payment_qr'))
 
 
 @bp.route('/<int:match_id>/request-replacement', methods=['POST'])

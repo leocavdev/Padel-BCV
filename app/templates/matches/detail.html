@@ -282,66 +282,98 @@
 {% if not current_user.is_admin %}
   {% if not registration and match.status == 'open' and not isFull %}
   <div class="sticky-cta">
-    {% if current_user.wallet_balance >= match.price_per_player %}
     <button onclick="showJoinConfirm()" class="btn-p full green">
       <i class="bi bi-check-circle"></i> S'inscrire · CHF {{ '%.2f'|format(match.price_per_player) }}
     </button>
-    <form id="join-form" method="POST" action="{{ url_for('matches.join_match', match_id=match.id) }}" style="display:none">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    </form>
-    {% else %}
-    <div style="background:#fee2e2;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <i class="bi bi-exclamation-triangle-fill" style="color:#dc2626;font-size:16px;flex-shrink:0"></i>
-      <div style="font-size:13px;color:#7f1d1d;line-height:1.5">
-        Solde insuffisant — il vous faut <strong>CHF {{ '%.2f'|format(match.price_per_player) }}</strong><br>
-        Votre solde : <strong>CHF {{ '%.2f'|format(current_user.wallet_balance) }}</strong>
-      </div>
-    </div>
-    <a href="{{ url_for('wallet.dashboard') }}"
-       style="display:flex;align-items:center;justify-content:center;gap:8px;
-              background:#2d6a4f;color:#fff;border-radius:14px;padding:14px;
-              font-size:15px;font-weight:700;text-decoration:none;
-              box-shadow:0 4px 14px rgba(0,0,0,0.18)">
-      <i class="bi bi-wallet2"></i> Recharger le portefeuille
-    </a>
-    {% endif %}
     <div style="text-align:center;margin-top:8px;font-size:12px;color:#91a492">
       Niveau requis : <strong>{{ match.required_skill_label }}</strong>
     </div>
   </div>
 
+  {# Formulaires cachés #}
+  <form id="join-wallet-form" method="POST" action="{{ url_for('matches.join_match', match_id=match.id) }}" style="display:none">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="use_wallet" value="true">
+  </form>
+  <form id="join-twint-form" method="POST" action="{{ url_for('matches.join_match', match_id=match.id) }}" style="display:none">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="use_wallet" value="false">
+  </form>
+
   {# Modale de confirmation d'inscription #}
   <div id="join-modal" onclick="hideJoinConfirm()"
        style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);
-              align-items:center;justify-content:center;padding:24px">
+              align-items:center;justify-content:center;padding:20px">
     <div onclick="event.stopPropagation()"
-         style="background:#fff;border-radius:20px;padding:24px;max-width:340px;width:100%;
+         style="background:#fff;border-radius:20px;padding:22px;max-width:340px;width:100%;
                 box-shadow:0 20px 60px rgba(0,0,0,0.3)">
-      <div style="text-align:center;margin-bottom:4px">
-        <div style="width:52px;height:52px;background:#dcfce7;border-radius:50%;
-                    display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
-          <i class="bi bi-calendar-check-fill" style="font-size:24px;color:#16a34a"></i>
+
+      {# Icône + titre #}
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="width:48px;height:48px;background:#dcfce7;border-radius:50%;
+                    display:flex;align-items:center;justify-content:center;margin:0 auto 10px">
+          <i class="bi bi-calendar-check-fill" style="font-size:22px;color:#16a34a"></i>
         </div>
-        <div style="font-size:17px;font-weight:700;color:#151c17;margin-bottom:10px">Confirmer l'inscription</div>
-        <div style="font-size:14px;color:#6b8070;line-height:1.6;text-align:left">
-          <strong>CHF {{ '%.2f'|format(match.price_per_player) }}</strong> seront déduits de votre portefeuille.
-          <br><br>
-          <i class="bi bi-exclamation-triangle-fill" style="color:#d97706"></i>
-          L'inscription est <strong>définitive</strong>. Pour quitter ce match, vous devrez trouver un remplaçant parmi les joueurs disponibles.
+        <div style="font-size:17px;font-weight:700;color:#151c17">Confirmer l'inscription</div>
+      </div>
+
+      {# Avertissement #}
+      <div style="background:#fefce8;border-radius:10px;padding:10px 12px;font-size:13px;color:#78350f;
+                  line-height:1.5;margin-bottom:16px;display:flex;gap:8px;align-items:flex-start">
+        <i class="bi bi-exclamation-triangle-fill" style="color:#d97706;flex-shrink:0;margin-top:1px"></i>
+        <span>L'inscription est <strong>définitive</strong>. Pour quitter ce match, vous devrez trouver un remplaçant parmi les joueurs disponibles.</span>
+      </div>
+
+      {# Choix du mode de paiement #}
+      <div style="font-size:12px;font-weight:700;color:#91a492;text-transform:uppercase;
+                  letter-spacing:.05em;margin-bottom:8px">Choisir le mode de paiement</div>
+
+      {# Option portefeuille #}
+      {% if current_user.wallet_balance >= match.price_per_player %}
+      <button onclick="submitWallet()"
+              style="display:flex;align-items:center;gap:10px;width:100%;padding:13px 14px;
+                     background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;
+                     cursor:pointer;margin-bottom:8px;text-align:left">
+        <i class="bi bi-wallet2" style="font-size:18px;color:#16a34a;flex-shrink:0"></i>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#14532d">Portefeuille</div>
+          <div style="font-size:12px;color:#4ade80">CHF {{ '%.2f'|format(match.price_per_player) }} déduits · Solde après : CHF {{ '%.2f'|format(current_user.wallet_balance - match.price_per_player) }}</div>
+        </div>
+        <i class="bi bi-chevron-right" style="color:#86efac;margin-left:auto"></i>
+      </button>
+      {% else %}
+      <div style="display:flex;align-items:center;gap:10px;width:100%;padding:13px 14px;
+                  background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:12px;
+                  margin-bottom:8px;opacity:.6">
+        <i class="bi bi-wallet2" style="font-size:18px;color:#9ca3af;flex-shrink:0"></i>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#6b7280">Portefeuille — solde insuffisant</div>
+          <div style="font-size:12px;color:#9ca3af">Solde : CHF {{ '%.2f'|format(current_user.wallet_balance) }} / CHF {{ '%.2f'|format(match.price_per_player) }} requis ·
+            <a href="{{ url_for('wallet.dashboard') }}" style="color:#2d6a4f;font-weight:700">Recharger</a>
+          </div>
         </div>
       </div>
-      <div style="display:flex;gap:10px;margin-top:20px">
-        <button onclick="hideJoinConfirm()"
-                style="flex:1;padding:13px;background:#f3f4f6;color:#374151;border:none;
-                       border-radius:12px;font-size:15px;font-weight:600;cursor:pointer">
-          Annuler
-        </button>
-        <button onclick="submitJoin()"
-                style="flex:1;padding:13px;background:#2d6a4f;color:#fff;border:none;
-                       border-radius:12px;font-size:15px;font-weight:700;cursor:pointer">
-          Confirmer
-        </button>
-      </div>
+      {% endif %}
+
+      {# Option TWINT #}
+      <button onclick="submitTwint()"
+              style="display:flex;align-items:center;gap:10px;width:100%;padding:13px 14px;
+                     background:#f8f8f8;border:1.5px solid #d1d5db;border-radius:12px;
+                     cursor:pointer;margin-bottom:14px;text-align:left">
+        <img src="{{ url_for('static', filename='img/twint_logo.png') }}" width="26" height="26"
+             style="border-radius:6px;flex-shrink:0" alt="TWINT">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#151c17">TWINT</div>
+          <div style="font-size:12px;color:#6b8070">Vous serez redirigé vers le QR de paiement</div>
+        </div>
+        <i class="bi bi-chevron-right" style="color:#9ca3af;margin-left:auto"></i>
+      </button>
+
+      <button onclick="hideJoinConfirm()"
+              style="width:100%;padding:12px;background:#f3f4f6;color:#374151;border:none;
+                     border-radius:12px;font-size:15px;font-weight:600;cursor:pointer">
+        Annuler
+      </button>
     </div>
   </div>
   <script>
@@ -351,8 +383,11 @@
     function hideJoinConfirm() {
       document.getElementById('join-modal').style.display = 'none';
     }
-    function submitJoin() {
-      document.getElementById('join-form').submit();
+    function submitWallet() {
+      document.getElementById('join-wallet-form').submit();
+    }
+    function submitTwint() {
+      document.getElementById('join-twint-form').submit();
     }
   </script>
   {% endif %}
