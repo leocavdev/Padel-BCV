@@ -17,7 +17,19 @@ _MONTH_NAMES = ['jan', 'fév', 'mars', 'avr', 'mai', 'juin',
 @bp.route('/')
 @login_required
 def list_matches():
-    today = datetime.now(_CH).date()
+    now_ch = datetime.now(_CH)
+    today = now_ch.date()
+    now_time = now_ch.time()
+
+    def _is_future():
+        return db.or_(Match.date > today, db.and_(Match.date == today, Match.start_time > now_time))
+
+    def _is_past_not_cancelled():
+        return db.and_(
+            db.or_(Match.date < today, db.and_(Match.date == today, Match.start_time <= now_time)),
+            Match.status != 'cancelled'
+        )
+
     registered_matches = []
     registered_ids = []
     incoming_requests = []
@@ -28,7 +40,7 @@ def list_matches():
             registered_matches = (Match.query
                                   .filter(Match.id.in_(registered_ids))
                                   .filter(Match.status.in_(['open', 'confirmed']))
-                                  .filter(Match.date >= today)
+                                  .filter(_is_future())
                                   .order_by(Match.date, Match.start_time)
                                   .all())
         incoming_requests = (ReplacementRequest.query
@@ -36,19 +48,19 @@ def list_matches():
                              .all())
     open_matches = (Match.query
                     .filter_by(status='open')
-                    .filter(Match.date >= today)
+                    .filter(_is_future())
                     .filter(~Match.id.in_(registered_ids) if registered_ids else True)
                     .order_by(Match.date, Match.start_time)
                     .all())
     confirmed_matches = (Match.query
                          .filter_by(status='confirmed')
-                         .filter(Match.date >= today)
+                         .filter(_is_future())
                          .filter(~Match.id.in_(registered_ids) if registered_ids else True)
                          .order_by(Match.date, Match.start_time)
                          .all())
     past_matches = (Match.query
                     .filter(db.or_(
-                        db.and_(Match.date < today, Match.status != 'cancelled'),
+                        _is_past_not_cancelled(),
                         Match.status == 'completed'
                     ))
                     .order_by(Match.date.desc(), Match.start_time.desc())
