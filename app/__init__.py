@@ -61,12 +61,16 @@ def _migrate():
     from sqlalchemy import text, inspect
     inspector = inspect(db.engine)
     existing = [col['name'] for col in inspector.get_columns('users')]
-    if 'is_approved' not in existing:
-        with db.engine.connect() as conn:
+    with db.engine.connect() as conn:
+        if 'is_approved' not in existing:
             conn.execute(text(
                 'ALTER TABLE users ADD COLUMN is_approved BOOLEAN NOT NULL DEFAULT TRUE'
             ))
-            conn.commit()
+        if 'nom' not in existing:
+            conn.execute(text('ALTER TABLE users ADD COLUMN nom VARCHAR(64)'))
+        if 'prenom' not in existing:
+            conn.execute(text('ALTER TABLE users ADD COLUMN prenom VARCHAR(64)'))
+        conn.commit()
 
 
 def _seed_admin():
