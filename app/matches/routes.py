@@ -172,29 +172,36 @@ def join_match(match_id):
         flash('Vous êtes déjà inscrit à ce match.', 'warning')
         return redirect(url_for('matches.match_detail', match_id=match_id))
 
-    # Payment method
-    use_wallet = request.form.get('use_wallet') == 'true'
-    if use_wallet and current_user.wallet_balance >= match.price_per_player:
-        current_user.wallet_balance -= match.price_per_player
-        payment_status = 'paid'
-        db.session.add(Transaction(
-            user_id=current_user.id,
-            amount=-match.price_per_player,
-            type='match_fee',
-            description=f'Paiement par portefeuille — match #{match.id} ({match.location})',
-            match_id=match.id,
-        ))
-        flash(f'Inscription confirmée. {match.price_per_player:.2f} CHF déduits de votre portefeuille.', 'success')
-    else:
-        payment_status = 'pending'
-        flash('Inscription enregistrée. Effectuez le paiement pour confirmer votre place.', 'info')
+    # Paiement immédiat par portefeuille uniquement
+    if current_user.wallet_balance < match.price_per_player:
+        flash(
+            f'Solde insuffisant. Rechargez votre portefeuille '
+            f'({match.price_per_player:.2f} CHF requis, solde actuel : {current_user.wallet_balance:.2f} CHF).',
+            'danger',
+        )
+        return redirect(url_for('matches.match_detail', match_id=match_id))
 
-    mp = MatchPlayer(match_id=match_id, player_id=current_user.id, payment_status=payment_status)
+    current_user.wallet_balance -= match.price_per_player
+    db.session.add(Transaction(
+        user_id=current_user.id,
+        amount=-match.price_per_player,
+        type='match_fee',
+        description=f'Paiement — match #{match.id} ({match.location})',
+        match_id=match.id,
+    ))
+
+    mp = MatchPlayer(match_id=match_id, player_id=current_user.id, payment_status='paid')
     db.session.add(mp)
 
     if current_count + 1 >= 4:
         match.status = 'confirmed'
-        flash('Le match est complet (4/4) et a été confirmé !', 'success')
+        flash(
+            f'Inscription confirmée ! {match.price_per_player:.2f} CHF déduits. '
+            f'Le match est complet (4/4) et confirmé !',
+            'success',
+        )
+    else:
+        flash(f'Inscription confirmée ! {match.price_per_player:.2f} CHF déduits de votre portefeuille.', 'success')
 
     db.session.commit()
     return redirect(url_for('matches.match_detail', match_id=match_id))
@@ -310,6 +317,15 @@ def respond_replacement(match_id, request_id):
             flash('Vous êtes déjà inscrit à ce match.', 'warning')
             return redirect(url_for('matches.match_detail', match_id=match_id))
 
+        if current_user.wallet_balance < match.price_per_player:
+            flash(
+                f'Solde insuffisant pour accepter ce remplacement. '
+                f'Rechargez votre portefeuille ({match.price_per_player:.2f} CHF requis, '
+                f'solde actuel : {current_user.wallet_balance:.2f} CHF).',
+                'danger',
+            )
+            return redirect(url_for('matches.match_detail', match_id=match_id))
+
         requester = rr.requester
         if mp.payment_status == 'paid':
             requester.wallet_balance += match.price_per_player
@@ -321,14 +337,23 @@ def respond_replacement(match_id, request_id):
                 match_id=match.id,
             ))
 
-        db.session.add(MatchPlayer(match_id=match_id, player_id=current_user.id, payment_status='pending'))
+        current_user.wallet_balance -= match.price_per_player
+        db.session.add(Transaction(
+            user_id=current_user.id,
+            amount=-match.price_per_player,
+            type='match_fee',
+            description=f'Paiement remplacement — match #{match.id} ({match.location})',
+            match_id=match.id,
+        ))
+
+        db.session.add(MatchPlayer(match_id=match_id, player_id=current_user.id, payment_status='paid'))
         db.session.delete(mp)
         db.session.delete(rr)
         db.session.commit()
         flash(
             f'Vous remplacez {requester.username} dans le match du '
             f'{match.date.strftime("%d/%m/%Y")} à {match.location}. '
-            f'Paiement en attente : {match.price_per_player:.2f} CHF.',
+            f'{match.price_per_player:.2f} CHF déduits de votre portefeuille.',
             'success',
         )
         return redirect(url_for('matches.match_detail', match_id=match_id))

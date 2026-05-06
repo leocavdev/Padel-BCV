@@ -282,27 +282,79 @@
 {% if not current_user.is_admin %}
   {% if not registration and match.status == 'open' and not isFull %}
   <div class="sticky-cta">
-    <div style="display:flex;gap:10px">
-      {% if current_user.wallet_balance >= match.price_per_player %}
-      <form method="POST" action="{{ url_for('matches.join_match', match_id=match.id) }}" style="flex:1">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="use_wallet" value="true">
-        <button class="btn-p full green">
-          <i class="bi bi-wallet2"></i> Payer CHF {{ '%.2f'|format(match.price_per_player) }} avec votre solde
-        </button>
-      </form>
-      {% endif %}
-      <form method="POST" action="{{ url_for('matches.join_match', match_id=match.id) }}" style="flex:1">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn-p full">
-          <i class="bi bi-qr-code"></i> Payer CHF {{ '%.2f'|format(match.price_per_player) }} par TWINT
-        </button>
-      </form>
+    {% if current_user.wallet_balance >= match.price_per_player %}
+    <button onclick="showJoinConfirm()" class="btn-p full green">
+      <i class="bi bi-check-circle"></i> S'inscrire · CHF {{ '%.2f'|format(match.price_per_player) }}
+    </button>
+    <form id="join-form" method="POST" action="{{ url_for('matches.join_match', match_id=match.id) }}" style="display:none">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    </form>
+    {% else %}
+    <div style="background:#fee2e2;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <i class="bi bi-exclamation-triangle-fill" style="color:#dc2626;font-size:16px;flex-shrink:0"></i>
+      <div style="font-size:13px;color:#7f1d1d;line-height:1.5">
+        Solde insuffisant — il vous faut <strong>CHF {{ '%.2f'|format(match.price_per_player) }}</strong><br>
+        Votre solde : <strong>CHF {{ '%.2f'|format(current_user.wallet_balance) }}</strong>
+      </div>
     </div>
+    <a href="{{ url_for('wallet.dashboard') }}"
+       style="display:flex;align-items:center;justify-content:center;gap:8px;
+              background:#2d6a4f;color:#fff;border-radius:14px;padding:14px;
+              font-size:15px;font-weight:700;text-decoration:none;
+              box-shadow:0 4px 14px rgba(0,0,0,0.18)">
+      <i class="bi bi-wallet2"></i> Recharger le portefeuille
+    </a>
+    {% endif %}
     <div style="text-align:center;margin-top:8px;font-size:12px;color:#91a492">
-      Niveau requis : <strong>{{ match.required_skill_label }}</strong> · Votre solde : <strong>{{ '%.2f'|format(current_user.wallet_balance) }} CHF</strong>
+      Niveau requis : <strong>{{ match.required_skill_label }}</strong>
     </div>
   </div>
+
+  {# Modale de confirmation d'inscription #}
+  <div id="join-modal" onclick="hideJoinConfirm()"
+       style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);
+              align-items:center;justify-content:center;padding:24px">
+    <div onclick="event.stopPropagation()"
+         style="background:#fff;border-radius:20px;padding:24px;max-width:340px;width:100%;
+                box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+      <div style="text-align:center;margin-bottom:4px">
+        <div style="width:52px;height:52px;background:#dcfce7;border-radius:50%;
+                    display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <i class="bi bi-calendar-check-fill" style="font-size:24px;color:#16a34a"></i>
+        </div>
+        <div style="font-size:17px;font-weight:700;color:#151c17;margin-bottom:10px">Confirmer l'inscription</div>
+        <div style="font-size:14px;color:#6b8070;line-height:1.6;text-align:left">
+          <strong>CHF {{ '%.2f'|format(match.price_per_player) }}</strong> seront déduits de votre portefeuille.
+          <br><br>
+          <i class="bi bi-exclamation-triangle-fill" style="color:#d97706"></i>
+          L'inscription est <strong>définitive</strong>. Pour quitter ce match, vous devrez trouver un remplaçant parmi les joueurs disponibles.
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button onclick="hideJoinConfirm()"
+                style="flex:1;padding:13px;background:#f3f4f6;color:#374151;border:none;
+                       border-radius:12px;font-size:15px;font-weight:600;cursor:pointer">
+          Annuler
+        </button>
+        <button onclick="submitJoin()"
+                style="flex:1;padding:13px;background:#2d6a4f;color:#fff;border:none;
+                       border-radius:12px;font-size:15px;font-weight:700;cursor:pointer">
+          Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
+  <script>
+    function showJoinConfirm() {
+      document.getElementById('join-modal').style.display = 'flex';
+    }
+    function hideJoinConfirm() {
+      document.getElementById('join-modal').style.display = 'none';
+    }
+    function submitJoin() {
+      document.getElementById('join-form').submit();
+    }
+  </script>
   {% endif %}
 
   {% if registration and registration.payment_status == 'pending' %}
@@ -351,9 +403,15 @@
         <button class="btn-p full red" style="font-size:13px"><i class="bi bi-x-lg"></i> Refuser</button>
       </form>
     </div>
+    {% if current_user.wallet_balance >= match.price_per_player %}
     <div style="font-size:11px;color:#3b82f6;margin-top:8px;text-align:center">
-      En acceptant, vous serez inscrit avec paiement en attente ({{ '%.2f'|format(match.price_per_player) }} CHF)
+      En acceptant, <strong>CHF {{ '%.2f'|format(match.price_per_player) }}</strong> seront déduits de votre portefeuille (solde : CHF {{ '%.2f'|format(current_user.wallet_balance) }})
     </div>
+    {% else %}
+    <div style="font-size:11px;color:#dc2626;margin-top:8px;text-align:center;font-weight:600">
+      <i class="bi bi-exclamation-triangle-fill"></i> Solde insuffisant — rechargez votre portefeuille (CHF {{ '%.2f'|format(match.price_per_player) }} requis, solde : CHF {{ '%.2f'|format(current_user.wallet_balance) }})
+    </div>
+    {% endif %}
   </div>
   {% endif %}
 
