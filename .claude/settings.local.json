@@ -43,7 +43,15 @@
       "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"add diagnostic count on reimbursements page\")",
       "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV push)",
       "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV add app/templates/admin/reimbursements.html)",
-      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"fix reimbursements layout: cards in scroll-content, not in hero\")"
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"fix reimbursements layout: cards in scroll-content, not in hero\")",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV add app/templates/base.html)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"add reimbursements tab to admin bottom nav\")",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV add app/templates/admin/dashboard.html)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"move DB link to dashboard quick actions\")",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV add app/templates/admin/reimbursements.html app/admin/routes.py)",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"remove diagnostic section from reimbursements page\")",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"restore DB tab in admin nav \\(6 tabs total\\)\")",
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"replace reimbursement amount input with toggle button\")"
     ]
   }
 }

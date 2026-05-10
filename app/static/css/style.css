@@ -445,7 +445,7 @@ html, body {
 .chip {
   padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 600;
   border: none; cursor: pointer; white-space: nowrap; flex-shrink: 0;
-  background: #f0f4f1; color: #4d5e4f;
+  background: #f0f4f1; color: #4d5e4f; text-decoration: none;
   transition: background .15s, color .15s; font-family: inherit;
 }
 .chip.active       { background: var(--green-main); color: #fff; }
