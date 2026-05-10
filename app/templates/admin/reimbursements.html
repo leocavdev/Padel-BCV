@@ -96,21 +96,19 @@
         </div>
 
         <div style="padding:10px 14px">
-          <div style="font-size:12px;color:#6b8070;margin-bottom:6px">
-            Déjà remboursé : <strong>{{ "%.2f"|format(match.reimbursed_amount) }} CHF</strong>
-          </div>
-          <form method="POST" action="{{ url_for('admin.update_reimbursement', match_id=match.id) }}"
-                style="display:flex;gap:8px;align-items:center">
+          <form method="POST" action="{{ url_for('admin.toggle_reimbursement', match_id=match.id) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="input-box" style="flex:1;margin:0">
-              <i class="bi bi-currency-chf"></i>
-              <input type="number" name="reimbursed_amount" step="0.50" min="0"
-                     value="{{ match.reimbursed_amount }}"
-                     style="background:transparent;border:none;outline:none;flex:1;font-size:14px">
-            </div>
-            <button type="submit" class="btn-p small" style="flex-shrink:0;white-space:nowrap">
-              Mettre à jour
+            {% if is_settled %}
+            <button type="submit"
+                    style="width:100%;padding:10px;border-radius:10px;border:1.5px solid #d1fae5;background:#f0fdf4;color:#16a34a;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+              <i class="bi bi-check-circle-fill"></i> Remboursé — Annuler
             </button>
+            {% else %}
+            <button type="submit"
+                    style="width:100%;padding:10px;border-radius:10px;border:1.5px solid #d8eade;background:#fff;color:#2d6a4f;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+              <i class="bi bi-circle"></i> Marquer comme remboursé ({{ "%.2f"|format(owed) }} CHF)
+            </button>
+            {% endif %}
           </form>
         </div>
 

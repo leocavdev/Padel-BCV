@@ -214,18 +214,17 @@ def reimbursements():
                            title='Remboursements')
 
 
-@bp.route('/matches/<int:match_id>/update-reimbursement', methods=['POST'])
+@bp.route('/matches/<int:match_id>/toggle-reimbursement', methods=['POST'])
 @admin_required
-def update_reimbursement(match_id):
+def toggle_reimbursement(match_id):
     match = Match.query.get_or_404(match_id)
-    try:
-        amount = float(request.form.get('reimbursed_amount', match.reimbursed_amount))
-    except (TypeError, ValueError):
-        flash('Montant invalide.', 'danger')
-        return redirect(url_for('admin.reimbursements'))
-    match.reimbursed_amount = max(0.0, round(amount, 2))
+    total = round(match.price_per_player * 8, 2)
+    owed = round(total / 2, 2)
+    if match.reimbursed_amount >= owed:
+        match.reimbursed_amount = 0.0
+    else:
+        match.reimbursed_amount = owed
     db.session.commit()
-    flash('Remboursement mis à jour.', 'success')
     return redirect(url_for('admin.reimbursements'))
 
 
