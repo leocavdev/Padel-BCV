@@ -8,6 +8,7 @@
 
   <div class="scroll-content" style="background:#f4f6f4">
     <div style="padding:20px 16px 32px;display:flex;flex-direction:column;gap:14px">
+
       <div class="card-new" style="padding:18px">
         <div style="font-size:16px;font-weight:700;color:#151c17;margin-bottom:8px">Padel BCV</div>
         <p style="font-size:14px;color:#4b5563;line-height:1.7">
@@ -28,6 +29,145 @@
       <a href="{{ url_for('auth.reglement') }}" class="btn-p full">
         Règlement
       </a>
+
+      {# ── FAQ ─────────────────────────────────────────────────────────── #}
+      <div style="font-size:18px;font-weight:800;color:#151c17;margin-top:8px">FAQ</div>
+
+      <style>
+        .faq-item { border-radius:12px; background:#fff; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+        .faq-item summary {
+          list-style:none; cursor:pointer; padding:16px 16px;
+          font-size:14px; font-weight:700; color:#151c17;
+          display:flex; align-items:center; justify-content:space-between; gap:12px;
+          user-select:none; -webkit-user-select:none;
+        }
+        .faq-item summary::-webkit-details-marker { display:none; }
+        .faq-item summary::after {
+          content:"\F282"; font-family:"bootstrap-icons"; font-size:16px;
+          color:#6b8070; flex-shrink:0; transition:transform .2s;
+        }
+        .faq-item[open] summary::after { transform:rotate(180deg); }
+        .faq-body {
+          padding:0 16px 16px; font-size:14px; color:#4b5563; line-height:1.75;
+          border-top:1px solid #f0f4f1;
+        }
+        .faq-body ul { padding-left:18px; margin:8px 0 0; display:grid; gap:6px; }
+        .faq-body strong { color:#151c17; }
+        .faq-tag {
+          display:inline-block; font-size:11px; font-weight:700; padding:2px 8px;
+          border-radius:20px; margin-right:4px;
+        }
+      </style>
+
+      {# 1 – Réserver un match #}
+      <details class="faq-item">
+        <summary><span><i class="bi bi-calendar-plus" style="margin-right:8px;color:#2563eb"></i>Comment réserver un match ?</span></summary>
+        <div class="faq-body">
+          <ol style="padding-left:18px;margin:8px 0 0;display:grid;gap:6px">
+            <li>Ouvrez l'onglet <strong>Matchs</strong>.</li>
+            <li>Consultez les matchs disponibles (<span class="faq-tag" style="background:#dcfce7;color:#16a34a">Ouvert</span> = places libres).</li>
+            <li>Appuyez sur un match pour voir ses détails : date, lieu, niveau requis, prix.</li>
+            <li>Si votre niveau est suffisant, appuyez sur <strong>Rejoindre</strong>.</li>
+            <li>Choisissez votre mode de paiement : <strong>solde</strong> (déduction immédiate) ou <strong>TWINT</strong> (scan du QR code).</li>
+          </ol>
+          <p style="margin-top:10px">Dès que 4 joueurs sont inscrits, le match passe automatiquement à <span class="faq-tag" style="background:#dbeafe;color:#2563eb">Confirmé</span>.</p>
+        </div>
+      </details>
+
+      {# 2 – Quitter un match #}
+      <details class="faq-item">
+        <summary><span><i class="bi bi-person-dash" style="margin-right:8px;color:#d97706"></i>Comment quitter un match ?</span></summary>
+        <div class="faq-body">
+          <p style="margin-top:8px">Il n'est pas possible de quitter un match directement. Vous devez trouver un <strong>remplaçant</strong> :</p>
+          <ol style="padding-left:18px;margin:8px 0 0;display:grid;gap:6px">
+            <li>Ouvrez la page du match et appuyez sur <strong>Demander un remplacement</strong>.</li>
+            <li>Sélectionnez un joueur dans la liste (niveau suffisant requis).</li>
+            <li>Le joueur reçoit une notification et accepte ou refuse.</li>
+            <li>S'il accepte et paie, vous êtes libéré du match et remboursé sur votre solde.</li>
+          </ol>
+          <p style="margin-top:10px">Tant que le remplacement n'est pas accepté, vous restez inscrit au match.</p>
+        </div>
+      </details>
+
+      {# 3 – Payer un match #}
+      <details class="faq-item">
+        <summary><span><i class="bi bi-credit-card" style="margin-right:8px;color:#16a34a"></i>Comment payer un match ?</span></summary>
+        <div class="faq-body">
+          <p style="margin-top:8px">Lors de l'inscription, deux options s'offrent à vous :</p>
+          <ul>
+            <li><strong>Payer via le solde</strong> — le montant est déduit instantanément de votre portefeuille. C'est la méthode la plus rapide.</li>
+            <li><strong>Payer via TWINT</strong> — un QR code s'affiche. Scannez-le avec votre application TWINT, puis appuyez sur <em>J'ai payé</em> dans l'application pour confirmer votre place.</li>
+          </ul>
+          <p style="margin-top:10px">Tant que le paiement n'est pas confirmé, votre inscription est en attente (<span class="faq-tag" style="background:#fef9c3;color:#854d0e">En attente</span>).</p>
+        </div>
+      </details>
+
+      {# 4 – Le solde #}
+      <details class="faq-item">
+        <summary><span><i class="bi bi-wallet2" style="margin-right:8px;color:#7c3aed"></i>Comment fonctionne le solde ?</span></summary>
+        <div class="faq-body">
+          <p style="margin-top:8px">Votre solde (onglet <strong>Solde</strong>) fonctionne comme un portefeuille prépayé :</p>
+          <ul>
+            <li><strong>Recharge</strong> — uniquement par un administrateur, après que vous ayez effectué un virement ou un paiement physique.</li>
+            <li><strong>Débit</strong> — automatique lors du paiement d'un match (–X CHF).</li>
+            <li><strong>Remboursement</strong> — si vous trouvez un remplaçant pour un match déjà payé, le montant vous est recrédité automatiquement.</li>
+          </ul>
+          <p style="margin-top:10px">Consultez l'historique complet de vos mouvements dans l'onglet <strong>Solde</strong>.</p>
+        </div>
+      </details>
+
+      {# 5 – Niveau initial #}
+      <details class="faq-item">
+        <summary><span><i class="bi bi-bar-chart-steps" style="margin-right:8px;color:#0891b2"></i>Comment mon niveau initial est-il attribué ?</span></summary>
+        <div class="faq-body">
+          <p style="margin-top:8px">Votre niveau de départ est fixé par un administrateur lors de la création de votre compte, sur la base de votre expérience déclarée et/ou d'une évaluation sur le terrain.</p>
+          <p style="margin-top:8px">Il est exprimé sur une échelle de <strong>0 à 7</strong> et détermine votre catégorie :</p>
+          <ul>
+            <li><strong style="color:#16a34a">Débutant</strong> — 0.0 à 1.9</li>
+            <li><strong style="color:#2563eb">Intermédiaire</strong> — 2.0 à 3.9</li>
+            <li><strong style="color:#d97706">Avancé</strong> — 4.0 à 5.9</li>
+            <li><strong style="color:#dc2626">Expert</strong> — 6.0 à 7.0</li>
+          </ul>
+          <p style="margin-top:10px">Si vous pensez que votre niveau est mal évalué, contactez un administrateur.</p>
+        </div>
+      </details>
+
+      {# 6 – Impact des résultats #}
+      <details class="faq-item">
+        <summary><span><i class="bi bi-trophy" style="margin-right:8px;color:#f59e0b"></i>Comment les résultats impactent-ils mon niveau ?</span></summary>
+        <div class="faq-body">
+          <p style="margin-top:8px">Après chaque match <strong>confirmé</strong> et dont le résultat est validé :</p>
+          <ul>
+            <li><strong>Victoire</strong> → +0.05 point</li>
+            <li><strong>Défaite</strong> → −0.05 point</li>
+          </ul>
+          <p style="margin-top:10px">Le niveau ne peut pas dépasser 7.0 ni descendre en dessous de 0.0. Votre catégorie est recalculée automatiquement à chaque mise à jour.</p>
+        </div>
+      </details>
+
+      {# 7 – Soumettre un résultat #}
+      <details class="faq-item">
+        <summary><span><i class="bi bi-check2-circle" style="margin-right:8px;color:#16a34a"></i>Comment soumettre le résultat d'un match ?</span></summary>
+        <div class="faq-body">
+          <p style="margin-top:8px">Le résultat est soumis de manière collaborative par les joueurs :</p>
+          <ol style="padding-left:18px;margin:8px 0 0;display:grid;gap:6px">
+            <li>Le jour du match (ou après), un joueur ouvre la page du match et appuie sur <strong>Proposer un résultat</strong>.</li>
+            <li>Il assigne chaque joueur à une équipe (Équipe 1 ou Équipe 2) et indique l'équipe gagnante.</li>
+            <li>Un joueur de <strong>l'équipe adverse</strong> doit ensuite <strong>confirmer</strong> le résultat.</li>
+            <li>Une fois confirmé, les niveaux sont mis à jour automatiquement.</li>
+          </ol>
+          <p style="margin-top:10px">Si le résultat est contesté, la proposition est annulée et un nouveau résultat peut être soumis.</p>
+        </div>
+      </details>
+
+      {# 8 – Niveau requis #}
+      <details class="faq-item">
+        <summary><span><i class="bi bi-shield-check" style="margin-right:8px;color:#6b8070"></i>Que signifie le niveau requis d'un match ?</span></summary>
+        <div class="faq-body">
+          <p style="margin-top:8px">Chaque match peut avoir un <strong>niveau minimum requis</strong>. Si votre catégorie est inférieure à ce niveau, vous ne pouvez pas vous inscrire.</p>
+          <p style="margin-top:8px">Cela garantit des parties équilibrées et respectueuses du niveau de jeu de chacun. Votre niveau actuel est toujours visible sur votre <strong>Profil</strong>.</p>
+        </div>
+      </details>
 
     </div>
   </div>
