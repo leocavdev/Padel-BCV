@@ -118,31 +118,37 @@ const ENC = encodeURIComponent(TWINT_TOKEN);
 
 const BANKS = {
   raiffeisen: {
+    iosScheme: 'raiffeisentwint',
     pkg: 'ch.raiffeisen.android',
     appstore: 'https://apps.apple.com/ch/search?term=raiffeisen+twint',
     playstore: 'https://play.google.com/store/search?q=raiffeisen+twint'
   },
   ubs: {
+    iosScheme: 'ubstwint',
     pkg: 'ch.ubs.twint',
     appstore: 'https://apps.apple.com/ch/search?term=ubs+twint',
     playstore: 'https://play.google.com/store/search?q=ubs+twint'
   },
   postfinance: {
+    iosScheme: 'postfinancetwint',
     pkg: 'ch.postfinance.twint',
     appstore: 'https://apps.apple.com/ch/search?term=postfinance+twint',
     playstore: 'https://play.google.com/store/search?q=postfinance+twint'
   },
   zkb: {
+    iosScheme: 'zkbtwint',
     pkg: 'ch.zkb.twint',
     appstore: 'https://apps.apple.com/ch/search?term=zkb+twint',
     playstore: 'https://play.google.com/store/search?q=zkb+twint'
   },
   bcv: {
+    iosScheme: 'bcvtwint',
     pkg: 'ch.bcv.twint',
     appstore: 'https://apps.apple.com/ch/app/bcv-twint/id1209496081',
     playstore: 'https://play.google.com/store/apps/details?id=ch.bcv.twint'
   },
   generic: {
+    iosScheme: 'twint',
     pkg: null,
     appstore: 'https://apps.apple.com/ch/search?term=twint',
     playstore: 'https://play.google.com/store/search?q=twint'
@@ -172,13 +178,13 @@ function openTwintApp(bankKey) {
     window.location.href = intent;
 
   } else if (isIOS) {
-    // window.location.href dans le gestionnaire de clic = geste utilisateur direct,
-    // requis par iOS Safari pour ouvrir un URL scheme personnalisé.
-    // Pas de détection automatique (visibilityState/blur non fiables sur iOS) —
-    // on affiche un lien de téléchargement passif si l'app n'est pas installée.
+    // Chaque app TWINT de banque enregistre son propre URL scheme iOS (ex: bcvtwint://).
+    // On utilise le scheme spécifique à la banque choisie pour ouvrir directement la bonne app.
+    // Si l'app n'est pas installée, iOS affiche une erreur et le lien App Store reste visible.
     document.getElementById('twint-appstore-link').href = bank.appstore;
     document.getElementById('twint-no-app').style.display = 'block';
-    window.location.href = 'twint://qr?data=' + ENC;
+    const scheme = bank.iosScheme || 'twint';
+    window.location.href = scheme + '://qr?data=' + ENC;
 
   } else {
     hideTwintPicker();
