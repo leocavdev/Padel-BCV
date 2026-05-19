@@ -28,7 +28,7 @@
       </div>
 
       {# Payer avec TWINT #}
-      <button onclick="showTwintPicker()"
+      <button onclick="onTwintButtonClick()"
          style="display:flex;align-items:center;justify-content:center;gap:10px;
                 background:#000;color:#fff;border-radius:14px;padding:14px 24px;
                 width:100%;font-size:15px;font-weight:700;border:none;cursor:pointer;
@@ -36,6 +36,21 @@
         <img src="{{ url_for('static', filename='img/twint_logo.png') }}" width="28" height="28" style="border-radius:6px" alt="TWINT">
         Payer avec TWINT
       </button>
+
+      {# Instructions iOS — affichées quand le bouton est pressé sur iPhone #}
+      <div id="ios-instructions" style="display:none;background:#fff;border-radius:16px;padding:16px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,0.08)">
+        <div style="font-size:14px;font-weight:700;color:#151c17;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+          <img src="{{ url_for('static', filename='img/twint_logo.png') }}" width="20" height="20" style="border-radius:4px" alt="">
+          Comment payer avec TWINT
+        </div>
+        <ol style="font-size:13px;color:#4b5563;line-height:2;padding-left:20px;margin:0">
+          <li>Ouvrez votre app <strong>TWINT</strong> sur ce téléphone</li>
+          <li>Appuyez sur l'icône <strong>Scanner</strong> (QR code)</li>
+          <li>Scannez le <strong>QR code affiché ci-dessus</strong></li>
+          <li>Confirmez le paiement dans TWINT</li>
+          <li>Revenez ici et appuyez sur <strong style="color:#2d6a4f">J'ai effectué le paiement</strong></li>
+        </ol>
+      </div>
 
       {% if pending_mp and match %}
       {# Confirmation de paiement TWINT — inscription en attente #}
@@ -95,10 +110,6 @@
     <div style="padding:0 16px 8px">
       <button onclick="hideTwintPicker()" class="twint-bank-btn" style="color:#ff453a">Annuler</button>
     </div>
-    <p id="twint-no-app" style="display:none;text-align:center;font-size:12px;color:#8e8e93;padding:0 16px 12px;margin:0">
-      App non installée ?
-      <a id="twint-appstore-link" href="#" style="color:#3b82f6;text-decoration:none">Télécharger TWINT</a>
-    </p>
   </div>
 </div>
 
@@ -155,9 +166,18 @@ const BANKS = {
   }
 };
 
-function showTwintPicker() {
-  const modal = document.getElementById('twint-modal');
-  modal.style.display = 'flex';
+const IS_IOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+function onTwintButtonClick() {
+  if (IS_IOS) {
+    // Sur iOS, le deep link TWINT depuis Safari n'est pas supporté pour les QR statiques.
+    // (TWINT utilise un schème twint-issuerN:// privé, non documenté, par banque.)
+    // On affiche les instructions de scan à la place.
+    document.getElementById('ios-instructions').style.display = 'block';
+    document.getElementById('ios-instructions').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } else {
+    document.getElementById('twint-modal').style.display = 'flex';
+  }
 }
 
 function hideTwintPicker() {
@@ -166,30 +186,11 @@ function hideTwintPicker() {
 
 function openTwintApp(bankKey) {
   const bank = BANKS[bankKey];
-  const ua = navigator.userAgent;
-  const isAndroid = /android/i.test(ua);
-  const isIOS    = /iphone|ipad|ipod/i.test(ua);
-
-  if (isAndroid) {
-    hideTwintPicker();
-    const fb = encodeURIComponent(bank.playstore);
-    const pkg = bank.pkg ? `package=${bank.pkg};` : '';
-    const intent = `intent://payment#Intent;action=ch.twint.action.TWINT_PAYMENT;scheme=twint;${pkg}S.code=${ENC};S.startingOrigin=EXTERNAL_WEB_BROWSER;S.browser_fallback_url=${fb};end`;
-    window.location.href = intent;
-
-  } else if (isIOS) {
-    // Chaque app TWINT de banque enregistre son propre URL scheme iOS (ex: bcvtwint://).
-    // On utilise le scheme spécifique à la banque choisie pour ouvrir directement la bonne app.
-    // Si l'app n'est pas installée, iOS affiche une erreur et le lien App Store reste visible.
-    document.getElementById('twint-appstore-link').href = bank.appstore;
-    document.getElementById('twint-no-app').style.display = 'block';
-    const scheme = bank.iosScheme || 'twint';
-    window.location.href = scheme + '://qr?data=' + ENC;
-
-  } else {
-    hideTwintPicker();
-    alert('Ouvrez votre app TWINT sur votre téléphone et scannez le QR code ci-dessus.');
-  }
+  hideTwintPicker();
+  const fb = encodeURIComponent(bank.playstore);
+  const pkg = bank.pkg ? `package=${bank.pkg};` : '';
+  const intent = `intent://payment#Intent;action=ch.twint.action.TWINT_PAYMENT;scheme=twint;${pkg}S.code=${ENC};S.startingOrigin=EXTERNAL_WEB_BROWSER;S.browser_fallback_url=${fb};end`;
+  window.location.href = intent;
 }
 </script>
 {% endblock %}
