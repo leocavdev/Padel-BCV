@@ -51,7 +51,19 @@
       "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV add app/templates/admin/reimbursements.html app/admin/routes.py)",
       "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"remove diagnostic section from reimbursements page\")",
       "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"restore DB tab in admin nav \\(6 tabs total\\)\")",
-      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"replace reimbursement amount input with toggle button\")"
+      "Bash(git -C /Users/leonardo/Desktop/App_padel_BCV commit -m \"replace reimbursement amount input with toggle button\")",
+      "WebFetch(domain:saferpay.github.io)",
+      "WebFetch(domain:developers.payrexx.com)",
+      "WebFetch(domain:docs.payrexx.com)",
+      "WebFetch(domain:docs.adyen.com)",
+      "Bash(gh api *)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:admin.sandbox.datatrans.com)",
+      "WebFetch(domain:www.twint.ch)",
+      "WebFetch(domain:docs.embed.co)",
+      "WebFetch(domain:developerhub.ppro.com)",
+      "WebFetch(domain:docs.direct.worldline-solutions.com)"
     ]
   }
 }
