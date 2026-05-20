@@ -14,11 +14,11 @@ class Config:
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
     PLAYERS_PER_MATCH = 4
     PAYMENT_QR_DATA = (
-        "Padel BCV | Paiement des matchs | "
+        "Padel ASBCV | Paiement des matchs | "
         "Virement : IBAN FR76 1234 5678 9012 3456 7890 123 | "
         "Libellé : Votre prénom + date du match"
     )
-    # Token extrait du QR code TWINT BCV statique (utilisé pour le deep link Android/iOS)
+    # Token extrait du QR code TWINT ASBCV statique (utilisé pour le deep link Android/iOS)
     TWINT_QR_TOKEN = (
         "02:1732cc684ac546e7b4e463509e548633"
         "#eedc8077fee9e3f280459d636fa00244d6a05843"

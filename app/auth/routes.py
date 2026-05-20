@@ -72,7 +72,7 @@ def profile():
 @login_required
 def padel_bcv():
     return render_template('auth/padel_bcv.html',
-                           title='Padel BCV')
+                           title='Padel ASBCV')
 
 
 @bp.route('/joueurs-bcv')
@@ -88,7 +88,7 @@ def players_bcv():
     return render_template('auth/players_bcv.html',
                            groups=grouped,
                            skill_levels=SKILL_LEVELS,
-                           title='Joueurs BCV')
+                           title='Joueurs ASBCV')
 
 
 @bp.route('/reglement')

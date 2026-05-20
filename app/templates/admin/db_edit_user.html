@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{{ title }} — Padel BCV{% endblock %}
+{% block title %}{{ title }} — Padel ASBCV{% endblock %}
 {% block content %}
 <div class="page-fade" style="display:flex;flex-direction:column;height:100%">
 
@@ -37,7 +37,7 @@
         </div>
 
         <div class="input-wrap">
-          <label style="font-size:13px;font-weight:600;color:#2d3e30">Email privé (non BCV)</label>
+          <label style="font-size:13px;font-weight:600;color:#2d3e30">Email privé (non ASBCV)</label>
           <div class="input-box">
             <i class="bi bi-envelope"></i>
             <input type="email" name="email" value="{{ user.email if user else '' }}"
