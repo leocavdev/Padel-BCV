@@ -28,7 +28,7 @@
       </div>
 
       {# Bouton TWINT — RaiseNow avec montant pré-rempli (amount.custom=false = non modifiable) #}
-      <a href="https://pay.raisenow.io/fnzzn{% if match %}?amount.values={{ (match.price_per_player | round | int) }}&amount.custom=false{% endif %}"
+      <a href="https://pay.raisenow.io/fnzzn{% if match %}?amount.values={{ match.price_per_player }}&amount.custom=false{% endif %}"
          style="display:flex;align-items:center;justify-content:center;gap:10px;
                 background:#000;color:#fff;border-radius:14px;padding:14px 24px;
                 width:100%;font-size:15px;font-weight:700;text-decoration:none;
