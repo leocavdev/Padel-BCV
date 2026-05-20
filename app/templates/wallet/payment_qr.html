@@ -28,8 +28,7 @@
       </div>
 
       {# Payer avec TWINT #}
-      <button onclick="payWithTwint(this)"
-         data-amount="{{ match.price_per_player if match else '' }}"
+      <button onclick="payWithTwint()"
          style="display:flex;align-items:center;justify-content:center;gap:10px;
                 background:#000;color:#fff;border-radius:14px;padding:14px 24px;
                 width:100%;font-size:15px;font-weight:700;border:none;cursor:pointer;
@@ -93,19 +92,17 @@
 const TWINT_TOKEN = "{{ twint_token }}";
 const ENC = encodeURIComponent(TWINT_TOKEN);
 
-function payWithTwint(btn) {
-  const amountCents = btn.dataset.amount ? Math.round(parseFloat(btn.dataset.amount) * 100) : null;
+function payWithTwint() {
   const isAndroid = /android/i.test(navigator.userAgent);
   const isIOS    = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
   if (isAndroid) {
     const fb = encodeURIComponent('https://play.google.com/store/search?q=twint');
-    const amountExtra = amountCents ? `S.amount=${amountCents};` : '';
-    const intent = `intent://payment#Intent;action=ch.twint.action.TWINT_PAYMENT;scheme=twint;S.code=${ENC};${amountExtra}S.startingOrigin=EXTERNAL_WEB_BROWSER;S.browser_fallback_url=${fb};end`;
+    const intent = `intent://payment#Intent;action=ch.twint.action.TWINT_PAYMENT;scheme=twint;S.code=${ENC};S.startingOrigin=EXTERNAL_WEB_BROWSER;S.browser_fallback_url=${fb};end`;
     window.location.href = intent;
 
   } else if (isIOS) {
-    launchTwintIOS(amountCents);
+    launchTwintIOS();
 
   } else {
     alert('Ouvrez votre app TWINT sur votre téléphone et scannez le QR code ci-dessus.');
@@ -114,15 +111,12 @@ function payWithTwint(btn) {
 
 // Tente les schémas twint-issuer1..50 via iframes cachées (silencieuses si non installé).
 // La bonne app s'ouvre dès que son schéma répond ; visibilitychange le détecte.
-function launchTwintIOS(amountCents) {
+function launchTwintIOS() {
   document.getElementById('twint-loading').style.display = 'flex';
-
-  const extras = { code: TWINT_TOKEN };
-  if (amountCents) extras.amount = amountCents;
 
   const alData = encodeURIComponent(JSON.stringify({
     app_action_type: 'TWINT_PAYMENT',
-    extras: extras,
+    extras: { code: TWINT_TOKEN },
     referer_app_link: { target_url: '', url: '', app_name: 'EXTERNAL_WEB_BROWSER' },
     version: '6.0'
   }));
