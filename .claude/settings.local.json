@@ -67,7 +67,14 @@
       "Bash(brew list *)",
       "Bash(python3 -c \"import qrcode; help\\(qrcode\\)\")",
       "Bash(python3 -c \"from qreader import QReader; import cv2; qr=QReader\\(\\); img=cv2.cvtColor\\(cv2.imread\\('/Users/leonardo/Desktop/App_padel_BCV/app/static/img/qr_payment.png'\\), cv2.COLOR_BGR2RGB\\); print\\(qr.detect_and_decode\\(image=img\\)\\)\")",
-      "Bash(git revert *)"
+      "Bash(git revert *)",
+      "WebFetch(domain:unpkg.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:support.raisenow.com)",
+      "WebFetch(domain:app.unpkg.com)",
+      "WebFetch(domain:docs.raisenow.com)",
+      "WebFetch(domain:assets.raisenow.io)",
+      "WebFetch(domain:bitbucket.org)"
     ]
   }
 }
