@@ -63,7 +63,10 @@
       "WebFetch(domain:www.twint.ch)",
       "WebFetch(domain:docs.embed.co)",
       "WebFetch(domain:developerhub.ppro.com)",
-      "WebFetch(domain:docs.direct.worldline-solutions.com)"
+      "WebFetch(domain:docs.direct.worldline-solutions.com)",
+      "Bash(brew list *)",
+      "Bash(python3 -c \"import qrcode; help\\(qrcode\\)\")",
+      "Bash(python3 -c \"from qreader import QReader; import cv2; qr=QReader\\(\\); img=cv2.cvtColor\\(cv2.imread\\('/Users/leonardo/Desktop/App_padel_BCV/app/static/img/qr_payment.png'\\), cv2.COLOR_BGR2RGB\\); print\\(qr.detect_and_decode\\(image=img\\)\\)\")"
     ]
   }
 }
