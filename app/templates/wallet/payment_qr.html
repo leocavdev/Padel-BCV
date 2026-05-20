@@ -27,19 +27,15 @@
         </div>
       </div>
 
-      {# Bouton TWINT via RaiseNow (gère iOS/Android nativement) #}
-      <div id="rnw-paylink-button-fnzzn" style="width:100%"></div>
-      <script type="module">
-        import {TwintButton} from "https://unpkg.com/@raisenow/paylink-button@2/dist/TwintButton.js"
-        TwintButton.render("#rnw-paylink-button-fnzzn", {
-          "solution-id": "fnzzn",
-          "solution-type": "pay",
-          "language": "fr",
-          "size": "large",
-          "width": "fixed",
-          "color-scheme": "dark",
-        })
-      </script>
+      {# Bouton TWINT — RaiseNow avec montant pré-rempli (amount.custom=false = non modifiable) #}
+      <a href="https://pay.raisenow.io/fnzzn{% if match %}?amount.values={{ (match.price_per_player | round | int) }}&amount.custom=false{% endif %}"
+         style="display:flex;align-items:center;justify-content:center;gap:10px;
+                background:#000;color:#fff;border-radius:14px;padding:14px 24px;
+                width:100%;font-size:15px;font-weight:700;text-decoration:none;
+                box-shadow:0 4px 14px rgba(0,0,0,0.18);box-sizing:border-box">
+        <img src="{{ url_for('static', filename='img/twint_logo.png') }}" width="28" height="28" style="border-radius:6px" alt="TWINT">
+        Payer avec TWINT
+      </a>
 
       {% if pending_mp and match %}
       {# Confirmation de paiement TWINT — inscription en attente #}
