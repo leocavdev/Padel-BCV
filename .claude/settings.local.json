@@ -74,7 +74,11 @@
       "WebFetch(domain:app.unpkg.com)",
       "WebFetch(domain:docs.raisenow.com)",
       "WebFetch(domain:assets.raisenow.io)",
-      "WebFetch(domain:bitbucket.org)"
+      "WebFetch(domain:bitbucket.org)",
+      "Bash(cp /Users/leonardo/Desktop/App_padel_BCV/LEO_img_ADMIN.png /Users/leonardo/Desktop/App_padel_BCV/app/static/img/LEO_img_ADMIN.png)"
+    ],
+    "additionalDirectories": [
+      "/Users/leonardo/Desktop/App_padel_BCV"
     ]
   }
 }
