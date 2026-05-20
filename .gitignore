@@ -5,3 +5,5 @@ __pycache__/
 *.tmp.*
 instance/LEO_img_ADMIN.png
 WITHA_img_ADMIN.png
+LEO_img_ADMIN.png
+.claude/settings.local.json
