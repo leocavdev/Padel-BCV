@@ -9,3 +9,5 @@ Pillow==11.0.0
 email-validator==2.1.0
 gunicorn
 psycopg2-binary
+requests==2.31.0
+python-dotenv==1.0.0

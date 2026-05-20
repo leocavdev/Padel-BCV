@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.admin import bp
 from app.admin.forms import CreateMatchForm, EditMatchForm
+from app.whatsapp import notify_new_match
 from app.models import (Match, MatchPlayer, Transaction, User,
                          ReplacementRequest, MatchResultProposal,
                          SKILL_ORDER, SKILL_LEVELS, _now_ch)
@@ -64,6 +65,7 @@ def create_match():
         )
         db.session.add(match)
         db.session.commit()
+        notify_new_match(match)
         flash('Match créé avec succès.', 'success')
         return redirect(url_for('admin.manage_match', match_id=match.id))
     return render_template('admin/create_match.html', form=form, title='Créer un match')

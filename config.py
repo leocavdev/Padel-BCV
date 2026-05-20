@@ -24,3 +24,8 @@ class Config:
         "#eedc8077fee9e3f280459d636fa00244d6a05843"
         "#a~8cDutzr6Rp2pha6lDzRJvA~s~ADL72ziETNmJAfNGQ4KXPQ"
     )
+    # Green API – WhatsApp group notifications
+    GREENAPI_INSTANCE_ID = os.environ.get('GREENAPI_INSTANCE_ID', '')
+    GREENAPI_TOKEN       = os.environ.get('GREENAPI_TOKEN', '')
+    # Group chat ID format: 120363XXXXXXXXXX@g.us  (get it via /getChats)
+    GREENAPI_GROUP_ID    = os.environ.get('GREENAPI_GROUP_ID', '')
