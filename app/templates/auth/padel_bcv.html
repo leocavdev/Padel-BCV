@@ -12,7 +12,7 @@
       <div class="card-new" style="padding:18px">
         <div style="font-size:16px;font-weight:700;color:#151c17;margin-bottom:8px">Padel ASBCV</div>
         <p style="font-size:14px;color:#4b5563;line-height:1.7">
-          Retrouvez ici les ressources dédiées à la communauté Padel de l'ASBCV (Association Sportive de la Banque Cantonale Vaudoise). Découvrez les informations essentielles sur les matchs, les:
+          Retrouvez ici les ressources dédiées à la section Padel de l'ASBCV (Association Sportive de la Banque Cantonale Vaudoise). Découvrez les informations essentielles sur les matchs, les:
           joueurs, progression et règlement.
         </p>
       </div>
@@ -29,6 +29,36 @@
       <a href="{{ url_for('auth.reglement') }}" class="btn-p full">
         Règlement
       </a>
+      <button onclick="document.getElementById('contact-modal').style.display='flex'" class="btn-p full" style="background:#fff;color:#151c17;border:1.5px solid #d1d5db;">
+        <i class="bi bi-whatsapp" style="color:#25d366;margin-right:8px"></i>Contacter les administrateurs
+      </button>
+
+      {# ── Modal contact ──────────────────────────────────────────────── #}
+      <div id="contact-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:flex-end;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+        <div style="background:#fff;border-radius:20px 20px 0 0;padding:24px 20px 36px;width:100%;max-width:480px">
+          <div style="font-size:16px;font-weight:800;color:#151c17;margin-bottom:4px">Contacter un administrateur</div>
+          <div style="font-size:13px;color:#6b7280;margin-bottom:20px">Choisissez un administrateur à contacter via WhatsApp.</div>
+          <a href="https://wa.me/41798704802" target="_blank" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:#f0fdf4;text-decoration:none;margin-bottom:12px">
+            <div style="width:42px;height:42px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <i class="bi bi-whatsapp" style="color:#fff;font-size:20px"></i>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:#151c17">Withawat Ngamphrom</div>
+              <div style="font-size:12px;color:#6b7280">+41 79 870 48 02</div>
+            </div>
+          </a>
+          <a href="https://wa.me/41789009796" target="_blank" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:#f0fdf4;text-decoration:none;margin-bottom:20px">
+            <div style="width:42px;height:42px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <i class="bi bi-whatsapp" style="color:#fff;font-size:20px"></i>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:#151c17">Leonardo Cavaliere</div>
+              <div style="font-size:12px;color:#6b7280">+41 78 900 97 96</div>
+            </div>
+          </a>
+          <button onclick="document.getElementById('contact-modal').style.display='none'" style="width:100%;padding:14px;border-radius:12px;border:none;background:#f3f4f6;font-size:15px;font-weight:600;color:#374151;cursor:pointer">Fermer</button>
+        </div>
+      </div>
 
       {# ── FAQ ─────────────────────────────────────────────────────────── #}
       <div style="font-size:18px;font-weight:800;color:#151c17;margin-top:8px">FAQ</div>
