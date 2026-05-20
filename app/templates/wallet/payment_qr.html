@@ -102,7 +102,16 @@
   </div>
 </div>
 
+{# Overlay chargement iOS TWINT #}
+<div id="twint-loading" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.55);align-items:center;justify-content:center">
+  <div style="background:#1c1c1e;border-radius:20px;padding:28px 36px;text-align:center">
+    <div style="width:36px;height:36px;border:3px solid #3a3a3c;border-top-color:#fff;border-radius:50%;animation:tw-spin .8s linear infinite;margin:0 auto"></div>
+    <div style="margin-top:14px;font-size:14px;color:#fff;font-weight:600">Connexion à TWINT…</div>
+  </div>
+</div>
+
 <style>
+@keyframes tw-spin { to { transform: rotate(360deg); } }
 .twint-bank-btn {
   display:block; width:100%; padding:16px; margin:4px 0;
   background:#2c2c2e; color:#fff; border:none; border-radius:12px;
@@ -163,6 +172,51 @@ function hideTwintPicker() {
   document.getElementById('twint-modal').style.display = 'none';
 }
 
+// iOS : tente les schémas twint-issuer1..50 via iframes cachées (silencieuses si non installé).
+// La bonne app s'ouvre dès que son schéma répond ; visibilitychange le détecte.
+function launchTwintIOS(bank) {
+  const loading = document.getElementById('twint-loading');
+  loading.style.display = 'flex';
+
+  // Format documenté par Adyen/Datatrans pour les deep links TWINT iOS
+  const alData = encodeURIComponent(JSON.stringify({
+    app_action_type: 'TWINT_PAYMENT',
+    extras: { code: TWINT_TOKEN },
+    referer_app_link: { target_url: '', url: '', app_name: 'EXTERNAL_WEB_BROWSER' },
+    version: '6.0'
+  }));
+
+  let done = false;
+  let n = 1;
+
+  function onHide() {
+    if (document.hidden && !done) {
+      done = true;
+      loading.style.display = 'none';
+      document.removeEventListener('visibilitychange', onHide);
+    }
+  }
+  document.addEventListener('visibilitychange', onHide);
+
+  const tick = setInterval(() => {
+    if (done || n > 50) {
+      clearInterval(tick);
+      document.removeEventListener('visibilitychange', onHide);
+      loading.style.display = 'none';
+      if (!done) {
+        document.getElementById('twint-appstore-link').href = bank.appstore;
+        document.getElementById('twint-no-app').style.display = 'block';
+      }
+      return;
+    }
+    const fr = document.createElement('iframe');
+    fr.style.cssText = 'position:fixed;width:0;height:0;border:none;top:0;left:0;opacity:0';
+    fr.src = `twint-issuer${n++}://applinks/?al_applink_data=${alData}`;
+    document.body.appendChild(fr);
+    setTimeout(() => fr.parentNode?.removeChild(fr), 800);
+  }, 50);
+}
+
 function openTwintApp(bankKey) {
   const bank = BANKS[bankKey];
   const isAndroid = /android/i.test(navigator.userAgent);
@@ -176,10 +230,8 @@ function openTwintApp(bankKey) {
     window.location.href = intent;
 
   } else if (isIOS) {
-    document.getElementById('twint-appstore-link').href = bank.appstore;
-    document.getElementById('twint-no-app').style.display = 'block';
-    const scheme = bank.iosScheme || 'twint';
-    window.location.href = scheme + '://qr?data=' + ENC;
+    hideTwintPicker();
+    launchTwintIOS(bank);
 
   } else {
     hideTwintPicker();
