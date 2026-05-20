@@ -75,7 +75,11 @@
       "WebFetch(domain:docs.raisenow.com)",
       "WebFetch(domain:assets.raisenow.io)",
       "WebFetch(domain:bitbucket.org)",
-      "Bash(cp /Users/leonardo/Desktop/App_padel_BCV/LEO_img_ADMIN.png /Users/leonardo/Desktop/App_padel_BCV/app/static/img/LEO_img_ADMIN.png)"
+      "Bash(cp /Users/leonardo/Desktop/App_padel_BCV/LEO_img_ADMIN.png /Users/leonardo/Desktop/App_padel_BCV/app/static/img/LEO_img_ADMIN.png)",
+      "Bash(sips -Z 120 /Users/leonardo/Desktop/App_padel_BCV/app/static/img/LEO_img_ADMIN.png --out /Users/leonardo/Desktop/App_padel_BCV/app/static/img/LEO_img_ADMIN.png)",
+      "Bash(sips -Z 120 /Users/leonardo/Desktop/App_padel_BCV/app/static/img/WITHA_img_ADMIN.png --out /Users/leonardo/Desktop/App_padel_BCV/app/static/img/WITHA_img_ADMIN.png)",
+      "Bash(git rm *)",
+      "Bash(git reset *)"
     ],
     "additionalDirectories": [
       "/Users/leonardo/Desktop/App_padel_BCV"

@@ -3,4 +3,5 @@
 __pycache__/
 .env
 *.tmp.*
-instance/
+instance/LEO_img_ADMIN.png
+WITHA_img_ADMIN.png
