@@ -28,7 +28,7 @@
       </div>
 
       {# Payer avec TWINT #}
-      <button onclick="showTwintPicker()"
+      <button onclick="payWithTwint()"
          style="display:flex;align-items:center;justify-content:center;gap:10px;
                 background:#000;color:#fff;border-radius:14px;padding:14px 24px;
                 width:100%;font-size:15px;font-weight:700;border:none;cursor:pointer;
@@ -36,6 +36,11 @@
         <img src="{{ url_for('static', filename='img/twint_logo.png') }}" width="28" height="28" style="border-radius:6px" alt="TWINT">
         Payer avec TWINT
       </button>
+
+      <p id="twint-no-app" style="display:none;text-align:center;font-size:12px;color:#6b8070;margin:0">
+        App TWINT introuvable —
+        <a href="https://apps.apple.com/ch/search?term=twint" style="color:#3b82f6;text-decoration:none">Télécharger</a>
+      </p>
 
       {% if pending_mp and match %}
       {# Confirmation de paiement TWINT — inscription en attente #}
@@ -70,37 +75,6 @@
   </div>
 </div>
 
-{# TWINT App Picker — bottom sheet style iOS #}
-<div id="twint-modal" onclick="hideTwintPicker()"
-     style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);
-            align-items:flex-end;justify-content:center">
-  <div onclick="event.stopPropagation()"
-       style="background:#1c1c1e;border-radius:16px 16px 0 0;width:100%;max-width:500px;
-              padding-bottom:env(safe-area-inset-bottom,16px)">
-
-    <div style="text-align:center;padding:20px 16px 16px;border-bottom:1px solid #3a3a3c">
-      <div style="font-size:17px;font-weight:700;color:#fff;margin-bottom:4px">TWINT</div>
-      <div style="font-size:14px;color:#8e8e93">Veuillez sélectionner l'app TWINT souhaitée</div>
-    </div>
-
-    <div style="padding:8px 16px">
-      <button onclick="openTwintApp('raiffeisen')" class="twint-bank-btn">Raiffeisen TWINT</button>
-      <button onclick="openTwintApp('ubs')"        class="twint-bank-btn">UBS TWINT</button>
-      <button onclick="openTwintApp('postfinance')"class="twint-bank-btn">PostFinance TWINT</button>
-      <button onclick="openTwintApp('zkb')"        class="twint-bank-btn">ZKB TWINT</button>
-      <button onclick="openTwintApp('bcv')"        class="twint-bank-btn">BCV TWINT</button>
-      <button onclick="openTwintApp('generic')"    class="twint-bank-btn">Autre app TWINT</button>
-    </div>
-
-    <div style="padding:0 16px 8px">
-      <button onclick="hideTwintPicker()" class="twint-bank-btn" style="color:#ff453a">Annuler</button>
-    </div>
-    <p id="twint-no-app" style="display:none;text-align:center;font-size:12px;color:#8e8e93;padding:0 16px 12px;margin:0">
-      App non installée ?
-      <a id="twint-appstore-link" href="#" style="color:#3b82f6;text-decoration:none">Télécharger TWINT</a>
-    </p>
-  </div>
-</div>
 
 {# Overlay chargement iOS TWINT #}
 <div id="twint-loading" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.55);align-items:center;justify-content:center">
@@ -112,73 +86,34 @@
 
 <style>
 @keyframes tw-spin { to { transform: rotate(360deg); } }
-.twint-bank-btn {
-  display:block; width:100%; padding:16px; margin:4px 0;
-  background:#2c2c2e; color:#fff; border:none; border-radius:12px;
-  font-size:17px; font-weight:600; cursor:pointer; text-align:center;
-  -webkit-tap-highlight-color:transparent;
-}
-.twint-bank-btn:active { background:#3a3a3c; }
 </style>
 
 <script>
 const TWINT_TOKEN = "{{ twint_token }}";
 const ENC = encodeURIComponent(TWINT_TOKEN);
 
-const BANKS = {
-  raiffeisen: {
-    iosScheme: 'raiffeisentwint',
-    pkg: 'ch.raiffeisen.android',
-    appstore: 'https://apps.apple.com/ch/search?term=raiffeisen+twint',
-    playstore: 'https://play.google.com/store/search?q=raiffeisen+twint'
-  },
-  ubs: {
-    iosScheme: 'ubstwint',
-    pkg: 'ch.ubs.twint',
-    appstore: 'https://apps.apple.com/ch/search?term=ubs+twint',
-    playstore: 'https://play.google.com/store/search?q=ubs+twint'
-  },
-  postfinance: {
-    iosScheme: 'postfinancetwint',
-    pkg: 'ch.postfinance.twint',
-    appstore: 'https://apps.apple.com/ch/search?term=postfinance+twint',
-    playstore: 'https://play.google.com/store/search?q=postfinance+twint'
-  },
-  zkb: {
-    iosScheme: 'zkbtwint',
-    pkg: 'ch.zkb.twint',
-    appstore: 'https://apps.apple.com/ch/search?term=zkb+twint',
-    playstore: 'https://play.google.com/store/search?q=zkb+twint'
-  },
-  bcv: {
-    iosScheme: 'bcvtwint',
-    pkg: 'ch.bcv.twint',
-    appstore: 'https://apps.apple.com/ch/app/bcv-twint/id1209496081',
-    playstore: 'https://play.google.com/store/apps/details?id=ch.bcv.twint'
-  },
-  generic: {
-    iosScheme: 'twint',
-    pkg: null,
-    appstore: 'https://apps.apple.com/ch/search?term=twint',
-    playstore: 'https://play.google.com/store/search?q=twint'
+function payWithTwint() {
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const isIOS    = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  if (isAndroid) {
+    const fb = encodeURIComponent('https://play.google.com/store/search?q=twint');
+    const intent = `intent://payment#Intent;action=ch.twint.action.TWINT_PAYMENT;scheme=twint;S.code=${ENC};S.startingOrigin=EXTERNAL_WEB_BROWSER;S.browser_fallback_url=${fb};end`;
+    window.location.href = intent;
+
+  } else if (isIOS) {
+    launchTwintIOS();
+
+  } else {
+    alert('Ouvrez votre app TWINT sur votre téléphone et scannez le QR code ci-dessus.');
   }
-};
-
-function showTwintPicker() {
-  document.getElementById('twint-modal').style.display = 'flex';
 }
 
-function hideTwintPicker() {
-  document.getElementById('twint-modal').style.display = 'none';
-}
-
-// iOS : tente les schémas twint-issuer1..50 via iframes cachées (silencieuses si non installé).
+// Tente les schémas twint-issuer1..50 via iframes cachées (silencieuses si non installé).
 // La bonne app s'ouvre dès que son schéma répond ; visibilitychange le détecte.
-function launchTwintIOS(bank) {
-  const loading = document.getElementById('twint-loading');
-  loading.style.display = 'flex';
+function launchTwintIOS() {
+  document.getElementById('twint-loading').style.display = 'flex';
 
-  // Format documenté par Adyen/Datatrans pour les deep links TWINT iOS
   const alData = encodeURIComponent(JSON.stringify({
     app_action_type: 'TWINT_PAYMENT',
     extras: { code: TWINT_TOKEN },
@@ -192,7 +127,7 @@ function launchTwintIOS(bank) {
   function onHide() {
     if (document.hidden && !done) {
       done = true;
-      loading.style.display = 'none';
+      document.getElementById('twint-loading').style.display = 'none';
       document.removeEventListener('visibilitychange', onHide);
     }
   }
@@ -202,11 +137,8 @@ function launchTwintIOS(bank) {
     if (done || n > 50) {
       clearInterval(tick);
       document.removeEventListener('visibilitychange', onHide);
-      loading.style.display = 'none';
-      if (!done) {
-        document.getElementById('twint-appstore-link').href = bank.appstore;
-        document.getElementById('twint-no-app').style.display = 'block';
-      }
+      document.getElementById('twint-loading').style.display = 'none';
+      if (!done) document.getElementById('twint-no-app').style.display = 'block';
       return;
     }
     const fr = document.createElement('iframe');
@@ -215,28 +147,6 @@ function launchTwintIOS(bank) {
     document.body.appendChild(fr);
     setTimeout(() => fr.parentNode?.removeChild(fr), 800);
   }, 50);
-}
-
-function openTwintApp(bankKey) {
-  const bank = BANKS[bankKey];
-  const isAndroid = /android/i.test(navigator.userAgent);
-  const isIOS    = /iphone|ipad|ipod/i.test(navigator.userAgent);
-
-  if (isAndroid) {
-    hideTwintPicker();
-    const fb = encodeURIComponent(bank.playstore);
-    const pkg = bank.pkg ? `package=${bank.pkg};` : '';
-    const intent = `intent://payment#Intent;action=ch.twint.action.TWINT_PAYMENT;scheme=twint;${pkg}S.code=${ENC};S.startingOrigin=EXTERNAL_WEB_BROWSER;S.browser_fallback_url=${fb};end`;
-    window.location.href = intent;
-
-  } else if (isIOS) {
-    hideTwintPicker();
-    launchTwintIOS(bank);
-
-  } else {
-    hideTwintPicker();
-    alert('Ouvrez votre app TWINT sur votre téléphone et scannez le QR code ci-dessus.');
-  }
 }
 </script>
 {% endblock %}
