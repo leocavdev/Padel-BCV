@@ -14,7 +14,7 @@ def notify_new_match(match):
     date_str  = match.date.strftime('%d/%m/%Y')
     start_str = match.start_time.strftime('%H:%M')
     end_str   = match.end_time.strftime('%H:%M')
-    price     = round(match.price_per_player * 8, 2)
+    price     = match.price_per_player
 
     skill_labels = {
         'beginner':     'Débutant',
