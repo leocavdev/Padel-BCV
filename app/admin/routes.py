@@ -194,7 +194,7 @@ def record_result(match_id):
 @admin_required
 def reimbursements():
     matches = (Match.query
-               .filter(Match.paid_by.isnot(None))
+               .filter(Match.paid_by.isnot(None), Match.status != 'cancelled')
                .order_by(Match.date.desc(), Match.start_time.desc())
                .all())
 
