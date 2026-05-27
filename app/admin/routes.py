@@ -202,7 +202,7 @@ def reimbursements():
     owed_to_witha = 0.0
     for m in matches:
         total = round(m.price_per_player * 8, 2)
-        owed = round(total / 2, 2)
+        owed = round(total, 2)
         remaining = max(0.0, round(owed - m.reimbursed_amount, 2))
         if m.paid_by == 'Leonardo':
             owed_to_leo += remaining
@@ -221,7 +221,7 @@ def reimbursements():
 def toggle_reimbursement(match_id):
     match = Match.query.get_or_404(match_id)
     total = round(match.price_per_player * 8, 2)
-    owed = round(total / 2, 2)
+    owed = round(total, 2)
     if match.reimbursed_amount >= owed:
         match.reimbursed_amount = 0.0
     else:

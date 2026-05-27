@@ -47,7 +47,7 @@
 
       {% for match in matches %}
       {% set total = (match.price_per_player * 8) | round(2) %}
-      {% set owed = (total / 2) | round(2) %}
+      {% set owed = total | round(2) %}
       {% set remaining = [0.0, (owed - match.reimbursed_amount) | round(2)] | max %}
       {% set is_settled = remaining <= 0 %}
 
