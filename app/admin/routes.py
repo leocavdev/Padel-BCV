@@ -8,6 +8,7 @@ from app.admin.forms import CreateMatchForm, EditMatchForm
 from app.whatsapp import notify_new_match
 from app.models import (Match, MatchPlayer, Transaction, User,
                          ReplacementRequest, MatchResultProposal,
+                         ManualExpense,
                          SKILL_ORDER, SKILL_LEVELS, _now_ch)
 
 
@@ -197,20 +198,27 @@ def reimbursements():
                .filter(Match.paid_by.isnot(None), Match.status != 'cancelled')
                .order_by(Match.date.desc(), Match.start_time.desc())
                .all())
+    expenses = ManualExpense.query.order_by(ManualExpense.created_at.desc()).all()
 
     owed_to_leo = 0.0
     owed_to_witha = 0.0
     for m in matches:
         total = round(m.price_per_player * 8, 2)
-        owed = round(total, 2)
-        remaining = max(0.0, round(owed - m.reimbursed_amount, 2))
+        remaining = max(0.0, round(total - m.reimbursed_amount, 2))
         if m.paid_by == 'Leonardo':
             owed_to_leo += remaining
         elif m.paid_by == 'Withawat':
             owed_to_witha += remaining
+    for e in expenses:
+        if not e.is_settled:
+            if e.paid_by == 'Leonardo':
+                owed_to_leo += e.amount
+            elif e.paid_by == 'Withawat':
+                owed_to_witha += e.amount
 
     return render_template('admin/reimbursements.html',
                            matches=matches,
+                           expenses=expenses,
                            owed_to_leo=round(owed_to_leo, 2),
                            owed_to_witha=round(owed_to_witha, 2),
                            title='Remboursements')
@@ -221,12 +229,50 @@ def reimbursements():
 def toggle_reimbursement(match_id):
     match = Match.query.get_or_404(match_id)
     total = round(match.price_per_player * 8, 2)
-    owed = round(total, 2)
-    if match.reimbursed_amount >= owed:
+    if match.reimbursed_amount >= total:
         match.reimbursed_amount = 0.0
     else:
-        match.reimbursed_amount = owed
+        match.reimbursed_amount = total
     db.session.commit()
+    return redirect(url_for('admin.reimbursements'))
+
+
+@bp.route('/expenses/add', methods=['POST'])
+@admin_required
+def add_expense():
+    description = request.form.get('description', '').strip()
+    paid_by = request.form.get('paid_by', '')
+    try:
+        amount = round(float(request.form.get('amount', 0)), 2)
+    except ValueError:
+        flash('Montant invalide.', 'danger')
+        return redirect(url_for('admin.reimbursements'))
+    if not description or paid_by not in ('Leonardo', 'Withawat') or amount <= 0:
+        flash('Veuillez remplir tous les champs correctement.', 'danger')
+        return redirect(url_for('admin.reimbursements'))
+    expense = ManualExpense(description=description, amount=amount, paid_by=paid_by)
+    db.session.add(expense)
+    db.session.commit()
+    flash('Frais ajouté.', 'success')
+    return redirect(url_for('admin.reimbursements'))
+
+
+@bp.route('/expenses/<int:expense_id>/toggle', methods=['POST'])
+@admin_required
+def toggle_expense(expense_id):
+    expense = ManualExpense.query.get_or_404(expense_id)
+    expense.is_settled = not expense.is_settled
+    db.session.commit()
+    return redirect(url_for('admin.reimbursements'))
+
+
+@bp.route('/expenses/<int:expense_id>/delete', methods=['POST'])
+@admin_required
+def delete_expense(expense_id):
+    expense = ManualExpense.query.get_or_404(expense_id)
+    db.session.delete(expense)
+    db.session.commit()
+    flash('Frais supprimé.', 'success')
     return redirect(url_for('admin.reimbursements'))
 
 

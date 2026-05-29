@@ -38,6 +38,77 @@
 
       </div>
 
+      {# ── Section frais manuels ── #}
+      <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <div style="padding:12px 14px 10px;border-bottom:1px solid #f0f4f0;display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:13px;font-weight:700;color:#151c17;display:flex;align-items:center;gap:6px">
+            <i class="bi bi-receipt" style="color:#d97706"></i> Frais manuels
+          </div>
+        </div>
+
+        <div style="padding:12px 14px;border-bottom:1px solid #f0f4f0">
+          <form method="POST" action="{{ url_for('admin.add_expense') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <input type="text" name="description" placeholder="Description (ex: Achat de balles…)" required maxlength="300"
+                     style="width:100%;padding:9px 12px;border:1.5px solid #d8eade;border-radius:10px;font-size:13px;color:#151c17;background:#fafcfa;box-sizing:border-box">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <input type="number" name="amount" placeholder="Montant (CHF)" required min="0.01" step="0.01"
+                       style="width:100%;padding:9px 12px;border:1.5px solid #d8eade;border-radius:10px;font-size:13px;color:#151c17;background:#fafcfa;box-sizing:border-box">
+                <select name="paid_by" required
+                        style="width:100%;padding:9px 12px;border:1.5px solid #d8eade;border-radius:10px;font-size:13px;color:#151c17;background:#fafcfa;box-sizing:border-box">
+                  <option value="" disabled selected>Payé par…</option>
+                  <option value="Leonardo">Leonardo</option>
+                  <option value="Withawat">Withawat</option>
+                </select>
+              </div>
+              <button type="submit"
+                      style="width:100%;padding:10px;border-radius:10px;border:none;background:#2d6a4f;color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+                <i class="bi bi-plus-circle-fill"></i> Ajouter un frais
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {% if expenses %}
+        <div style="padding:10px 14px;display:flex;flex-direction:column;gap:8px">
+          {% for e in expenses %}
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px{% if e.is_settled %};opacity:.6{% endif %}">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:600;color:#151c17;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.description }}</div>
+              <div style="font-size:11px;color:#91a492;margin-top:1px">
+                {{ e.created_at.strftime('%d/%m/%Y') }} · <span style="color:{% if e.paid_by == 'Leonardo' %}#d97706{% else %}#2563eb{% endif %}">{{ e.paid_by }}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:14px;font-weight:700;color:{% if e.is_settled %}#16a34a{% else %}#dc2626{% endif %}">
+                {{ "%.2f"|format(e.amount) }}<span style="font-size:10px;font-weight:400"> CHF</span>
+              </span>
+              <form method="POST" action="{{ url_for('admin.toggle_expense', expense_id=e.id) }}" style="margin:0">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" title="{% if e.is_settled %}Marquer non soldé{% else %}Marquer soldé{% endif %}"
+                        style="padding:5px 7px;border-radius:8px;border:1.5px solid {% if e.is_settled %}#d1fae5{% else %}#d8eade{% endif %};background:{% if e.is_settled %}#f0fdf4{% else %}#fff{% endif %};color:{% if e.is_settled %}#16a34a{% else %}#6b8070{% endif %};cursor:pointer;font-size:13px;display:flex;align-items:center">
+                  <i class="bi bi-{% if e.is_settled %}check-circle-fill{% else %}circle{% endif %}"></i>
+                </button>
+              </form>
+              <form method="POST" action="{{ url_for('admin.delete_expense', expense_id=e.id) }}" style="margin:0"
+                    onsubmit="return confirm('Supprimer ce frais ?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" title="Supprimer"
+                        style="padding:5px 7px;border-radius:8px;border:1.5px solid #fee2e2;background:#fff5f5;color:#dc2626;cursor:pointer;font-size:13px;display:flex;align-items:center">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="padding:14px;text-align:center;font-size:12px;color:#91a492">Aucun frais manuel enregistré.</div>
+        {% endif %}
+      </div>
+
+      {# ── Section matchs ── #}
       {% if not matches %}
       <div class="empty-state">
         <div class="empty-state-icon"><i class="bi bi-cash-coin" style="font-size:28px;color:#91a492"></i></div>

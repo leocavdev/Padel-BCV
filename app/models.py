@@ -191,6 +191,17 @@ class MatchResultProposal(db.Model):
         return {int(k): v for k, v in json.loads(self.team_assignments).items()}
 
 
+class ManualExpense(db.Model):
+    __tablename__ = 'manual_expenses'
+
+    id          = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String(300), nullable=False)
+    amount      = db.Column(db.Float, nullable=False)
+    paid_by     = db.Column(db.String(20), nullable=False)
+    is_settled  = db.Column(db.Boolean, nullable=False, default=False)
+    created_at  = db.Column(db.DateTime, default=_now_ch)
+
+
 class Transaction(db.Model):
     __tablename__ = 'transactions'
 
