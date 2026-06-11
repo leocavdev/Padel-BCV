@@ -12,7 +12,7 @@
       {% set stat_items = [
         ('Total matchs', stats.total, 'bi-calendar3',        '#d8f0e4', '#2d6a4f'),
         ('Ouverts',      stats.open,  'bi-circle-fill',      '#dcfce7', '#16a34a'),
-        ('Confirmés',    stats.confirmed, 'bi-check-circle-fill', '#dbeafe', '#2563eb'),
+        ('Complets',     stats.confirmed, 'bi-check-circle-fill', '#dbeafe', '#2563eb'),
         ('Joueurs',      stats.players,   'bi-people-fill',  '#ede9fe', '#7c3aed'),
       ] %}
       {% for label, value, icon, ibg, icolor in stat_items %}
@@ -42,7 +42,7 @@
 
   {# Filter chips #}
   <div style="padding:10px 16px;background:#fff;flex-shrink:0;border-bottom:1px solid #eef2ee;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none">
-    {% for s, label in [('', 'Tous'), ('open', 'Ouverts'), ('confirmed', 'Confirmés'), ('completed', 'Terminés'), ('cancelled', 'Annulés')] %}
+    {% for s, label in [('', 'Tous'), ('open', 'Ouverts'), ('confirmed', 'Complets'), ('completed', 'Terminés'), ('cancelled', 'Annulés')] %}
     <a href="{{ url_for('admin.dashboard', status=s) }}"
        class="chip {% if current_status == s %}admin-active{% endif %}">{{ label }}</a>
     {% endfor %}

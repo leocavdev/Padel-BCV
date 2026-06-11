@@ -291,7 +291,7 @@ def join_match(match_id):
         if match.status == 'confirmed':
             flash(
                 f'Inscription confirmée ! {match.price_per_player:.2f} CHF déduits. '
-                f'Le match est complet (4/4) et confirmé !',
+                f'Le match est maintenant complet (4/4) !',
                 'success',
             )
         else:

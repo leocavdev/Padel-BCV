@@ -77,7 +77,7 @@
           <div class="input-box" style="padding:0 12px">
             <i class="bi bi-flag"></i>
             <select name="status" style="flex:1;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;padding:12px 0">
-              {% for val, label in [('open','Ouvert'),('confirmed','Confirmé'),('completed','Terminé'),('cancelled','Annulé')] %}
+              {% for val, label in [('open','Ouvert'),('confirmed','Complet'),('completed','Terminé'),('cancelled','Annulé')] %}
               <option value="{{ val }}" {% if match.status == val %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>

@@ -159,7 +159,7 @@ def confirm_payment(match_id, player_id):
 def record_result(match_id):
     match = Match.query.get_or_404(match_id)
     if match.status != 'confirmed':
-        flash('Vous ne pouvez enregistrer des résultats que pour les matchs confirmés.', 'danger')
+        flash('Vous ne pouvez enregistrer des résultats que pour les matchs complets.', 'danger')
         return redirect(url_for('admin.manage_match', match_id=match_id))
 
     if match.date > date.today():

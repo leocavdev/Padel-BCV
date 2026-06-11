@@ -127,7 +127,7 @@ class Match(db.Model):
 
     @property
     def status_label(self):
-        return {'open': 'Ouvert', 'confirmed': 'Confirmé',
+        return {'open': 'Ouvert', 'confirmed': 'Complet',
                 'completed': 'Terminé', 'cancelled': 'Annulé'}.get(self.status, self.status)
 
     def get_team(self, number: int):
