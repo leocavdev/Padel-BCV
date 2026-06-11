@@ -29,6 +29,20 @@
           <div id="next-match-countdown" data-match-datetime="{{ next_match.date.strftime('%Y-%m-%d') }}T{{ next_match.start_time.strftime('%H:%M:%S') }}" style="font-size:16px;font-weight:700;color:#0f172a;white-space:nowrap">--h --m --s</div>
         </div>
       </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <a href="{{ url_for('matches.add_to_google_calendar', match_id=next_match.id) }}" target="_blank" rel="noopener"
+           style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 10px;
+                  background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;text-decoration:none">
+          <i class="bi bi-google" style="font-size:13px;color:#2d6a4f"></i>
+          <span style="font-size:12px;font-weight:700;color:#14532d">Google</span>
+        </a>
+        <a href="{{ url_for('matches.match_calendar', match_id=next_match.id) }}"
+           style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 10px;
+                  background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;text-decoration:none">
+          <i class="bi bi-download" style="font-size:13px;color:#64748b"></i>
+          <span style="font-size:12px;font-weight:700;color:#475569">Apple / iCal</span>
+        </a>
+      </div>
     </div>
     {% endif %}
 
