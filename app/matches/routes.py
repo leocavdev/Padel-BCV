@@ -1,6 +1,6 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, Response, abort
 
 _CH = ZoneInfo('Europe/Zurich')
 from flask_login import login_required, current_user
@@ -152,6 +152,49 @@ def match_detail(match_id):
                            today=today,
                            match_ended=match_ended,
                            title='Détail du match')
+
+
+@bp.route('/<int:match_id>/calendar.ics')
+@login_required
+def match_calendar(match_id):
+    match = Match.query.get_or_404(match_id)
+    if not current_user.is_admin:
+        registration = MatchPlayer.query.filter_by(match_id=match_id, player_id=current_user.id).first()
+        if not registration:
+            abort(403)
+    _UTC = ZoneInfo('UTC')
+    dt_start = datetime.combine(match.date, match.start_time).replace(tzinfo=_CH)
+    dt_end = datetime.combine(match.date, match.end_time).replace(tzinfo=_CH)
+    dt_start_utc = dt_start.astimezone(_UTC)
+    dt_end_utc = dt_end.astimezone(_UTC)
+    now_utc = datetime.now(_UTC)
+    players_str = ', '.join(mp.player.username for mp in match.players)
+    description = (
+        f'Match de padel\\n'
+        f'Lieu : {match.location}\\n'
+        f'Joueurs : {players_str}\\n'
+        f'Prix : {match.price_per_player:.2f} CHF/joueur'
+    )
+    ics = (
+        'BEGIN:VCALENDAR\r\n'
+        'VERSION:2.0\r\n'
+        'PRODID:-//Padel BCV//Match Calendar//FR\r\n'
+        'BEGIN:VEVENT\r\n'
+        f'UID:match-{match.id}@padelbcv.com\r\n'
+        f'DTSTAMP:{now_utc.strftime("%Y%m%dT%H%M%SZ")}\r\n'
+        f'DTSTART:{dt_start_utc.strftime("%Y%m%dT%H%M%SZ")}\r\n'
+        f'DTEND:{dt_end_utc.strftime("%Y%m%dT%H%M%SZ")}\r\n'
+        f'SUMMARY:Padel BCV - {match.location}\r\n'
+        f'DESCRIPTION:{description}\r\n'
+        f'LOCATION:{match.location}\r\n'
+        'END:VEVENT\r\n'
+        'END:VCALENDAR\r\n'
+    )
+    return Response(
+        ics,
+        mimetype='text/calendar',
+        headers={'Content-Disposition': f'attachment; filename="match-{match.id}.ics"'},
+    )
 
 
 @bp.route('/<int:match_id>/join', methods=['POST'])
