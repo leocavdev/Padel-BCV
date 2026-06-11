@@ -3,63 +3,105 @@
 {% block content %}
 <div class="page-fade" style="display:flex;flex-direction:column;height:100%">
 
-  {# Balance hero #}
-  <div class="wallet-hero" style="flex-shrink:0">
-    <div class="wallet-hero-bg"></div>
-    <div style="position:relative">
-      <div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:4px">Solde disponible</div>
-      <div class="wallet-balance">
-        {{ '%.2f'|format(current_user.wallet_balance) }}<span style="font-size:22px;font-weight:600;color:rgba(255,255,255,.7);margin-left:2px">CHF</span>
+  {# ── Balance hero ───────────────────────────────────────────────── #}
+  <div class="wallet-hero-v2">
+    <div class="wallet-hero-halo"></div>
+
+    {# Label + wallet badge #}
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="wallet-hero-label">Solde disponible</div>
+      <div class="wallet-hero-badge">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v0H5a2 2 0 0 0-2 2z"/>
+          <rect x="3" y="7" width="18" height="13" rx="3"/>
+          <path d="M16 13h2"/>
+        </svg>
       </div>
-      <div style="display:flex;gap:24px;margin-top:12px">
-        <div>
-          <div style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px">Total dépensé</div>
-          <div style="font-size:18px;font-weight:700;color:rgba(255,255,255,.85);margin-top:2px">
-            {{ '%.2f'|format(total_spent|abs) }}<span style="font-size:13px;font-weight:600;color:rgba(255,255,255,.5);margin-left:2px">CHF</span>
-          </div>
+    </div>
+
+    {# Balance figure #}
+    <div style="display:flex;align-items:baseline;gap:8px;margin-top:8px">
+      <span class="wallet-hero-balance">{{ '%.2f'|format(current_user.wallet_balance) }}</span>
+      <span class="wallet-hero-currency">CHF</span>
+    </div>
+
+    {# Two-stat strip: total dépensé | ce mois-ci #}
+    <div class="wallet-stat-strip">
+      <div class="wallet-stat-cell">
+        <div class="wallet-stat-label wallet-stat-red">Total dépensé</div>
+        <div class="wallet-stat-value wallet-stat-red">
+          {{ '%.2f'|format(total_spent|abs) }}<span class="wallet-stat-unit">CHF</span>
         </div>
+      </div>
+      <div class="wallet-stat-divider"></div>
+      <div class="wallet-stat-cell">
+        <div class="wallet-stat-label wallet-stat-orange">Ce mois-ci</div>
+        <div class="wallet-stat-value wallet-stat-orange">
+          {{ '%.2f'|format(current_month_spent|abs) }}<span class="wallet-stat-unit">CHF</span>
+        </div>
+      </div>
+    </div>
+
+    {# Total économisé avec l'ASBCV #}
+    <div class="wallet-saved-strip">
+      <div class="wallet-saved-label">Total économisé avec l'ASBCV</div>
+      <div class="wallet-saved-value">
+        <span style="color:rgb(108,224,254)">12.50</span><span class="wallet-saved-unit">CHF</span>
       </div>
     </div>
   </div>
 
-  {# Transactions #}
-  <div class="scroll-content" style="background:#f4f6f4">
-    <div style="padding:16px 16px 24px" id="historique">
-      <div class="section-hd">
-        <span class="section-hd-label">Mouvements récents</span>
+  {# ── Movements ──────────────────────────────────────────────────── #}
+  <div class="scroll-content" style="background:#F4F7F5">
+    <div style="padding:20px 16px 24px">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <span style="font-size:12px;font-weight:800;letter-spacing:1.2px;color:#6A7B72;text-transform:uppercase;white-space:nowrap">Mouvements récents</span>
       </div>
 
-      {% if transactions %}
-      <div class="card-new" style="overflow:hidden">
-        {% for tx in transactions %}
-        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;
-             border-bottom:{{ '1px solid #f4f6f4' if not loop.last else 'none' }}">
-          <div style="width:40px;height:40px;border-radius:50%;flex-shrink:0;
-               background:{{ '#dcfce7' if tx.amount > 0 else '#fff1f0' }};
-               display:flex;align-items:center;justify-content:center">
-            <i class="bi {{ 'bi-arrow-down-circle-fill' if tx.amount > 0 else 'bi-arrow-up-circle-fill' }}"
-               style="font-size:18px;color:{{ '#16a34a' if tx.amount > 0 else '#dc2626' }}"></i>
-          </div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:14px;font-weight:600;color:#151c17;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-              {{ tx.description }}
+      {% if has_transactions %}
+        {% for group in transaction_groups %}
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;font-weight:800;letter-spacing:0.8px;color:#9AA39E;text-transform:uppercase;margin:6px 2px 4px">{{ group.label }}</div>
+          <div class="wallet-month-card">
+            {% for tx in group.items %}
+            <div style="display:flex;align-items:center;gap:13px;padding:14px 4px;
+                 border-bottom:{{ 'none' if loop.last else '1px solid #ECEFED' }}">
+              <div class="wallet-tx-icon wallet-tx-icon-{{ 'credit' if tx.is_credit else 'debit' }}">
+                {% if tx.is_credit %}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M18 12l-6 6-6-6"/></svg>
+                {% else %}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D23B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 12l6-6 6 6"/></svg>
+                {% endif %}
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:15px;font-weight:800;color:#11201A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ tx.title }}</div>
+                {% if tx.sub %}
+                <div style="font-size:13px;font-weight:600;color:#6A7B72;margin-top:2px">{{ tx.sub }}</div>
+                {% endif %}
+                <div style="font-size:12px;font-weight:600;color:#9AA39E;margin-top:3px">{{ tx.date_str }} · {{ tx.time_str }}</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;align-self:flex-start;margin-top:1px">
+                <div style="font-size:15px;font-weight:800;letter-spacing:-0.2px;color:{{ '#16a34a' if tx.is_credit else '#D23B3B' }}">
+                  {{ '+' if tx.is_credit else '−' }}{{ '%.2f'|format(tx.amount|abs) }}<span style="font-size:11.5px;font-weight:700;margin-left:3px">CHF</span>
+                </div>
+              </div>
             </div>
-            <div style="font-size:12px;color:#91a492;margin-top:1px">
-              {{ tx.created_at.strftime('%d/%m/%Y %H:%M') }}
-            </div>
-          </div>
-          <div style="font-size:15px;font-weight:800;flex-shrink:0;color:{{ '#16a34a' if tx.amount > 0 else '#dc2626' }}">
-            {{ '+' if tx.amount > 0 else '' }}{{ '%.2f'|format(tx.amount) }} CHF
+            {% endfor %}
           </div>
         </div>
         {% endfor %}
-      </div>
+        <div style="text-align:center;color:#9AA39E;font-size:12.5px;font-weight:600;margin-top:8px">Vous êtes à jour ✓</div>
+
       {% else %}
-      <div class="empty-state">
-        <div class="empty-state-icon"><i class="bi bi-receipt" style="font-size:28px;color:#91a492"></i></div>
-        <p>Aucun mouvement enregistré.</p>
-      </div>
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9AA39E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>
+          </div>
+          <p>Aucun mouvement enregistré.</p>
+        </div>
       {% endif %}
+
     </div>
   </div>
 </div>

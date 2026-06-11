@@ -3,6 +3,40 @@ from flask_login import login_required, current_user
 from app.wallet import bp
 from app import db
 from app.models import Transaction, Match, MatchPlayer
+from datetime import datetime
+import re
+
+_MONTHS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+              'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
+
+
+def _fmt_date_fr(dt):
+    return f"{dt.day} {_MONTHS_FR[dt.month - 1]} {dt.year}"
+
+
+def _fmt_month_fr(dt):
+    return f"{_MONTHS_FR[dt.month - 1].capitalize()} {dt.year}"
+
+
+def _parse_tx(tx):
+    if ' — ' in tx.description:
+        parts = tx.description.split(' — ', 1)
+        title = parts[0]
+        sub = parts[1]
+        m = re.match(r'match #(\d+) \((.+)\)', sub, re.IGNORECASE)
+        if m:
+            sub = f"Match #{m.group(1)} · {m.group(2)}"
+    else:
+        title = tx.description
+        sub = None
+    return {
+        'title': title,
+        'sub': sub,
+        'date_str': _fmt_date_fr(tx.created_at),
+        'time_str': tx.created_at.strftime('%H:%M'),
+        'amount': tx.amount,
+        'is_credit': tx.amount > 0,
+    }
 
 
 @bp.route('/')
@@ -12,10 +46,28 @@ def dashboard():
                     .filter_by(user_id=current_user.id)
                     .order_by(Transaction.created_at.desc())
                     .all())
+
+    now = datetime.utcnow()
     total_spent = sum(tx.amount for tx in transactions if tx.amount < 0)
+    current_month_spent = sum(
+        tx.amount for tx in transactions
+        if tx.amount < 0
+        and tx.created_at.month == now.month
+        and tx.created_at.year == now.year
+    )
+
+    groups = {}
+    for tx in transactions:
+        key = (tx.created_at.year, tx.created_at.month)
+        if key not in groups:
+            groups[key] = {'label': _fmt_month_fr(tx.created_at), 'items': []}
+        groups[key]['items'].append(_parse_tx(tx))
+
     return render_template('wallet/dashboard.html',
-                           transactions=transactions,
+                           transaction_groups=list(groups.values()),
+                           has_transactions=bool(transactions),
                            total_spent=total_spent,
+                           current_month_spent=current_month_spent,
                            title='Solde')
 
 
