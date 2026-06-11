@@ -120,8 +120,8 @@
     </div>
     {% endif %}
 
-    {# Result proposal form — only for registered players on a played confirmed match, not past #}
-    {% if not current_user.is_admin and registration and match.status == 'confirmed' and today is defined and match.date <= today and False %}
+    {# Result proposal form — only for registered players after the match has ended, until score is entered #}
+    {% if not current_user.is_admin and registration and match.status == 'confirmed' and match_ended %}
       {% if not pending_proposal %}
       <div class="card-new" style="margin-bottom:12px;overflow:hidden">
         <div style="padding:12px 16px;border-bottom:1px solid #eef2ee;background:#f0fdf4">

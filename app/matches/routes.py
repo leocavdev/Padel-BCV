@@ -105,6 +105,7 @@ def history():
 def match_detail(match_id):
     match = Match.query.get_or_404(match_id)
     today = datetime.now(_CH).date()
+    now_naive = datetime.now(_CH).replace(tzinfo=None)
     registration = None
     eligible_replacements = []
     pending_request = None
@@ -112,6 +113,7 @@ def match_detail(match_id):
     pending_proposal = None
     proposal_my_team = None
     proposal_proposer_team = None
+    match_ended = match.datetime_end <= now_naive
     if not current_user.is_admin:
         registration = MatchPlayer.query.filter_by(
             match_id=match_id, player_id=current_user.id
@@ -131,7 +133,7 @@ def match_detail(match_id):
         incoming_request = ReplacementRequest.query.filter_by(
             match_id=match_id, replacement_id=current_user.id, status='pending'
         ).first()
-        if registration and match.status == 'confirmed' and match.date <= today:
+        if registration and match.status == 'confirmed' and match_ended:
             pending_proposal = MatchResultProposal.query.filter_by(
                 match_id=match_id, status='pending'
             ).first()
@@ -148,6 +150,7 @@ def match_detail(match_id):
                            proposal_my_team=proposal_my_team,
                            proposal_proposer_team=proposal_proposer_team,
                            today=today,
+                           match_ended=match_ended,
                            title='Détail du match')
 
 
