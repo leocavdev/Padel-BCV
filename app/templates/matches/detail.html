@@ -58,18 +58,24 @@
 
     {# Add to calendar — registered players, upcoming matches only #}
     {% if not current_user.is_admin and registration and match.status in ('open', 'confirmed') and match.date >= today %}
-    <div style="padding:0 0 12px">
-      <a href="{{ url_for('matches.match_calendar', match_id=match.id) }}"
-         style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:#fff;border-radius:14px;border:1.5px solid #e2e8f0;text-decoration:none;color:#2d6a4f">
-        <div style="width:34px;height:34px;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <i class="bi bi-calendar-plus-fill" style="font-size:16px;color:#16a34a"></i>
-        </div>
-        <div style="flex:1">
-          <div style="font-size:14px;font-weight:700;color:#151c17">Ajouter au calendrier</div>
-          <div style="font-size:12px;color:#91a492">Télécharger le fichier .ics</div>
-        </div>
-        <i class="bi bi-download" style="font-size:14px;color:#91a492;flex-shrink:0"></i>
-      </a>
+    <div class="card-new" style="padding:12px 16px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:#91a492;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">
+        <i class="bi bi-calendar-plus-fill" style="color:#2d6a4f;margin-right:5px"></i>Ajouter au calendrier
+      </div>
+      <div style="display:flex;gap:8px">
+        <a href="{{ url_for('matches.add_to_google_calendar', match_id=match.id) }}" target="_blank" rel="noopener"
+           style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 10px;
+                  background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;text-decoration:none">
+          <i class="bi bi-google" style="font-size:15px;color:#2d6a4f"></i>
+          <span style="font-size:13px;font-weight:700;color:#14532d">Google</span>
+        </a>
+        <a href="{{ url_for('matches.match_calendar', match_id=match.id) }}"
+           style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 10px;
+                  background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;text-decoration:none">
+          <i class="bi bi-download" style="font-size:15px;color:#64748b"></i>
+          <span style="font-size:13px;font-weight:700;color:#475569">Apple / iCal</span>
+        </a>
+      </div>
     </div>
     {% endif %}
 

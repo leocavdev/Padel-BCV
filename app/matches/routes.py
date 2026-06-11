@@ -197,6 +197,29 @@ def match_calendar(match_id):
     )
 
 
+@bp.route('/<int:match_id>/add-to-google-calendar')
+@login_required
+def add_to_google_calendar(match_id):
+    match = Match.query.get_or_404(match_id)
+    if not current_user.is_admin:
+        registration = MatchPlayer.query.filter_by(match_id=match_id, player_id=current_user.id).first()
+        if not registration:
+            abort(403)
+    from urllib.parse import urlencode
+    _UTC = ZoneInfo('UTC')
+    dt_start = datetime.combine(match.date, match.start_time).replace(tzinfo=_CH).astimezone(_UTC)
+    dt_end = datetime.combine(match.date, match.end_time).replace(tzinfo=_CH).astimezone(_UTC)
+    players_str = ', '.join(mp.player.username for mp in match.players)
+    params = {
+        'action': 'TEMPLATE',
+        'text': f'Padel BCV - {match.location}',
+        'dates': f'{dt_start.strftime("%Y%m%dT%H%M%SZ")}/{dt_end.strftime("%Y%m%dT%H%M%SZ")}',
+        'details': f'Match de padel\nJoueurs : {players_str}\nPrix : {match.price_per_player:.2f} CHF/joueur',
+        'location': match.location,
+    }
+    return redirect(f'https://calendar.google.com/calendar/render?{urlencode(params)}')
+
+
 @bp.route('/<int:match_id>/join', methods=['POST'])
 @login_required
 def join_match(match_id):
