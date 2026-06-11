@@ -64,7 +64,7 @@
         <div style="margin-bottom:14px">
           <div style="font-size:11px;font-weight:800;letter-spacing:0.8px;color:#9AA39E;text-transform:uppercase;margin:6px 2px 4px">{{ group.label }}</div>
           <div class="wallet-month-card">
-            {% for tx in group.items %}
+            {% for tx in group['items'] %}
             <div style="display:flex;align-items:center;gap:13px;padding:14px 4px;
                  border-bottom:{{ 'none' if loop.last else '1px solid #ECEFED' }}">
               <div class="wallet-tx-icon wallet-tx-icon-{{ 'credit' if tx.is_credit else 'debit' }}">
