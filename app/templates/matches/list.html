@@ -3,72 +3,86 @@
 {% block content %}
 <div class="page-fade" style="display:flex;flex-direction:column;height:100%">
 
-  {# Greeting header #}
-  <div style="background:#fff;padding:16px 20px 12px;flex-shrink:0;border-bottom:1px solid #eef2ee">
-    <div style="font-size:13px;color:#91a492;margin-bottom:2px">
+  {# Greeting header — Direction A Refined Light #}
+  <div style="background:#fff;padding:16px 20px 22px;flex-shrink:0">
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;color:#6A7B72;text-transform:capitalize">
       {% if now %}{{ now }}{% else %}Aujourd'hui{% endif %}
     </div>
-    <div style="font-size:22px;font-weight:800;color:#151c17">
+    <div style="font-size:26px;font-weight:800;color:#11201A;margin-top:3px;letter-spacing:-0.5px">
       {% if current_user.is_admin %}
         Tableau de bord
       {% else %}
-        Bonjour {{ current_user.username.split(' ')[0] }}
+        Bonjour <span style="color:#0E7A4B">{{ current_user.username.split(' ')[0] }}</span>
       {% endif %}
     </div>
     {% if registered_matches %}
     {% set next_match = registered_matches[0] %}
-    <div style="margin-top:12px;padding:12px 14px;background:#f8fafc;border-radius:14px;border:1px solid #e2e8f0">
-      <div style="font-size:13px;color:#475569;margin-bottom:4px">Prochain match inscrit</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <div>
-          <div style="font-size:15px;font-weight:700;color:#0f172a">{{ next_match.location }}</div>
-          <div style="font-size:13px;color:#64748b">Le {{ next_match.date.strftime('%d/%m/%Y') }} à {{ next_match.start_time.strftime('%H:%M') }}</div>
+    <div style="margin-top:18px;border-radius:22px;background:#fff;border:1px solid #E7ECE9;box-shadow:0 12px 30px rgba(16,40,30,0.07);overflow:hidden">
+      <div style="padding:16px 18px 18px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <span style="font-size:11.5px;font-weight:800;letter-spacing:1px;color:#0E7A4B;text-transform:uppercase">Prochain match</span>
+          <span id="days-chip"
+                data-match-datetime="{{ next_match.date.strftime('%Y-%m-%d') }}T{{ next_match.start_time.strftime('%H:%M:%S') }}"
+                style="font-size:12px;font-weight:700;color:#0A5C39;background:#EAF6EF;padding:5px 11px;border-radius:20px">&nbsp;</span>
         </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div style="font-size:12px;color:#64748b">Début du match dans</div>
-          <div id="next-match-countdown" data-match-datetime="{{ next_match.date.strftime('%Y-%m-%d') }}T{{ next_match.start_time.strftime('%H:%M:%S') }}" style="font-size:16px;font-weight:700;color:#0f172a;white-space:nowrap">--h --m --s</div>
+        <div style="font-size:19px;font-weight:800;color:#11201A;letter-spacing:-0.3px">{{ next_match.location }}</div>
+        <div style="font-size:14px;font-weight:700;color:#6A7B72;margin-top:2px">{{ next_match.required_skill_label }}</div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <div style="flex:1;display:flex;align-items:center;gap:9px;background:#F6F9F7;border-radius:14px;padding:10px 12px">
+            <i class="bi bi-calendar3" style="font-size:17px;color:#0E7A4B;flex-shrink:0"></i>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#6A7B72">Date</div>
+              <div style="font-size:14px;font-weight:800;color:#11201A">{{ next_match.date.strftime('%d/%m') }}</div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;align-items:center;gap:9px;background:#F6F9F7;border-radius:14px;padding:10px 12px">
+            <i class="bi bi-clock" style="font-size:17px;color:#0E7A4B;flex-shrink:0"></i>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#6A7B72">Horaire</div>
+              <div style="font-size:14px;font-weight:800;color:#11201A">{{ next_match.start_time.strftime('%H:%M') }}–{{ next_match.end_time.strftime('%H:%M') }}</div>
+            </div>
+          </div>
         </div>
+        <button onclick="document.getElementById('cal-modal').style.display='flex'"
+                style="margin-top:14px;width:100%;height:50px;border-radius:14px;border:none;background:#0E7A4B;color:#fff;
+                       font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;gap:9px;
+                       cursor:pointer;box-shadow:0 8px 18px rgba(14,122,75,0.35);font-family:inherit">
+          <i class="bi bi-calendar-plus-fill" style="font-size:16px"></i> Ajouter au calendrier
+        </button>
       </div>
-      <button onclick="document.getElementById('cal-modal').style.display='flex'"
-              style="width:100%;margin-top:10px;padding:9px 14px;background:#f0fdf4;border:1.5px solid #bbf7d0;
-                     border-radius:10px;font-size:13px;font-weight:700;color:#14532d;cursor:pointer;
-                     display:flex;align-items:center;justify-content:center;gap:6px">
-        <i class="bi bi-calendar-plus-fill" style="font-size:14px"></i> Ajouter au calendrier
-      </button>
+    </div>
 
-      <div id="cal-modal" onclick="document.getElementById('cal-modal').style.display='none'"
-           style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);
-                  align-items:flex-end;justify-content:center;padding:0">
-        <div onclick="event.stopPropagation()"
-             style="background:#fff;border-radius:20px 20px 0 0;padding:22px;width:100%;max-width:640px;
-                    box-shadow:0 -8px 40px rgba(0,0,0,0.2)">
-          <div style="font-size:16px;font-weight:700;color:#151c17;margin-bottom:14px;text-align:center">
-            <i class="bi bi-calendar-plus-fill" style="color:#2d6a4f;margin-right:6px"></i>Ajouter au calendrier
-          </div>
-          <div style="display:flex;gap:8px">
-            <a href="{{ url_for('matches.add_to_google_calendar', match_id=next_match.id) }}" target="_blank" rel="noopener"
-               style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 10px;
-                      background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;text-decoration:none">
-              <i class="bi bi-google" style="font-size:16px;color:#2d6a4f"></i>
-              <span style="font-size:14px;font-weight:700;color:#14532d">Google</span>
-            </a>
-            <a href="{{ url_for('matches.match_calendar', match_id=next_match.id) }}"
-               style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 10px;
-                      background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;text-decoration:none">
-              <i class="bi bi-download" style="font-size:16px;color:#64748b"></i>
-              <span style="font-size:14px;font-weight:700;color:#475569">Apple / iCal</span>
-            </a>
-          </div>
-          <button onclick="document.getElementById('cal-modal').style.display='none'"
-                  style="width:100%;margin-top:10px;padding:12px;background:#f3f4f6;color:#374151;border:none;
-                         border-radius:12px;font-size:15px;font-weight:600;cursor:pointer">
-            Annuler
-          </button>
+    <div id="cal-modal" onclick="document.getElementById('cal-modal').style.display='none'"
+         style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);
+                align-items:flex-end;justify-content:center;padding:0">
+      <div onclick="event.stopPropagation()"
+           style="background:#fff;border-radius:20px 20px 0 0;padding:22px;width:100%;max-width:640px;
+                  box-shadow:0 -8px 40px rgba(0,0,0,0.2)">
+        <div style="font-size:16px;font-weight:700;color:#151c17;margin-bottom:14px;text-align:center">
+          <i class="bi bi-calendar-plus-fill" style="color:#2d6a4f;margin-right:6px"></i>Ajouter au calendrier
         </div>
+        <div style="display:flex;gap:8px">
+          <a href="{{ url_for('matches.add_to_google_calendar', match_id=next_match.id) }}" target="_blank" rel="noopener"
+             style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 10px;
+                    background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;text-decoration:none">
+            <i class="bi bi-google" style="font-size:16px;color:#2d6a4f"></i>
+            <span style="font-size:14px;font-weight:700;color:#14532d">Google</span>
+          </a>
+          <a href="{{ url_for('matches.match_calendar', match_id=next_match.id) }}"
+             style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 10px;
+                    background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;text-decoration:none">
+            <i class="bi bi-download" style="font-size:16px;color:#64748b"></i>
+            <span style="font-size:14px;font-weight:700;color:#475569">Apple / iCal</span>
+          </a>
+        </div>
+        <button onclick="document.getElementById('cal-modal').style.display='none'"
+                style="width:100%;margin-top:10px;padding:12px;background:#f3f4f6;color:#374151;border:none;
+                       border-radius:12px;font-size:15px;font-weight:600;cursor:pointer">
+          Annuler
+        </button>
       </div>
     </div>
     {% endif %}
-
   </div>
 
   {# Incoming replacement requests #}
@@ -196,32 +210,15 @@
 
 <script>
 (function() {
-  const countdownEl = document.getElementById('next-match-countdown');
-  if (!countdownEl) return;
-  const target = countdownEl.dataset.matchDatetime;
-  const matchTime = new Date(target);
-  function updateCountdown() {
-    const now = new Date();
-    let diff = matchTime - now;
-    if (diff <= 0) {
-      countdownEl.textContent = 'Début imminent';
-      return;
-    }
+  const chip = document.getElementById('days-chip');
+  if (!chip) return;
+  const diff = new Date(chip.dataset.matchDatetime) - new Date();
+  if (diff <= 0) {
+    chip.textContent = 'En cours';
+  } else {
     const days = Math.floor(diff / 86400000);
-    diff %= 86400000;
-    const hours = Math.floor(diff / 3600000);
-    diff %= 3600000;
-    const minutes = Math.floor(diff / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-    const parts = [];
-    if (days) parts.push(days + 'j');
-    parts.push(String(hours).padStart(2, '0') + 'h');
-    parts.push(String(minutes).padStart(2, '0') + 'm');
-    parts.push(String(seconds).padStart(2, '0') + 's');
-    countdownEl.textContent = parts.join(' ');
+    chip.textContent = days === 0 ? "Aujourd'hui" : days === 1 ? 'Dans 1 jour' : `Dans ${days} jours`;
   }
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
 })();
 </script>
 
