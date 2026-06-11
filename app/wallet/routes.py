@@ -12,8 +12,10 @@ def dashboard():
                     .filter_by(user_id=current_user.id)
                     .order_by(Transaction.created_at.desc())
                     .all())
+    total_spent = sum(tx.amount for tx in transactions if tx.amount < 0)
     return render_template('wallet/dashboard.html',
                            transactions=transactions,
+                           total_spent=total_spent,
                            title='Solde')
 
 
