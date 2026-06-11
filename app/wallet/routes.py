@@ -63,11 +63,14 @@ def dashboard():
             groups[key] = {'label': _fmt_month_fr(tx.created_at), 'items': []}
         groups[key]['items'].append(_parse_tx(tx))
 
+    total_saved = abs(total_spent)
+
     return render_template('wallet/dashboard.html',
                            transaction_groups=list(groups.values()),
                            has_transactions=bool(transactions),
                            total_spent=total_spent,
                            current_month_spent=current_month_spent,
+                           total_saved=total_saved,
                            title='Solde')
 
 

@@ -46,7 +46,7 @@
     <div class="wallet-saved-strip">
       <div class="wallet-saved-label">Total économisé avec l'ASBCV</div>
       <div class="wallet-saved-value">
-        <span style="color:rgb(108,224,254)">12.50</span><span class="wallet-saved-unit">CHF</span>
+        <span style="color:rgb(108,224,254)">{{ '%.2f'|format(total_saved) }}</span><span class="wallet-saved-unit">CHF</span>
       </div>
     </div>
   </div>
@@ -91,8 +91,6 @@
           </div>
         </div>
         {% endfor %}
-        <div style="text-align:center;color:#9AA39E;font-size:12.5px;font-weight:600;margin-top:8px">Vous êtes à jour ✓</div>
-
       {% else %}
         <div class="empty-state">
           <div class="empty-state-icon">
