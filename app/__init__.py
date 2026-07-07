@@ -39,12 +39,33 @@ def create_app(config_class=Config):
         _seed_admin()
 
     @app.context_processor
-    def inject_pending_players_count():
-        if current_user.is_authenticated and current_user.is_admin:
+    def inject_pending_counts():
+        result = {'pending_players_count': 0, 'pending_results_count': 0}
+        if not current_user.is_authenticated:
+            return result
+        if current_user.is_admin:
             from app.models import User
-            count = User.query.filter_by(is_approved=False, role='player').count()
-            return {'pending_players_count': count}
-        return {'pending_players_count': 0}
+            result['pending_players_count'] = User.query.filter_by(is_approved=False, role='player').count()
+        else:
+            from app.models import Match, MatchPlayer
+            from datetime import datetime
+            from zoneinfo import ZoneInfo
+            _CH = ZoneInfo('Europe/Zurich')
+            now_ch = datetime.now(_CH)
+            today = now_ch.date()
+            now_time = now_ch.time()
+            reg_ids = [mp.match_id for mp in MatchPlayer.query.filter_by(player_id=current_user.id).all()]
+            if reg_ids:
+                result['pending_results_count'] = Match.query.filter(
+                    Match.id.in_(reg_ids),
+                    Match.status == 'confirmed',
+                    Match.winner_team == None,
+                    db.or_(
+                        Match.date < today,
+                        db.and_(Match.date == today, Match.end_time <= now_time)
+                    )
+                ).count()
+        return result
 
     @app.route('/')
     def index():

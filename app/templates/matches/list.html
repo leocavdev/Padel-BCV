@@ -104,6 +104,28 @@
   </div>
   {% endif %}
 
+  {# Pending result notifications #}
+  {% if pending_result_matches %}
+  <div style="padding:10px 16px;background:#fffbeb;border-bottom:2px solid #f59e0b;flex-shrink:0">
+    <div style="font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">
+      <i class="bi bi-hourglass-split"></i> Résultats à renseigner ({{ pending_result_matches|length }})
+    </div>
+    {% for match in pending_result_matches %}
+    <a href="{{ url_for('matches.match_detail', match_id=match.id) }}"
+       style="background:#fff;border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit">
+      <div style="width:36px;height:36px;border-radius:10px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <i class="bi bi-pencil-fill" style="font-size:15px;color:#d97706"></i>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:#151c17;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ match.location }}</div>
+        <div style="font-size:12px;color:#78716c">{{ match.date.strftime('%d/%m/%Y') }} · {{ match.start_time.strftime('%H:%M') }}–{{ match.end_time.strftime('%H:%M') }}</div>
+      </div>
+      <i class="bi bi-arrow-right" style="font-size:14px;color:#f59e0b;flex-shrink:0"></i>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   {# Registered matches #}
   <div class="scroll-content" style="background:#f4f6f4">
     {% if registered_matches %}
