@@ -208,8 +208,13 @@
 
     /* ── touchstart ─────────────────────────────────────────────────── */
     scroller.addEventListener('touchstart', (e) => {
-      /* N'activer que si l'utilisateur est en haut du contenu. */
-      if (scroller.scrollTop !== 0) return;
+      /* La plupart des pages utilisent un .scroll-content imbriqué comme
+         vrai conteneur de défilement — c'est son scrollTop qui compte.
+         Si aucun .scroll-content n'existe, on replie sur .app-content. */
+      const innerScroll = document.querySelector('.scroll-content');
+      const effectiveTop = innerScroll ? innerScroll.scrollTop : scroller.scrollTop;
+      if (effectiveTop !== 0) return;
+
       startY   = e.touches[0].clientY;
       rawDelta = 0;
       pulling  = true;
