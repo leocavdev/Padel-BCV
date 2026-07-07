@@ -1,11 +1,11 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from functools import wraps
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from app import db
 from app.admin import bp
 from app.admin.forms import CreateMatchForm, EditMatchForm
-from app.whatsapp import notify_new_match
+from app.whatsapp import notify_new_match, notify_incomplete_match_warning, notify_match_auto_cancelled
 from app.models import (Match, MatchPlayer, Transaction, User,
                          ReplacementRequest, MatchResultProposal,
                          ManualExpense,
@@ -21,6 +21,73 @@ def admin_required(f):
             return redirect(url_for('matches.list_matches'))
         return f(*args, **kwargs)
     return decorated
+
+
+# ── Cron jobs ─────────────────────────────────────────────────────────────────
+
+@bp.route('/cron/daily', methods=['POST'])
+def cron_daily():
+    """Daily cron job: warn incomplete matches 3 days out, cancel ones past deadline.
+
+    Called by an external scheduler (e.g. Render cron job). Protected by
+    X-Cron-Secret header matching the CRON_SECRET env var.
+    """
+    from flask import current_app
+    secret = current_app.config.get('CRON_SECRET', '')
+    if not secret or request.headers.get('X-Cron-Secret') != secret:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    today = date.today()
+    warned = []
+    cancelled = []
+
+    # ── Step 1: warn matches exactly 3 days away that are still open & incomplete ──
+    target_warn = today + timedelta(days=3)
+    to_warn = Match.query.filter_by(status='open').filter(
+        Match.date == target_warn,
+        Match.warning_sent_at.is_(None),
+    ).all()
+    for match in to_warn:
+        if not match.is_full:
+            notify_incomplete_match_warning(match)
+            match.warning_sent_at = _now_ch()
+            db.session.add(match)
+            warned.append(match.id)
+
+    # ── Step 2: cancel warned matches past their deadline (warning day has ended) ──
+    to_cancel = Match.query.filter_by(status='open').filter(
+        Match.warning_sent_at.isnot(None),
+    ).all()
+    for match in to_cancel:
+        if match.is_full:
+            continue
+        # Cancel only if we're past the day the warning was sent
+        warning_day = match.warning_sent_at.date()
+        if warning_day >= today:
+            continue
+        refunded = 0
+        for mp in match.players:
+            if mp.payment_status == 'paid':
+                mp.player.wallet_balance += match.price_per_player
+                mp.payment_status = 'refunded'
+                db.session.add(Transaction(
+                    user_id=mp.player_id,
+                    amount=match.price_per_player,
+                    type='refund',
+                    description=(
+                        f'Remboursement annulation automatique match #{match.id}'
+                        f' — {match.location}'
+                    ),
+                    match_id=match.id,
+                ))
+                refunded += 1
+        match.status = 'cancelled'
+        db.session.add(match)
+        notify_match_auto_cancelled(match, refunded)
+        cancelled.append(match.id)
+
+    db.session.commit()
+    return jsonify({'warned': warned, 'cancelled': cancelled}), 200
 
 
 # ── Dashboard ──────────────────────────────────────────────────────────────────

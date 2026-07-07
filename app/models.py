@@ -97,6 +97,7 @@ class Match(db.Model):
     winner_team      = db.Column(db.Integer, nullable=True)
     paid_by          = db.Column(db.String(20), nullable=True)
     reimbursed_amount = db.Column(db.Float, nullable=False, default=0.0)
+    warning_sent_at  = db.Column(db.DateTime, nullable=True, default=None)
     created_by       = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at       = db.Column(db.DateTime, default=_now_ch)
 

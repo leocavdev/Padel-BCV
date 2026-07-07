@@ -29,3 +29,5 @@ class Config:
     GREENAPI_TOKEN       = os.environ.get('GREENAPI_TOKEN', '')
     # Group chat ID format: 120363XXXXXXXXXX@g.us  (get it via /getChats)
     GREENAPI_GROUP_ID    = os.environ.get('GREENAPI_GROUP_ID', '')
+    # Secret token to authenticate cron job requests
+    CRON_SECRET          = os.environ.get('CRON_SECRET', '')
