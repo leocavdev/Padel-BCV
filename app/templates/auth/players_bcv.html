@@ -8,6 +8,138 @@
 
   <div class="scroll-content" style="background:#f4f6f4">
     <div style="padding:16px 16px 24px">
+
+      <!-- Palmarès -->
+      {% if podium %}
+      <div style="margin-bottom:24px">
+        <div class="section-hd">
+          <span class="section-hd-dot" style="background:#f59e0b"></span>
+          <span class="section-hd-label">Palmarès</span>
+        </div>
+
+        <!-- Podium visuel -->
+        <div class="card-new" style="padding:20px 12px 0;margin-bottom:10px;overflow:hidden">
+          <div style="text-align:center;margin-bottom:16px">
+            <span style="font-size:12px;font-weight:700;color:#6b8070;text-transform:uppercase;letter-spacing:0.8px">
+              <i class="bi bi-trophy-fill" style="color:#f59e0b;margin-right:5px"></i>Top Niveau
+            </span>
+          </div>
+          <div style="display:flex;align-items:flex-end;justify-content:center;gap:6px">
+
+            <!-- 2ème place -->
+            <div style="flex:1;text-align:center">
+              {% if podium|length >= 2 %}
+              <div style="margin-bottom:8px">
+                <div class="avatar av-{{ podium[1].skill_category_key }}"
+                     style="width:44px;height:44px;font-size:13px;margin:0 auto 5px">
+                  {{ podium[1].username[:2]|upper }}
+                </div>
+                <div style="font-size:12px;font-weight:700;color:#151c17;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">
+                  {{ podium[1].username.split(' ')[0] }}
+                </div>
+                <div style="font-size:11px;color:#6b8070">{{ '%.2f'|format(podium[1].skill_level) }}</div>
+              </div>
+              <div style="background:#94a3b8;border-radius:8px 8px 0 0;height:60px;display:flex;align-items:center;justify-content:center">
+                <span style="font-size:26px">🥈</span>
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- 1ère place (centre, plus haute) -->
+            <div style="flex:1;text-align:center">
+              <div style="margin-bottom:8px">
+                <div class="avatar av-{{ podium[0].skill_category_key }}"
+                     style="width:54px;height:54px;font-size:15px;margin:0 auto 5px;box-shadow:0 0 0 3px #f59e0b">
+                  {{ podium[0].username[:2]|upper }}
+                </div>
+                <div style="font-size:13px;font-weight:800;color:#151c17;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">
+                  {{ podium[0].username.split(' ')[0] }}
+                </div>
+                <div style="font-size:11px;color:#6b8070">{{ '%.2f'|format(podium[0].skill_level) }}</div>
+              </div>
+              <div style="background:#f59e0b;border-radius:8px 8px 0 0;height:84px;display:flex;align-items:center;justify-content:center">
+                <span style="font-size:32px">🥇</span>
+              </div>
+            </div>
+
+            <!-- 3ème place -->
+            <div style="flex:1;text-align:center">
+              {% if podium|length >= 3 %}
+              <div style="margin-bottom:8px">
+                <div class="avatar av-{{ podium[2].skill_category_key }}"
+                     style="width:44px;height:44px;font-size:13px;margin:0 auto 5px">
+                  {{ podium[2].username[:2]|upper }}
+                </div>
+                <div style="font-size:12px;font-weight:700;color:#151c17;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">
+                  {{ podium[2].username.split(' ')[0] }}
+                </div>
+                <div style="font-size:11px;color:#6b8070">{{ '%.2f'|format(podium[2].skill_level) }}</div>
+              </div>
+              <div style="background:#b45309;border-radius:8px 8px 0 0;height:42px;display:flex;align-items:center;justify-content:center">
+                <span style="font-size:22px">🥉</span>
+              </div>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Le + actif et Meilleur ratio -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+          <!-- Le + actif -->
+          <div class="card-new" style="padding:14px 12px">
+            <div style="font-size:10px;font-weight:700;color:#6b8070;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">
+              <i class="bi bi-fire" style="color:#ef4444;margin-right:4px"></i>Le + actif
+            </div>
+            {% if most_active %}
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <div class="avatar av-{{ most_active.player.skill_category_key }}"
+                   style="width:34px;height:34px;font-size:11px;flex-shrink:0">
+                {{ most_active.player.username[:2]|upper }}
+              </div>
+              <div style="min-width:0">
+                <div style="font-size:13px;font-weight:700;color:#151c17;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                  {{ most_active.player.username.split(' ')[0] }}
+                </div>
+              </div>
+            </div>
+            <div style="font-size:22px;font-weight:800;color:#151c17;line-height:1">{{ most_active.count }}</div>
+            <div style="font-size:11px;color:#6b8070;margin-top:2px">match{{ 's' if most_active.count > 1 else '' }} joué{{ 's' if most_active.count > 1 else '' }}</div>
+            {% else %}
+            <div style="font-size:12px;color:#91a492;margin-top:8px">Pas encore de matchs terminés</div>
+            {% endif %}
+          </div>
+
+          <!-- Meilleur ratio victoires -->
+          <div class="card-new" style="padding:14px 12px">
+            <div style="font-size:10px;font-weight:700;color:#6b8070;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">
+              <i class="bi bi-graph-up-arrow" style="color:#16a34a;margin-right:4px"></i>Meilleur ratio
+            </div>
+            {% if best_ratio %}
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <div class="avatar av-{{ best_ratio.player.skill_category_key }}"
+                   style="width:34px;height:34px;font-size:11px;flex-shrink:0">
+                {{ best_ratio.player.username[:2]|upper }}
+              </div>
+              <div style="min-width:0">
+                <div style="font-size:13px;font-weight:700;color:#151c17;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                  {{ best_ratio.player.username.split(' ')[0] }}
+                </div>
+              </div>
+            </div>
+            <div style="font-size:22px;font-weight:800;color:#151c17;line-height:1">{{ best_ratio.rate }}%</div>
+            <div style="font-size:11px;color:#6b8070;margin-top:2px">{{ best_ratio.wins }}V / {{ best_ratio.total }}J</div>
+            {% else %}
+            <div style="font-size:12px;color:#91a492;margin-top:8px">Min. 3 matchs requis</div>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Liste par niveau -->
       {% for key, players in groups.items() %}
       <div style="margin-bottom:18px">
         <div class="section-hd">
@@ -42,6 +174,7 @@
         {% endif %}
       </div>
       {% endfor %}
+
     </div>
   </div>
 </div>
