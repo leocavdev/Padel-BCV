@@ -78,7 +78,7 @@ def _migrate():
                 'ALTER TABLE matches ADD COLUMN reimbursed_amount FLOAT NOT NULL DEFAULT 0.0'
             ))
         if 'warning_sent_at' not in existing_matches:
-            conn.execute(text('ALTER TABLE matches ADD COLUMN warning_sent_at DATETIME'))
+            conn.execute(text('ALTER TABLE matches ADD COLUMN warning_sent_at TIMESTAMP'))
         conn.commit()
 
 
