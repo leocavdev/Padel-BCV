@@ -63,9 +63,30 @@ def logout():
 def profile():
     if current_user.is_admin:
         return redirect(url_for('admin.dashboard'))
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    _CH = ZoneInfo('Europe/Zurich')
+    now_ch = datetime.now(_CH)
+    today = now_ch.date()
+    now_time = now_ch.time()
     match_count = MatchPlayer.query.filter_by(player_id=current_user.id).count()
+    reg_ids = [mp.match_id for mp in MatchPlayer.query.filter_by(player_id=current_user.id).all()]
+    pending_result_matches = []
+    if reg_ids:
+        from app import db
+        pending_result_matches = (Match.query
+            .filter(Match.id.in_(reg_ids))
+            .filter(Match.status == 'confirmed')
+            .filter(Match.winner_team == None)
+            .filter(db.or_(
+                Match.date < today,
+                db.and_(Match.date == today, Match.end_time <= now_time)
+            ))
+            .order_by(Match.date.desc(), Match.start_time.desc())
+            .all())
     return render_template('auth/profile.html',
                            match_count=match_count,
+                           pending_result_matches=pending_result_matches,
                            title='Mon profil')
 
 

@@ -83,16 +83,11 @@
     <nav class="bottom-nav">
       <a href="{{ url_for('matches.list_matches') }}"
          class="nav-tab {% if request.endpoint and request.endpoint.startswith('matches') %}active{% endif %}">
-        <span class="nav-icon-wrap">
-          {% if request.endpoint and request.endpoint.startswith('matches') %}
-          <i class="bi bi-calendar-event-fill"></i>
-          {% else %}
-          <i class="bi bi-calendar-event"></i>
-          {% endif %}
-          {% if pending_results_count > 0 %}
-          <span class="nav-notif-badge" style="background:#f59e0b;border-color:#fff">{{ pending_results_count }}</span>
-          {% endif %}
-        </span>
+        {% if request.endpoint and request.endpoint.startswith('matches') %}
+        <i class="bi bi-calendar-event-fill"></i>
+        {% else %}
+        <i class="bi bi-calendar-event"></i>
+        {% endif %}
         <span>Matchs</span>
         {% if request.endpoint and request.endpoint.startswith('matches') %}
         <div class="nav-tab-indicator"></div>
@@ -124,11 +119,16 @@
       </a>
       <a href="{{ url_for('auth.profile') }}"
          class="nav-tab {% if request.endpoint == 'auth.profile' %}active{% endif %}">
-        {% if request.endpoint == 'auth.profile' %}
-        <i class="bi bi-person-fill"></i>
-        {% else %}
-        <i class="bi bi-person"></i>
-        {% endif %}
+        <span class="nav-icon-wrap">
+          {% if request.endpoint == 'auth.profile' %}
+          <i class="bi bi-person-fill"></i>
+          {% else %}
+          <i class="bi bi-person"></i>
+          {% endif %}
+          {% if pending_results_count > 0 %}
+          <span class="nav-notif-badge" style="background:#f59e0b;border-color:#fff">{{ pending_results_count }}</span>
+          {% endif %}
+        </span>
         <span>Profil</span>
         {% if request.endpoint == 'auth.profile' %}
         <div class="nav-tab-indicator"></div>

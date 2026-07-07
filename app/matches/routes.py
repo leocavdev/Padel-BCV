@@ -33,7 +33,6 @@ def list_matches():
     registered_matches = []
     registered_ids = []
     incoming_requests = []
-    pending_result_matches = []
     if not current_user.is_admin:
         user_regs = MatchPlayer.query.filter_by(player_id=current_user.id).all()
         registered_ids = [reg.match_id for reg in user_regs]
@@ -44,16 +43,6 @@ def list_matches():
                                   .filter(_is_future())
                                   .order_by(Match.date, Match.start_time)
                                   .all())
-            pending_result_matches = (Match.query
-                                      .filter(Match.id.in_(registered_ids))
-                                      .filter(Match.status == 'confirmed')
-                                      .filter(Match.winner_team == None)
-                                      .filter(db.or_(
-                                          Match.date < today,
-                                          db.and_(Match.date == today, Match.end_time <= now_time)
-                                      ))
-                                      .order_by(Match.date.desc(), Match.start_time.desc())
-                                      .all())
         incoming_requests = (ReplacementRequest.query
                              .filter_by(replacement_id=current_user.id, status='pending')
                              .all())
@@ -88,7 +77,6 @@ def list_matches():
                            past_matches=past_matches,
                            cancelled_matches=cancelled_matches,
                            incoming_requests=incoming_requests,
-                           pending_result_matches=pending_result_matches,
                            now=now_str,
                            title='Matchs')
 
