@@ -12,6 +12,13 @@
 <body>
 {% block body %}
 <div class="app-shell">
+
+  <!-- Indicateur pull-to-refresh (hors écran par défaut, géré par ptr.js) -->
+  <div id="ptr-indicator" aria-hidden="true">
+    <div id="ptr-spinner"></div>
+    <span id="ptr-label">Tirer pour rafraîchir</span>
+  </div>
+
   <div class="app-content">
 
     {# Flash messages #}
@@ -129,10 +136,138 @@
 {% endblock body %}
 
 <script>
+  /* ── Flash auto-dismiss ──────────────────────────────────────────── */
   setTimeout(() => {
     document.querySelectorAll('.flash-item').forEach(el => el.remove());
   }, 5000);
 
+  /* ── Pull-to-refresh ─────────────────────────────────────────────── *
+   *
+   * Fonctionnement :
+   *  1. touchstart  — mémorise la position Y du doigt si le scroll est à 0
+   *  2. touchmove   — calcule le delta, déplace l'indicateur et le contenu,
+   *                   bloque le rebond natif iOS via preventDefault
+   *  3. touchend    — si le seuil est atteint → reload ; sinon → snap-back
+   *
+   * Éléments :
+   *  #ptr-indicator  — bandeau d'indicateur (position:absolute dans .app-shell)
+   *  .app-content    — conteneur de scroll (translateY pour simuler le tirage)
+   *
+   * ------------------------------------------------------------------ */
+  (function () {
+
+    /* Paramètres ---------------------------------------------------- */
+    const THRESHOLD   = 80;   // distance de traction brute (px) pour déclencher
+    const RESISTANCE  = 0.45; // amortissement visuel (1 = sans résistance)
+    const MAX_VISUAL  = 60;   // déplacement visuel maximum autorisé (px)
+
+    /* Éléments ------------------------------------------------------ */
+    const scroller  = document.querySelector('.app-content');
+    const indicator = document.getElementById('ptr-indicator');
+    const label     = document.getElementById('ptr-label');
+
+    if (!scroller || !indicator) return; // page hors app-shell (login, etc.)
+
+    /* État interne -------------------------------------------------- */
+    let startY    = 0;     // position Y au touchstart
+    let rawDelta  = 0;     // distance brute parcourue depuis le début du geste
+    let pulling   = false; // true pendant un geste de tirage actif
+
+    /* Applique les transformations visuelles ------------------------- */
+    function setPosition(visual) {
+      /* L'indicateur monte de -60px (caché) vers 0px (pleinement visible). */
+      indicator.style.transform = `translateY(${-60 + visual}px)`;
+      /* Le contenu est poussé vers le bas du même montant. */
+      scroller.style.transform  = `translateY(${visual}px)`;
+    }
+
+    /* Remet tout à zéro, avec ou sans animation de retour ------------ */
+    function snapBack(animate) {
+      if (animate) {
+        const t = '0.25s ease';
+        indicator.style.transition = `transform ${t}`;
+        scroller.style.transition  = `transform ${t}`;
+      }
+      indicator.style.transform = 'translateY(-60px)';
+      scroller.style.transform  = 'translateY(0)';
+      indicator.classList.remove('ptr-ready', 'ptr-refreshing');
+      label.textContent = 'Tirer pour rafraîchir';
+
+      if (animate) {
+        setTimeout(() => {
+          indicator.style.transition = '';
+          scroller.style.transition  = '';
+        }, 260);
+      } else {
+        indicator.style.transition = '';
+        scroller.style.transition  = '';
+      }
+      pulling  = false;
+      rawDelta = 0;
+    }
+
+    /* ── touchstart ─────────────────────────────────────────────────── */
+    scroller.addEventListener('touchstart', (e) => {
+      /* N'activer que si l'utilisateur est en haut du contenu. */
+      if (scroller.scrollTop !== 0) return;
+      startY   = e.touches[0].clientY;
+      rawDelta = 0;
+      pulling  = true;
+    }, { passive: true });
+
+    /* ── touchmove ──────────────────────────────────────────────────── */
+    scroller.addEventListener('touchmove', (e) => {
+      if (!pulling) return;
+
+      rawDelta = e.touches[0].clientY - startY;
+
+      /* Annuler si le geste part vers le haut (scroll normal). */
+      if (rawDelta <= 0) {
+        pulling = false;
+        return;
+      }
+
+      /* Bloquer le rebond élastique natif iOS pour éviter le double-effet. */
+      e.preventDefault();
+
+      /* Amortissement : la résistance donne une sensation physique naturelle. */
+      const visual = Math.min(rawDelta * RESISTANCE, MAX_VISUAL);
+      setPosition(visual);
+
+      /* Mettre à jour l'état de l'indicateur selon le seuil. */
+      if (rawDelta >= THRESHOLD) {
+        indicator.classList.add('ptr-ready');
+        label.textContent = 'Relâcher pour rafraîchir';
+      } else {
+        indicator.classList.remove('ptr-ready');
+        label.textContent = 'Tirer pour rafraîchir';
+      }
+    }, { passive: false }); /* passive:false pour pouvoir appeler preventDefault */
+
+    /* ── touchend ───────────────────────────────────────────────────── */
+    scroller.addEventListener('touchend', () => {
+      if (!pulling) return;
+
+      if (rawDelta >= THRESHOLD) {
+        /* Seuil atteint → afficher l'état de chargement puis recharger. */
+        indicator.classList.add('ptr-refreshing');
+        indicator.classList.remove('ptr-ready');
+        label.textContent = 'Chargement…';
+
+        /* Figer l'indicateur visible pendant le rechargement. */
+        indicator.style.transition = 'transform 0.2s ease';
+        indicator.style.transform  = 'translateY(0)';
+        scroller.style.transition  = 'transform 0.2s ease';
+        scroller.style.transform   = `translateY(${MAX_VISUAL}px)`;
+
+        setTimeout(() => window.location.reload(), 300);
+      } else {
+        /* Seuil non atteint → retour en position initiale. */
+        snapBack(true);
+      }
+    }, { passive: true });
+
+  })();
 </script>
 {% block scripts %}{% endblock %}
 </body>
