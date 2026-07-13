@@ -12,9 +12,9 @@ def _now_ch():
     return datetime.now(_CH).replace(tzinfo=None)
 
 SKILL_LEVELS = {
-    'beginner':     (0.0, 0.9, 'Débutant'),
-    'intermediate': (1.0, 2.4, 'Intermédiaire'),
-    'advanced':     (2.5, 4.4, 'Avancé'),
+    'beginner':     (0.0, 0.99, 'Débutant'),
+    'intermediate': (1.0, 2.49, 'Intermédiaire'),
+    'advanced':     (2.5, 4.49, 'Avancé'),
     'expert':       (4.5, 7.0, 'Expert'),
 }
 
