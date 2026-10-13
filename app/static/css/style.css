@@ -298,7 +298,7 @@ html, body {
   flex: 0 0 42%; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   padding: 0 24px 24px;
-  background: url('/static/img/new_hero_login.jpeg') center center / cover no-repeat;
+  background: url('/static/img/new_hero_login.jpg') center center / cover no-repeat;
   position: relative; overflow: hidden;
 }
 .hero-login-lines {
